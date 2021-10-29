@@ -30,10 +30,6 @@ add_library(babblesynth OBJECT
 
 target_compile_definitions(babblesynth PRIVATE _USE_MATH_DEFINES)
 
-if (MSVC)
-    target_compile_options(babblesynth PRIVATE "/EHsc")
-endif()
-
 target_include_directories(babblesynth INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 #add_subdirectory(fast-akima-interpolation)

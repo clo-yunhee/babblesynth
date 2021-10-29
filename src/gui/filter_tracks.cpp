@@ -17,45 +17,68 @@
  */
 
 
+#include <numeric>
+
 #include "filter_tracks.h"
 #include "clickable_label.h"
 #include "app_state.h"
-#include "qlayoutitem.h"
-#include "qnamespace.h"
-#include "qpoint.h"
+
+#include <iostream>
+#include <stdexcept>
 
 using namespace babblesynth::gui;
 
 FilterTracks::FilterTracks(int nFormants, QWidget *parent)
     : QWidget(parent),
-      m_nFormants(nFormants)
+      m_nFormants(nFormants),
+      m_points(nFormants),
+      m_formantGraph(nFormants),
+      m_formantPoints(nFormants),
+      m_isDragging(false),
+      m_isDraggingPoint(false)
 {
     setObjectName("FilterTracks");
     setWindowTitle(tr("Filter tracks"));
     setMinimumSize(QSize(1024, 768));
+    setMouseTracking(true);
 
     m_timeAxis = new QValueAxis(this);
     m_timeAxis->setRange(0, 1);
 
-    QValueAxis *valueAxis = new QValueAxis(this);
-    valueAxis->setRange(50, 5000);
+    m_valueAxis = new QValueAxis(this);
+    m_valueAxis->setRange(0, 5000);
+    m_valueAxis->setTickInterval(1000);
+    m_valueAxis->setTickType(QValueAxis::TicksDynamic);
 
     QChart *chart = new QChart;
     chart->legend()->hide();
     chart->addAxis(m_timeAxis, Qt::AlignBottom);
-    chart->addAxis(valueAxis, Qt::AlignLeft);
+    chart->addAxis(m_valueAxis, Qt::AlignLeft);
     chart->setTitle(tr("Pitch and formants"));
     chart->setTheme(QChart::ChartThemeBlueIcy);
 
-    m_formantGraph.resize(nFormants);
     for (int n = 0; n < nFormants; ++n) {
         QColorLineSeries *graph = new QColorLineSeries(this);
-        graph->setColor(Qt::transparent);
+        graph->setName(QString("graph%1").arg(n));
+        graph->setProperty("formantNumber", n);
+        graph->setPen(QPen(Qt::transparent, 12));
         graph->setPointsVisible(true);
         chart->addSeries(graph);
         graph->attachAxis(m_timeAxis);
-        graph->attachAxis(valueAxis);
+        graph->attachAxis(m_valueAxis);
         m_formantGraph[n] = graph;
+    }
+    
+    for (int n = 0; n < nFormants; ++n) {
+        QColorLineSeries *points = new QColorLineSeries(this);
+        points->setName(QString("points%1").arg(n));
+        points->setProperty("formantNumber", n);
+        points->setPen(QPen(Qt::transparent, 12));
+        points->setPointsVisible(true);
+        chart->addSeries(points);
+        points->attachAxis(m_timeAxis);
+        points->attachAxis(m_valueAxis);
+        m_formantPoints[n] = points;
     }
 
     m_pitchGraph = new QColorLineSeries(this);
@@ -63,10 +86,18 @@ FilterTracks::FilterTracks(int nFormants, QWidget *parent)
     m_pitchGraph->setPointsVisible(true);
     chart->addSeries(m_pitchGraph);
     m_pitchGraph->attachAxis(m_timeAxis);
-    m_pitchGraph->attachAxis(valueAxis);
+    m_pitchGraph->attachAxis(m_valueAxis);
 
-    m_chartView = new QChartView(chart, this);
+    m_chartView = new ChartView(chart, this);
     m_chartView->setRenderHint(QPainter::Antialiasing);
+
+    QObject::connect(m_chartView, &ChartView::mouseHovered, this, &FilterTracks::onSeriesHovered);
+    QObject::connect(m_chartView, &ChartView::mouseLeft, this, &FilterTracks::onSeriesLeft);
+    QObject::connect(m_chartView, &ChartView::mouseDoubleClicked, this, &FilterTracks::onSeriesDoubleClicked);
+    QObject::connect(m_chartView, &ChartView::mouseRightClicked, this, &FilterTracks::onSeriesRightClicked);
+    QObject::connect(m_chartView, &ChartView::mousePressed, this, &FilterTracks::onSeriesPressed);
+    QObject::connect(m_chartView, &ChartView::mouseReleased, this, &FilterTracks::onSeriesReleased);
+    QObject::connect(m_chartView, &ChartView::mouseDragging, this, &FilterTracks::onSeriesDragging);
 
     QHBoxLayout *addButtons = new QHBoxLayout;
 
@@ -96,7 +127,6 @@ FilterTracks::FilterTracks(int nFormants, QWidget *parent)
     std::array freqsO {700, 1200, 2950, 4100, 4950};
     std::array freqsU {500, 900, 2850, 4000, 4950};
 
-    m_points.resize(nFormants);
     for (int n = 0; n < nFormants; ++n) {
         m_points[n].append(QPointF(0.0, freqsA[n]));
         m_points[n].append(QPointF(0.3, freqsA[n]));
@@ -111,38 +141,6 @@ FilterTracks::FilterTracks(int nFormants, QWidget *parent)
     }
 
     updatePlans();
-}
-
-void FilterTracks::newPoint(int n)
-{
-    const double duration = appState->pitchPlan()->duration();
-
-    QPointF last = m_points[n].back();
-
-    if (!qFuzzyCompare(last.x(), duration)) {
-        const int i = m_points[n].size() - 2;
-        m_points[n].insert(i, { (m_points[n][i].x() + duration) / 2, m_points[n][i].y() });
-    }
-    else {
-        m_points[n].append({ (last.x() + duration) / 2, last.y() });
-    }
-
-    updatePlans();
-}
-
-void FilterTracks::updatePlans()
-{
-    for (int n = 0; n < m_nFormants; ++n) {
-        appState->formantPlan(n)->reset(m_points[n][0].y());
-
-        for (int i = 1; i < m_points[n].size(); ++i) {
-            appState->formantPlan(n)->cubicToValueAtTime(m_points[n][i].y(), m_points[n][i].x());
-        }
-    }
-
-    appState->updatePlans();
-
-    redrawGraph();
 }
 
 void FilterTracks::redrawGraph()
@@ -177,28 +175,389 @@ void FilterTracks::redrawGraph()
     
     m_pitchGraph->replace(pitch);
 
-    QLinearGradient pitchGradient(QPointF(0, 0), QPointF(0, 100));
+    QLinearGradient pitchGradient(QPointF(50, 0), QPointF(50, 100));
     pitchGradient.setColorAt(0, Qt::white);
     pitchGradient.setColorAt(0.6, Qt::darkGray);
     pitchGradient.setColorAt(1, Qt::black);
 
     m_pitchGraph->colorBy(amplitude, pitchGradient);
-    m_pitchGraph->sizeBy(amplitude, 0, 5);
-
-    QLinearGradient formantGradient(QPointF(0, 0), QPointF(0, 100));
-    formantGradient.setColorAt(0, QColor::fromHsv(0, 0, 204));
-    formantGradient.setColorAt(1, QColor::fromHsv(39, 255, 255));
+    m_pitchGraph->sizeBy(amplitude, 0, 3);
 
     for (int n = 0; n < m_nFormants; ++n) {
         m_formantGraph[n]->replace(formants[n]);
-        m_formantGraph[n]->colorBy(amplitude, formantGradient);
-        m_formantGraph[n]->sizeBy(amplitude, 0, 5);
 
-        for (const QPointF point : m_points[n]) {
-            const int index = std::round((nPoints - 1) * point.x() / duration);
-            m_formantGraph[n]->setPointConfiguration(index, QColorXYSeries::PointConfiguration::Size, 8);
+        for (int i = 0; i < nPoints; ++i) {
+            setGraphPointStyle(n, i, Normal);
+        }
+
+        m_formantPoints[n]->replace(m_points[n]);
+
+        for (int i = 0; i < m_points[n].size(); ++i) {
+            setPointStyle(n, i, Normal);
+        }
+    }
+    
+    m_valueAxis->applyNiceNumbers();
+}
+
+void FilterTracks::updatePlans()
+{
+    for (int n = 0; n < m_nFormants; ++n) {
+        appState->formantPlan(n)->reset(m_points[n][0].y());
+
+        for (int i = 1; i < m_points[n].size(); ++i) {
+            appState->formantPlan(n)->cubicToValueAtTime(m_points[n][i].y(), m_points[n][i].x());
+        }
+    }
+
+    appState->updatePlans();
+
+    redrawGraph();
+}
+
+void FilterTracks::newPoint(int n)
+{
+    const double duration = appState->pitchPlan()->duration();
+
+    QPointF last = m_points[n].back();
+    QPointF previousToLast = m_points[n].at(m_points[n].size() - 2);
+
+    m_points[n].append({ (previousToLast.x() + last.x()) / 2, previousToLast.y() });
+
+    std::sort(m_points[n].begin(), m_points[n].end(), [](auto a, auto b) { return a.x() < b.x(); });
+
+    updatePlans();
+}
+
+void FilterTracks::onSeriesHovered(const QString& series, const QPointF& point, int index)
+{
+    if (!series.startsWith("graph") && !series.startsWith("points")) {
+        return;
+    }
+
+    const int n = series.right(1).toInt();
+
+    const int nGraphPoints = m_formantGraph[n]->count();
+
+    for (int i = 0; i < nGraphPoints; ++i) {
+        setGraphPointStyle(n, i, Hover);
+    }
+
+    const int nPoints = m_points[n].size();
+
+    for (int i = 0; i < nPoints; ++i) {
+        setPointStyle(n, i, Hover);
+    }
+
+    if (!m_isDragging) {
+        int leftPointIndex = 0;
+        while (leftPointIndex < nPoints && point.x() >= m_points[n][leftPointIndex].x()) {
+            ++leftPointIndex;
+        }
+
+        int rightPointIndex = nPoints - 1;
+        while (rightPointIndex >= 0 && point.x() <= m_points[n][rightPointIndex].x()) {
+            --rightPointIndex;
+        }
+
+        if (leftPointIndex > 0)
+            --leftPointIndex;
+        if (rightPointIndex < nPoints - 1)
+            ++rightPointIndex;
+
+        if (leftPointIndex < nPoints && rightPointIndex >= 0) {
+            if (leftPointIndex < rightPointIndex) { // Strictly increasing interval: hovering a segment
+                auto leftPos = m_chartView->posFromPoint(m_points[n][leftPointIndex]);
+                leftPos -= m_chartView->posFromPoint(point);
+                if (QPointF::dotProduct(leftPos, leftPos) <= 10 * 10) {
+                    return;
+                }
+
+                auto rightPos = m_chartView->posFromPoint(m_points[n][rightPointIndex]);
+                rightPos -= m_chartView->posFromPoint(point);
+                if (QPointF::dotProduct(rightPos, rightPos) <= 10 * 10) {
+                    return;
+                }
+
+                setGraphStyleBetweenPoints(n, leftPointIndex, rightPointIndex, HoverSegment);
+            }
+            else if (leftPointIndex == rightPointIndex) { // Same index: hovering a point
+                // Nothing.
+            }
         }
     }
 
     m_chartView->update();
+}
+
+void FilterTracks::onSeriesLeft(const QString& series)
+{
+    if (!series.startsWith("graph")) {
+        return;
+    }
+
+    const int n = series.right(1).toInt();
+
+    const int nGraphPoints = m_formantGraph[n]->count();
+
+    for (int i = 0; i < nGraphPoints; ++i) {
+        setGraphPointStyle(n, i, Normal);
+    }
+
+    const int nPoints = m_points[n].size();
+
+    for (int i = 0; i < nPoints; ++i) {
+        setPointStyle(n, i, Normal);
+    }
+}
+
+void FilterTracks::onSeriesDoubleClicked(const QString& series, const QPointF& point, int index)
+{
+    if (!series.startsWith("graph")) {
+        return;
+    }
+
+    const int n = series.right(1).toInt();
+
+    m_points[n].append(point);
+
+    std::sort(m_points[n].begin(), m_points[n].end(), [](auto a, auto b) { return a.x() < b.x(); });
+
+    updatePlans();
+}
+
+void FilterTracks::onSeriesRightClicked(const QString& series, const QPointF& point, int index)
+{
+    if (!series.startsWith("points")) {
+        return;
+    }
+
+    const int n = series.right(1).toInt();
+
+    m_points[n].removeAt(index);
+
+    updatePlans();
+}
+
+void FilterTracks::onSeriesPressed(const QString& series, const QPointF& point, int index)
+{
+    if (!series.startsWith("points") && !series.startsWith("graph")) {
+        return;
+    }
+
+    const int n = series.right(1).toInt();
+
+    if (!m_isDragging) {
+        if (series.startsWith("points")) {
+            setPointStyle(n, index, Drag);
+
+            m_isDragging = true;
+            m_isDraggingPoint = true;
+            m_formantBeingDragged = n;
+            m_pointIndexBeingDragged = index;
+        }
+        else if (series.startsWith("graph")) {
+            const int nPoints = m_points[n].size();
+
+            int leftPointIndex = 0;
+            while (leftPointIndex < nPoints && point.x() >= m_points[n][leftPointIndex].x()) {
+                ++leftPointIndex;
+            }
+
+            int rightPointIndex = nPoints - 1;
+            while (rightPointIndex >= 0 && point.x() <= m_points[n][rightPointIndex].x()) {
+                --rightPointIndex;
+            }
+
+            if (leftPointIndex > 0)
+                --leftPointIndex;
+            if (rightPointIndex < nPoints - 1)
+                ++rightPointIndex;
+
+            if (leftPointIndex < nPoints && rightPointIndex >= 0) {
+                if (leftPointIndex < rightPointIndex) { // Strictly increasing interval: hovering a segment
+
+                    // Add checks for proximity to the two ends.
+                    auto leftPos = m_chartView->posFromPoint(m_points[n][leftPointIndex]);
+                    leftPos -= m_chartView->posFromPoint(point);
+                    if (QPointF::dotProduct(leftPos, leftPos) <= 10 * 10) {
+                        return;
+                    }
+
+                    auto rightPos = m_chartView->posFromPoint(m_points[n][rightPointIndex]);
+                    rightPos -= m_chartView->posFromPoint(point);
+                    if (QPointF::dotProduct(rightPos, rightPos) <= 10 * 10) {
+                        return;
+                    }
+
+                    setPointStyle(n, leftPointIndex, Drag);
+                    setPointStyle(n, rightPointIndex, Drag);
+                    setGraphStyleBetweenPoints(n, leftPointIndex, rightPointIndex, Drag);
+
+                    m_isDragging = true;
+                    m_isDraggingPoint = false;
+                    m_formantBeingDragged = n;
+                    m_pointIndexBeingDragged = leftPointIndex;
+                    m_secondPointIndexBeingDragged = rightPointIndex;
+                    m_dragPointOriginY = point.y();
+                    m_firstPointOriginY = m_points[n][leftPointIndex].y();
+                    m_secondPointOriginY = m_points[n][rightPointIndex].y();
+                }
+            }
+        }
+    }
+}
+
+void FilterTracks::onSeriesReleased(const QString& series)
+{
+    if (m_isDragging) {
+        setPointStyle(m_formantBeingDragged, m_pointIndexBeingDragged, Normal);
+
+        if (!m_isDraggingPoint) {
+            setPointStyle(m_formantBeingDragged, m_secondPointIndexBeingDragged, Normal);
+            setGraphStyleBetweenPoints(m_formantBeingDragged, m_pointIndexBeingDragged, m_secondPointIndexBeingDragged, Normal);
+        }
+
+        m_isDragging = false;
+    } 
+}
+
+void FilterTracks::onSeriesDragging(const QString& series, const QPointF& point)
+{
+    if (!series.startsWith("points") && !series.startsWith("graph")) {
+        return;
+    }
+
+    const int n = series.right(1).toInt();
+
+    if (m_isDragging) {
+        if (series.startsWith("points")) {
+            m_points[n][m_pointIndexBeingDragged] = point;
+
+            if (m_pointIndexBeingDragged == 0) {
+                m_points[n][0].setX(0);
+            }
+            else {
+                std::vector<int> idx(m_points[n].size());
+                std::iota(idx.begin(), idx.end(), 0);
+
+                std::sort(idx.begin(), idx.end(), [this, n](int i, int j) { return m_points[n][i].x() < m_points[n][j].x(); });
+
+                m_pointIndexBeingDragged = idx[m_pointIndexBeingDragged];
+
+                for (int i = 0; i < idx.size(); ++i) {
+                    auto v = m_points[n][i];
+                    int j = idx[i];
+                    
+                    if (i != j) {
+                        std::swap(v, m_points[n][j]);
+                        std::swap(j, idx[j]);
+                    }
+
+                    m_points[n][i] = v;
+                    idx[i] = i;
+                }
+            }
+        }
+        else if (series.startsWith("graph") && !m_isDraggingPoint) {
+            double dy = point.y() - m_dragPointOriginY;
+
+            m_points[n][m_pointIndexBeingDragged].ry() = m_firstPointOriginY + dy;
+            m_points[n][m_secondPointIndexBeingDragged].ry() = m_secondPointOriginY + dy;
+        }
+
+        updatePlans();
+
+        const int nGraphPoints = m_formantGraph[n]->count();
+
+        for (int i = 0; i < nGraphPoints; ++i) {
+            setGraphPointStyle(n, i, Hover);
+        }
+
+        const int nPoints = m_points[n].size();
+
+        for (int i = 0; i < nPoints; ++i) {
+            setPointStyle(n, i, Hover);
+        }
+
+        setPointStyle(n, m_pointIndexBeingDragged, Drag);
+
+        if (!m_isDraggingPoint) {
+            setPointStyle(n, m_secondPointIndexBeingDragged, Drag);
+            setGraphStyleBetweenPoints(n, m_pointIndexBeingDragged, m_secondPointIndexBeingDragged, Drag);
+        }
+    }
+}
+
+void FilterTracks::setPointStyle(int formant, int index, PointStyle style)
+{
+    qreal size;
+    QColor color;
+
+    switch (style) {
+    case Normal:
+        size = 8;
+        color = QColor(96, 96, 96);
+        break;
+    case Hover:
+        size = 9;
+        color = QColor(72, 72, 72);
+        break;
+    case Drag:
+        size = 10;
+        color = QColor(48, 48, 48);
+        break;
+    case HoverSegment:
+        throw std::invalid_argument("HoverSegment style is not applicable to point series");
+    }
+
+    m_formantPoints[formant]->setPointConfiguration(index, QColorXYSeries::PointConfiguration::Size, size);
+    m_formantPoints[formant]->setPointConfiguration(index, QColorXYSeries::PointConfiguration::Color, color);
+}
+
+void FilterTracks::setGraphPointStyle(int formant, int index, PointStyle style)
+{
+    qreal size;
+    QColor color;
+
+    switch (style) {
+    case Normal:
+        size = 3;
+        color = QColor(255, 127, 80);
+        break;
+    case Hover:
+        size = 3.5;
+        color = QColor(255, 127, 80);
+        break;
+    case HoverSegment:
+        size = 3.5;
+        color = QColor(255, 167, 91);
+        break;
+    case Drag:
+        size = 4;
+        color = QColor(255, 97, 76);
+        break;
+    }
+
+    m_formantGraph[formant]->setPointConfiguration(index, QColorXYSeries::PointConfiguration::Size, size);
+    m_formantGraph[formant]->setPointConfiguration(index, QColorXYSeries::PointConfiguration::Color, color);
+}
+
+void FilterTracks::setGraphStyleBetweenPoints(int formant, int left, int right, PointStyle style)
+{
+    QVector<QPointF> graph = m_formantGraph[formant]->pointsVector();
+
+    int leftGraph = std::distance(graph.begin(),
+                    std::upper_bound(graph.begin(), graph.end(),
+                                m_points[formant][left],
+                                [](auto a, auto b) { return a.x() < b.x(); }));
+
+    int rightGraph = std::distance(graph.begin(),
+                    std::lower_bound(graph.begin(), graph.end(),
+                                m_points[formant][right],
+                                [](auto a, auto b) { return a.x() < b.x(); }));
+
+    for (int i = leftGraph; i <= rightGraph; ++i) {
+        setGraphPointStyle(formant, i, style);
+    }
 }

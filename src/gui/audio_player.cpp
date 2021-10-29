@@ -17,8 +17,9 @@
  */
 
 
-#include "audio_player.h"
 #include <stdexcept>
+
+#include "audio_player.h"
 
 using namespace babblesynth::gui;
 

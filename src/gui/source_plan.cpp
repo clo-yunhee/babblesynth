@@ -20,7 +20,6 @@
 #include "source_plan.h"
 #include "clickable_label.h"
 #include "app_state.h"
-#include "qnamespace.h"
 
 using namespace babblesynth::gui;
 
@@ -44,7 +43,9 @@ SourcePlan::SourcePlan(QWidget *parent)
     m_timeAxis->setRange(0, 1);
 
     QValueAxis *valueAxis = new QValueAxis(this);
-    valueAxis->setRange(50, 400);
+    valueAxis->setRange(0, 500);
+    valueAxis->setTickInterval(100);
+    valueAxis->setTickType(QValueAxis::TicksDynamic);
 
     QChart *chart = new QChart;
     chart->legend()->hide();
@@ -178,7 +179,7 @@ void SourcePlan::redrawGraph()
     
     m_pitchGraph->replace(pitch);
 
-    QLinearGradient gradient(QPointF(0, 0), QPointF(0, 100));
+    QLinearGradient gradient(QPointF(50, 0), QPointF(50, 100));
     gradient.setColorAt(0, Qt::white);
     gradient.setColorAt(0.6, Qt::darkGray);
     gradient.setColorAt(1, Qt::black);

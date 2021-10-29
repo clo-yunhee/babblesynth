@@ -29,8 +29,8 @@ SOFTWARE.
 #ifndef ACCESS_PRIVATE_HPP
 #define ACCESS_PRIVATE_HPP
 
-#include <utility>
 #include <type_traits>
+#include <utility>
 
 #if __cplusplus == 201103L
 namespace std {

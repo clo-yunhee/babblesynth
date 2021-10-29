@@ -17,13 +17,12 @@
  */
 
 
+#include <stdexcept>
 #include <babblesynth.h>
 
 #include "source_parameters.h"
 #include "app_state.h"
 #include "clickable_label.h"
-
-#include <stdexcept>
 
 using namespace babblesynth::gui;
 
@@ -40,10 +39,8 @@ SourceParameters::SourceParameters(QWidget *parent)
     }
 
     m_sourceParams = new QFormLayout;
-    updateFields();
 
     m_sourceGraph = new QLineSeries(this);
-    redrawGraph();
 
     QValueAxis *timeAxis = new QValueAxis(this);
     timeAxis->setRange(0, 1);
@@ -73,6 +70,9 @@ SourceParameters::SourceParameters(QWidget *parent)
     rootLayout->addWidget(sourceType);
     rootLayout->addLayout(bottomLayout);
     setLayout(rootLayout);
+
+    updateFields();
+    redrawGraph();
 
     QObject::connect(sourceType, &QComboBox::currentTextChanged, this, &SourceParameters::onSourceTypeChanged);
 }
@@ -155,15 +155,15 @@ void SourceParameters::addField(parameter& param)
 
     if (name == "Oq") {
         name = "O<sub>q</sub>";
-        helpText = "Open quotient";
+        helpText = tr("Open quotient");
     }
     else if (name == "am") {
         name = utf8("αₘ"); // small alpha + subscript m
-        helpText = "Asymmetry coefficient";
+        helpText = tr("Asymmetry coefficient");
     }
     else if (name == "Qa") {
         name = utf8("Qₐ"); // Q + subscript a
-        helpText = "Return quotient";
+        helpText = tr("Return quotient");
     }
 
     QPixmap pixmap = QIcon(":/icons/help.png").pixmap(QSize(24, 24));
@@ -174,7 +174,7 @@ void SourceParameters::addField(parameter& param)
 
     QObject::connect(helpIcon, &ClickableLabel::clicked, [this, name, helpText](QMouseEvent *event) {
         QMessageBox dialog(QMessageBox::NoIcon,
-                           "Parameter info",
+                           tr("Parameter info"),
                            QString("%1: %2").arg(name).arg(helpText),
                            QMessageBox::Ok,
                            this);

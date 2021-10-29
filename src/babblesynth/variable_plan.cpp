@@ -20,14 +20,45 @@
 #include <stdexcept>
 
 #include "variable_plan.h"
+#include "spline.h"
 
 using namespace babblesynth;
 
 variable_plan::variable_plan(double initialValue)
-    : m_spline(tk::spline::cspline_hermite)
+    : m_spline(new tk::spline)
 {
     m_times.push_back(0);
     m_values.push_back(initialValue);
+}
+
+variable_plan::variable_plan(const variable_plan& orig)
+    : m_times(orig.m_times),
+      m_values(orig.m_values),
+      m_transitions(orig.m_transitions),
+      m_spline(new tk::spline)
+{
+    ((tk::spline *) m_spline)->set_boundary(tk::spline::first_deriv, 0.0, tk::spline::first_deriv, 0.0);
+    ((tk::spline *) m_spline)->set_points(m_times, m_values, tk::spline::cspline_hermite);
+}
+
+variable_plan::~variable_plan()
+{
+    delete (tk::spline *) m_spline;
+}
+
+variable_plan& variable_plan::operator=(const variable_plan& orig)
+{
+    delete (tk::spline *) m_spline;
+
+    m_times = orig.m_times;
+    m_values = orig.m_values;
+    m_transitions = orig.m_transitions;
+    m_spline = new tk::spline;
+
+    ((tk::spline *) m_spline)->set_boundary(tk::spline::first_deriv, 0.0, tk::spline::first_deriv, 0.0);
+    ((tk::spline *) m_spline)->set_points(m_times, m_values, tk::spline::cspline_hermite);
+
+    return *this;
 }
 
 variable_plan& variable_plan::stepToValueAtTime(double value, double time)
@@ -95,9 +126,9 @@ void variable_plan::addPoint(double time, double value, transition trans)
     m_times.push_back(time);
     m_values.push_back(value);
     m_transitions.push_back(trans);
-    m_spline.set_boundary(tk::spline::first_deriv, 0.0, tk::spline::first_deriv, 0.0);
-    m_spline.set_points(m_times, m_values);
-    m_spline.make_monotonic();
+    ((tk::spline *) m_spline)->set_boundary(tk::spline::first_deriv, 0.0, tk::spline::first_deriv, 0.0);
+    ((tk::spline *) m_spline)->set_points(m_times, m_values, tk::spline::cspline_hermite);
+    //m_spline.make_monotonic();
 }
 
 double variable_plan::interpolateStep(int index, double time) const
@@ -118,5 +149,5 @@ double variable_plan::interpolateLinear(int index, double time) const
 
 double variable_plan::interpolateCubic(int index, double time) const
 {
-    return m_spline(time);
+    return (*(tk::spline *) m_spline)(time);
 }

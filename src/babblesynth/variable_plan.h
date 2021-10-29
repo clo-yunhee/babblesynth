@@ -22,8 +22,6 @@
 
 #include <vector>
 
-#include "spline.h"
-
 namespace babblesynth {
 
 class variable_plan {
@@ -35,6 +33,10 @@ public:
     };
 
     explicit variable_plan(double initialValue = 0);
+    variable_plan(const variable_plan& orig);
+    ~variable_plan();
+
+    variable_plan& operator=(const variable_plan& orig);
 
     variable_plan& stepToValueAtTime(double value, double time);
     variable_plan& linearToValueAtTime(double value, double time);
@@ -57,7 +59,8 @@ private:
     std::vector<double> m_values;
     std::vector<transition> m_transitions;
 
-    tk::spline m_spline;
+    // tk::spline m_spline; // Moved to the cpp file because anonymous namespace
+    void *m_spline;
 };
 
 } // babblesynth

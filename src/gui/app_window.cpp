@@ -18,8 +18,6 @@
 
 
 #include "app_window.h"
-#include "qmainwindow.h"
-#include "qnamespace.h"
 
 using namespace babblesynth::gui;
 
@@ -46,16 +44,16 @@ AppWindow::AppWindow()
 
     QWidget *centralWidget = new QWidget;
 
-    QPushButton *sourceButton = new QPushButton("Source parameters", centralWidget);
+    QPushButton *sourceButton = new QPushButton(tr("Source parameters"), centralWidget);
     QObject::connect(sourceButton, &QPushButton::pressed, m_sourceParameters, &QWidget::show);
 
-    QPushButton *filterButton = new QPushButton("Filter tracks", centralWidget);
+    QPushButton *filterButton = new QPushButton(tr("Filter tracks"), centralWidget);
     QObject::connect(filterButton, &QPushButton::pressed, m_filterTracks, &QWidget::show);
 
-    QPushButton *pitchPlan = new QPushButton("Edit pitch track");
+    QPushButton *pitchPlan = new QPushButton(tr("Edit pitch track"));
     QObject::connect(pitchPlan, &QPushButton::pressed, m_sourcePlan, &QWidget::show);
     
-    QPushButton *playButton = new QPushButton("Play", centralWidget);
+    QPushButton *playButton = new QPushButton(tr("Play"), centralWidget);
     QObject::connect(playButton, &QPushButton::pressed, this, &AppWindow::renderAndPlay);
 
     QVBoxLayout *leftLayout = new QVBoxLayout;

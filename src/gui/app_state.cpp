@@ -17,11 +17,12 @@
  */
 
 
+#include <stdexcept>
+
 #include "app_state.h"
 #include "filter/formant_filter.h"
 #include "generator/source_generator.h"
 #include "variable_plan.h"
-#include <stdexcept>
 
 using namespace babblesynth::gui;
 
