@@ -19,6 +19,8 @@ add_executable(babblesynth-gui WIN32
     app_window.h
     audio_player.cpp
     audio_player.h
+    chart_view.cpp
+    chart_view.h
     clickable_label.cpp
     clickable_label.h
     filter_tracks.cpp

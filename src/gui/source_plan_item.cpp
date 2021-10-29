@@ -51,9 +51,9 @@ SourcePlanItem::SourcePlanItem(int duration,
     pitch->setValue(targetPitch);
 
     QComboBox *pitchType = new QComboBox(this);
-    pitchType->addItem("Step");
-    pitchType->addItem("Linear");
-    pitchType->addItem("Cubic");
+    pitchType->addItem(tr("Step"));
+    pitchType->addItem(tr("Linear"));
+    pitchType->addItem(tr("Cubic"));
     pitchType->setCurrentIndex(int(pitchTransition));
 
     QHBoxLayout *pitchRow = new QHBoxLayout;
@@ -67,9 +67,9 @@ SourcePlanItem::SourcePlanItem(int duration,
     amplitude->setSuffix(" %");
 
     QComboBox *amplitudeType = new QComboBox(this);
-    amplitudeType->addItem("Step");
-    amplitudeType->addItem("Linear");
-    amplitudeType->addItem("Cubic");
+    amplitudeType->addItem(tr("Step"));
+    amplitudeType->addItem(tr("Linear"));
+    amplitudeType->addItem(tr("Cubic"));
     amplitudeType->setCurrentIndex(int(amplitudeTransition));
 
     QHBoxLayout *amplitudeRow = new QHBoxLayout;

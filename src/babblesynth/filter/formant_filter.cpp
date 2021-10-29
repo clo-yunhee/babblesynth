@@ -19,14 +19,13 @@
 
 #include <cmath>
 #include <complex>
+// #include <iostream>
 #include <numeric>
 
 #include "formant_filter.h"
 #include "sos_filter.h"
 #include "tf_filter.h"
 #include "../generator/noise.h"
-
-#include <iostream>
 
 using namespace babblesynth::filter;
 
@@ -75,7 +74,7 @@ std::vector<double> formant_filter::generateFrom(const std::vector<double>& inpu
 
     for (int i = 0; i < samples; ++i) {
         if (std::isnan(lfilt_output[i]) || std::isinf(lfilt_output[i])) {
-            std::cout << "lfilter overflowed, substituting with sosfilt result" << std::endl;
+            //std::cout << "lfilter overflowed, substituting with sosfilt result" << std::endl;
             lfilt_output[i] = sosfilt_output[i];
         }
     }
