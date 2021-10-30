@@ -30,16 +30,14 @@ using namespace babblesynth::gui;
 
 FilterTracks::FilterTracks(int nFormants, QWidget *parent)
     : QWidget(parent),
-      m_nFormants(nFormants),
       m_points(nFormants),
+      m_nFormants(nFormants),
       m_formantGraph(nFormants),
       m_formantPoints(nFormants),
       m_isDragging(false),
       m_isDraggingPoint(false)
 {
     setObjectName("FilterTracks");
-    setWindowTitle(tr("Filter tracks"));
-    setMinimumSize(QSize(1024, 768));
     setMouseTracking(true);
 
     m_timeAxis = new QValueAxis(this);
@@ -99,26 +97,8 @@ FilterTracks::FilterTracks(int nFormants, QWidget *parent)
     QObject::connect(m_chartView, &ChartView::mouseReleased, this, &FilterTracks::onSeriesReleased);
     QObject::connect(m_chartView, &ChartView::mouseDragging, this, &FilterTracks::onSeriesDragging);
 
-    QHBoxLayout *addButtons = new QHBoxLayout;
-
-    addButtons->addStretch();
-    for (int n = 0; n < nFormants; ++n) {
-        QToolButton *addButton = new QToolButton(this);
-        addButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        addButton->setText(QString("  F%1").arg(n + 1));
-        addButton->setIcon(QIcon(":/icons/plus.png"));
-
-        QObject::connect(addButton, &QToolButton::pressed,
-                         this, [this, n]() { newPoint(n); });
-        
-        addButtons->addWidget(addButton, 1);
-        addButtons->addSpacing(2);
-    }
-    addButtons->addStretch();
-
     QVBoxLayout *rootLayout = new QVBoxLayout;
-    rootLayout->addWidget(m_chartView, 1);
-    rootLayout->addLayout(addButtons);
+    rootLayout->addWidget(m_chartView);
     setLayout(rootLayout);
 
     std::array freqsA {1000, 1800, 2900, 4200, 4950};
@@ -213,20 +193,6 @@ void FilterTracks::updatePlans()
     appState->updatePlans();
 
     redrawGraph();
-}
-
-void FilterTracks::newPoint(int n)
-{
-    const double duration = appState->pitchPlan()->duration();
-
-    QPointF last = m_points[n].back();
-    QPointF previousToLast = m_points[n].at(m_points[n].size() - 2);
-
-    m_points[n].append({ (previousToLast.x() + last.x()) / 2, previousToLast.y() });
-
-    std::sort(m_points[n].begin(), m_points[n].end(), [](auto a, auto b) { return a.x() < b.x(); });
-
-    updatePlans();
 }
 
 void FilterTracks::onSeriesHovered(const QString& series, const QPointF& point, int index)

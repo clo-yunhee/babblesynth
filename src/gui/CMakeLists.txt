@@ -6,12 +6,6 @@ find_package(Qt5 COMPONENTS Core Widgets Multimedia Charts LinguistTools REQUIRE
 
 set(TS_FILES translations/babblesynth-gui_en_GB.ts)
 
-qt5_add_big_resources(BIG_QRC_FILES
-    fonts/fonts.qrc
-    icons/icons.qrc
-    qdarkstyle/dark/style.qrc
-)
-
 add_executable(babblesynth-gui WIN32
     app_state.cpp
     app_state.h
@@ -40,8 +34,12 @@ add_executable(babblesynth-gui WIN32
     colorplot/colorxyseries/colorxychart.cpp
     colorplot/colorxyseries/qcolorxyseries.cpp
     main.cpp
+    qt_conf.qrc
+    fonts/fonts.qrc
+    icons/icons.qrc
+    qdarkstyle/dark/style.qrc
     ${TS_FILES}
-    ${BIG_QRC_FILES}
+    $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Windows>:icons/appicon.rc>
 )
 
 qt5_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${TS_FILES})
@@ -63,5 +61,5 @@ set_target_properties(babblesynth-gui PROPERTIES
 )
 
 add_custom_command(TARGET babblesynth-gui POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -DTARGET_EXECUTABLE=$<TARGET_FILE:babblesynth-gui> -DQt5_DIR=${Qt5_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/../../copy_runtime_deps.cmake
+    COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DTARGET_EXECUTABLE=$<TARGET_FILE:babblesynth-gui> -DQt5_DIR=${Qt5_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/copy_runtime_deps.cmake
 )

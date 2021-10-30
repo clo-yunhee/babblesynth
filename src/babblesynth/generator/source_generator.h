@@ -28,6 +28,7 @@ namespace generator {
 class source_generator : public parameter_holder {
 public:
     explicit source_generator(int sampleRate);
+    virtual ~source_generator() = default;
 
     std::vector<double> generate(std::vector<std::pair<int, int>>& periods);
 

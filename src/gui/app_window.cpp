@@ -37,8 +37,8 @@ AppWindow::AppWindow()
     m_audioPlayer = new AudioPlayer(m_sampleRate, this);
 
     m_sourceParameters = new SourceParameters;
-    m_sourcePlan = new SourcePlan;
-    m_filterTracks = new FilterTracks(5);
+    m_sourcePlan = new SourcePlan(this);
+    m_filterTracks = new FilterTracks(5, this);
 
     QObject::connect(m_sourcePlan, &SourcePlan::updated, m_filterTracks, &FilterTracks::redrawGraph);
 
@@ -47,23 +47,25 @@ AppWindow::AppWindow()
     QPushButton *sourceButton = new QPushButton(tr("Source parameters"), centralWidget);
     QObject::connect(sourceButton, &QPushButton::pressed, m_sourceParameters, &QWidget::show);
 
+    /*
     QPushButton *filterButton = new QPushButton(tr("Filter tracks"), centralWidget);
     QObject::connect(filterButton, &QPushButton::pressed, m_filterTracks, &QWidget::show);
 
     QPushButton *pitchPlan = new QPushButton(tr("Edit pitch track"));
     QObject::connect(pitchPlan, &QPushButton::pressed, m_sourcePlan, &QWidget::show);
+    */
     
     QPushButton *playButton = new QPushButton(tr("Play"), centralWidget);
     QObject::connect(playButton, &QPushButton::pressed, this, &AppWindow::renderAndPlay);
 
     QVBoxLayout *leftLayout = new QVBoxLayout;
-    leftLayout->addWidget(pitchPlan);
-    leftLayout->addWidget(playButton);
+    leftLayout->addWidget(m_filterTracks, 2);
+    leftLayout->addWidget(m_sourcePlan, 1);
     leftLayout->addStretch();
 
     QVBoxLayout *rightLayout = new QVBoxLayout;
+    rightLayout->addWidget(playButton);
     rightLayout->addWidget(sourceButton);
-    rightLayout->addWidget(filterButton);
     rightLayout->addStretch();
 
     QFrame *rootSeparator = new QFrame(centralWidget);

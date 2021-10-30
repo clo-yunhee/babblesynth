@@ -23,6 +23,8 @@
 
 int main(int argc, char *argv[])
 {
+    QApplication::setWindowIcon(QIcon(":/icons/appicon.ico"));
+
     QApplication app(argc, argv);
 
     int id = QFontDatabase::addApplicationFont(":/fonts/Roboto-Regular.ttf");

@@ -84,7 +84,6 @@ std::vector<double> source_generator::generate(std::vector<std::pair<int, int>>&
     double lastNoise = noise[0] / noiseAmplitude;
 
     int periodStart = 0;
-    int nPeriod = 0;
 
     double maxAmplitude = 1e-10;
 

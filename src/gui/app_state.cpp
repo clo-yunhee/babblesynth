@@ -27,6 +27,13 @@
 using namespace babblesynth::gui;
 
 AppState::AppState(int sampleRate)
+    : m_pitchPlan(true),
+      m_amplitudePlan(true),
+      m_F1_plan(false),
+      m_F2_plan(false),
+      m_F3_plan(false),
+      m_F4_plan(false),
+      m_F5_plan(false)
 {
     setSampleRate(sampleRate);
     m_pitchPlan.reset(140).stepToValueAtTime(140, 1.0);

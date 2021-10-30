@@ -6,5 +6,6 @@
         <file>plus@2x.png</file>
         <file>minus.png</file>
         <file>minus@2x.png</file>
+        <file>appicon.ico</file>
     </qresource>
 </RCC>

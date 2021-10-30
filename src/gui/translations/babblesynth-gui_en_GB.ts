@@ -9,17 +9,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="50"/>
-        <source>Filter tracks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../app_window.cpp" line="53"/>
-        <source>Edit pitch track</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../app_window.cpp" line="56"/>
+        <location filename="../app_window.cpp" line="58"/>
         <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
@@ -27,12 +17,7 @@
 <context>
     <name>babblesynth::gui::FilterTracks</name>
     <message>
-        <location filename="../filter_tracks.cpp" line="41"/>
-        <source>Filter tracks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../filter_tracks.cpp" line="57"/>
+        <location filename="../filter_tracks.cpp" line="55"/>
         <source>Pitch and formants</source>
         <translation type="unfinished"></translation>
     </message>
@@ -73,12 +58,7 @@
 <context>
     <name>babblesynth::gui::SourcePlan</name>
     <message>
-        <location filename="../source_plan.cpp" line="30"/>
-        <source>Source plan</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../source_plan.cpp" line="55"/>
+        <location filename="../source_plan.cpp" line="54"/>
         <source>Pitch and amplitude</source>
         <translation type="unfinished"></translation>
     </message>

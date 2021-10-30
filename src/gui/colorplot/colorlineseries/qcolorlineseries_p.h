@@ -53,7 +53,7 @@ public:
     void initializeTheme(int index, ChartTheme* theme, bool forced = false) override;
 
 private:
-    Q_DECLARE_PUBLIC(QColorLineSeries);
+    Q_DECLARE_PUBLIC(QColorLineSeries)
 };
 
 QT_CHARTS_END_NAMESPACE

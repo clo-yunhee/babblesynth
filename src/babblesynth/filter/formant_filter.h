@@ -29,6 +29,7 @@ namespace filter {
 class formant_filter : public parameter_holder {
 public:
     explicit formant_filter(int sampleRate);
+    virtual ~formant_filter() = default;
 
     std::vector<double> generateFrom(const std::vector<double>& input, const std::vector<std::pair<int, int>>& periods);
 

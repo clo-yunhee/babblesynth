@@ -31,6 +31,8 @@ namespace source {
 
 class abstract_source : public parameter_holder {
 public:
+    virtual ~abstract_source() = default;
+
     virtual double evaluateAtPhase(double theta) = 0;
 
 protected:

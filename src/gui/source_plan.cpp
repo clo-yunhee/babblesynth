@@ -27,8 +27,7 @@ SourcePlan::SourcePlan(QWidget *parent)
     : QWidget(parent)
 {
     setObjectName("SourcePlan");
-    setWindowTitle(tr("Source plan"));
-    setMinimumSize(QSize(1024, 768));
+    //setMinimumSize(QSize(1024, 768));
 
     QToolButton *addButton = new QToolButton(this);
     addButton->setIcon(QIcon(":/icons/plus.png"));

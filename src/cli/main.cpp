@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
     babblesynth::generator::source_generator source(sampleRate);
 
-    babblesynth::variable_plan pitch(130.81);
+    babblesynth::variable_plan pitch(true, 130.81);
     pitch.linearToValueAtTime(130.81, 0.6);
     pitch.cubicToValueAtTime(164.81, 0.7);
     pitch.linearToValueAtTime(164.81, 1.2);
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     pitch.cubicToValueAtTime(261.63, 2.5);
     pitch.linearToValueAtTime(261.63, 3.6);
 
-    babblesynth::variable_plan amplitude(1e-10);
+    babblesynth::variable_plan amplitude(true, 1e-10);
     amplitude.linearToValueAtTime(0.8, 0.1);
     amplitude.linearToValueAtTime(1.0, 1.8);
     amplitude.linearToValueAtTime(0.8, 3.5);
@@ -64,11 +64,11 @@ int main(int argc, char *argv[])
 
     babblesynth::filter::formant_filter vtf(sampleRate);
 
-    babblesynth::variable_plan F1(900);
-    babblesynth::variable_plan F2(1300);
-    babblesynth::variable_plan F3(2400);
-    babblesynth::variable_plan F4(2800);
-    babblesynth::variable_plan F5(3800);
+    babblesynth::variable_plan F1(false, 900);
+    babblesynth::variable_plan F2(false, 1300);
+    babblesynth::variable_plan F3(false, 2400);
+    babblesynth::variable_plan F4(false, 2800);
+    babblesynth::variable_plan F5(false, 3800);
 
     F1.linearToValueAtTime(1100, 3.0);
     F2.linearToValueAtTime(1400, 3.0);
