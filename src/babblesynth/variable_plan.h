@@ -32,7 +32,7 @@ public:
         TransitionCubic,
     };
 
-    explicit variable_plan(double initialValue = 0);
+    explicit variable_plan(bool piecewiseMonotonic = false, double initialValue = 0);
     variable_plan(const variable_plan& orig);
     ~variable_plan();
 
@@ -50,10 +50,13 @@ public:
 
 private:
     void addPoint(double time, double value, transition trans);
+    void updateSpline();
 
     double interpolateStep(int index, double time) const;
     double interpolateLinear(int index, double time) const;
     double interpolateCubic(int index, double time) const;
+
+    bool m_isPiecewiseMonotonic;
 
     std::vector<double> m_times;
     std::vector<double> m_values;

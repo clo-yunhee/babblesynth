@@ -29,6 +29,15 @@ SOFTWARE.
 #ifndef ACCESS_PRIVATE_HPP
 #define ACCESS_PRIVATE_HPP
 
+#if defined(__GNUC__) || defined(__clang__)
+#define IGNORE_WARNING_BEGIN _Pragma("GCC diagnostic push") \
+                             _Pragma("GCC diagnostic ignored \"-Wunused-function\"")
+#define IGNORE_WARNING_END _Pragma("GCC diagnostic pop")
+#else
+#define IGNORE_WARNING_BEGIN
+#define IGNORE_WARNING_END
+#endif
+
 #include <type_traits>
 #include <utility>
 
@@ -102,6 +111,7 @@ namespace {
   PRIVATE_ACCESS_DETAIL_ACCESS_PRIVATE(Tag, Class, Type, Name, Class::*)       \
   namespace {                                                                  \
     namespace access_private {                                                 \
+      IGNORE_WARNING_BEGIN                                                     \
       Type &Name(Class &&t) { return t.*get(private_access_detail::Tag{}); }   \
       Type &Name(Class &t) { return t.*get(private_access_detail::Tag{}); }    \
       /* The following usings are here to avoid duplicate const qualifier      \
@@ -113,6 +123,7 @@ namespace {
       PRIVATE_ACCESS_DETAIL_CONCATENATE(Y, Tag) & Name(const Class &t) {       \
         return t.*get(private_access_detail::Tag{});                           \
       }                                                                        \
+      IGNORE_WARNING_END                                                       \
     }                                                                          \
   }
 

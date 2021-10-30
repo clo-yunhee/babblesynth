@@ -29,9 +29,9 @@ void filter::lfilter(const std::vector<double>& b,
                      std::vector<double>& z)
 {
     const int len_b = b.size();
-    const int len_a = a.size();
+    // const int len_a = a.size();
 
-    const double a0 = a[0];
+    // const double a0 = a[0];
 
     int k; // Index along x and y
     int j; // Index along b and a

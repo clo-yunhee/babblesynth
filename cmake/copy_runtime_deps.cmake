@@ -48,6 +48,13 @@ if (WIN32)
         message(WARNING "Runtime dependency ${_file} could not be resolved.")
     endforeach()
 
-    file(INSTALL ${QT_ROOT}/plugins/platforms/qwindows.dll DESTINATION ${target_dir}/plugins/platforms)
-    file(INSTALL ${QT_ROOT}/plugins/audio/qtaudio_windows.dll DESTINATION ${target_dir}/plugins/audio)
+    if(CMAKE_BUILD_TYPE STREQUAL Debug)
+        set(d_ d)
+    else()
+        set(d_)
+    endif()
+
+    file(INSTALL ${QT_ROOT}/plugins/platforms/qwindows${d_}.dll DESTINATION ${target_dir}/plugins/platforms)
+    file(INSTALL ${QT_ROOT}/plugins/audio/qtaudio_windows${d_}.dll
+                 ${QT_ROOT}/plugins/audio/qtaudio_wasapi${d_}.dll DESTINATION ${target_dir}/plugins/audio)
 endif()

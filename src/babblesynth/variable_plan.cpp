@@ -24,40 +24,45 @@
 
 using namespace babblesynth;
 
-variable_plan::variable_plan(double initialValue)
-    : m_spline(new tk::spline)
+variable_plan::variable_plan(bool piecewiseMonotonic, double initialValue)
+    : m_isPiecewiseMonotonic(piecewiseMonotonic),
+      m_times({0.0}),
+      m_values({initialValue}),
+      m_transitions({TransitionLinear, TransitionLinear}),
+      m_spline(nullptr)
 {
-    m_times.push_back(0);
-    m_values.push_back(initialValue);
+    updateSpline();
 }
 
 variable_plan::variable_plan(const variable_plan& orig)
-    : m_times(orig.m_times),
+    : m_isPiecewiseMonotonic(orig.m_isPiecewiseMonotonic),
+      m_times(orig.m_times),
       m_values(orig.m_values),
       m_transitions(orig.m_transitions),
-      m_spline(new tk::spline)
-{
-    ((tk::spline *) m_spline)->set_boundary(tk::spline::first_deriv, 0.0, tk::spline::first_deriv, 0.0);
-    ((tk::spline *) m_spline)->set_points(m_times, m_values, tk::spline::cspline_hermite);
+      m_spline(nullptr)
+{    
+    updateSpline();
 }
 
 variable_plan::~variable_plan()
 {
-    delete (tk::spline *) m_spline;
+    if (m_spline != nullptr) {
+        delete (tk::spline *) m_spline;
+    }
 }
 
 variable_plan& variable_plan::operator=(const variable_plan& orig)
 {
-    delete (tk::spline *) m_spline;
+    if (m_spline != nullptr) {
+        delete (tk::spline *) m_spline;
+        m_spline = nullptr;
+    }
 
+    m_isPiecewiseMonotonic = orig.m_isPiecewiseMonotonic;
     m_times = orig.m_times;
     m_values = orig.m_values;
     m_transitions = orig.m_transitions;
-    m_spline = new tk::spline;
-
-    ((tk::spline *) m_spline)->set_boundary(tk::spline::first_deriv, 0.0, tk::spline::first_deriv, 0.0);
-    ((tk::spline *) m_spline)->set_points(m_times, m_values, tk::spline::cspline_hermite);
-
+    updateSpline();
     return *this;
 }
 
@@ -86,6 +91,7 @@ variable_plan& variable_plan::reset(double initialValue)
     m_transitions.clear();
     m_times.push_back(0);
     m_values.push_back(initialValue);
+    updateSpline();
     return *this;
 }
 
@@ -126,9 +132,22 @@ void variable_plan::addPoint(double time, double value, transition trans)
     m_times.push_back(time);
     m_values.push_back(value);
     m_transitions.push_back(trans);
-    ((tk::spline *) m_spline)->set_boundary(tk::spline::first_deriv, 0.0, tk::spline::first_deriv, 0.0);
-    ((tk::spline *) m_spline)->set_points(m_times, m_values, tk::spline::cspline_hermite);
-    //m_spline.make_monotonic();
+    updateSpline();
+}
+
+void variable_plan::updateSpline()
+{
+    if (m_spline != nullptr) {
+        delete (tk::spline *) m_spline;
+    }
+ 
+    if (m_times.size() >= 3) {
+        m_spline = new tk::spline(m_times, m_values, tk::spline::cspline_hermite, m_isPiecewiseMonotonic,
+                                  tk::spline::first_deriv, 0.0, tk::spline::first_deriv, 0.0);
+    }
+    else {   
+        m_spline = nullptr;
+    }
 }
 
 double variable_plan::interpolateStep(int index, double time) const
@@ -149,5 +168,10 @@ double variable_plan::interpolateLinear(int index, double time) const
 
 double variable_plan::interpolateCubic(int index, double time) const
 {
-    return (*(tk::spline *) m_spline)(time);
+    if (m_spline != nullptr) {
+        return (*(tk::spline *) m_spline)(time);
+    }
+    else {
+        return interpolateLinear(index, time);
+    }
 }

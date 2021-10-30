@@ -54,8 +54,6 @@ private slots:
     void onSeriesDragging(const QString& series, const QPointF& point);
 
 private:
-    void newPoint(int n);
-
     enum PointStyle {
         Normal, Hover, Drag, HoverSegment
     };
