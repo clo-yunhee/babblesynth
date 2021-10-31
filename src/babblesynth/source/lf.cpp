@@ -16,97 +16,116 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "lf.h"
+
+#include "../fzero.h"
 
 using namespace babblesynth::source;
 
-template<typename Func, typename Func2>
-static double fzero(const Func& f, const Func2& df, double x0,
-                const double tol = 1e-7,
-                const double eps = 1e-13,
-                const int maxIter = 50)
-{
+template <typename Func, typename Func2>
+static double oldfzero(const Func& f, const Func2& df, double x0,
+                       const double tol = 1e-7, const double eps = 1e-13,
+                       const int maxIter = 50) {
     for (int iter = 0; iter < maxIter; ++iter) {
         double y = f(x0);
         double dy = df(x0);
-        if (std::abs(dy) < eps)
-            return x0;
+        if (std::abs(dy) < eps) return x0;
         double x1 = x0 - y / dy;
-        if (std::abs(x1 - x0) <= tol)
-            return x1;
+        if (std::abs(x1 - x0) <= tol) return x1;
         x0 = x1;
     }
     return x0;
 }
 
-lf::lf()
-    : abstract_source(),
-      Oq(0.6),
-      am(0.7),
-      Qa(0.1)
-{
-    addParameter("Oq", 0.6).setMin(0.1).setMax(0.9);
-    addParameter("am", 0.7).setMin(0.55).setMax(0.9);
-    addParameter("Qa", 0.1).setMin(0.01).setMax(1);
+lf::lf() : abstract_source(), Oq(0.6), am(0.7), Qa(0.1) {
+    addParameter("Oq", 0.6);
+    addParameter("am", 0.7).setMin(0.5).setMax(1);
+    addParameter("Qa", 0.1);
     calculateModelParameters();
 }
 
-double lf::evaluateAtPhase(double theta)
-{
+double lf::evaluateAtPhase(double theta) {
     const double t = theta / (2 * M_PI);
 
     if (t <= Te) {
-        return -Ee * exp(alpha * (t - Te)) * sin(M_PI * t / Tp) / sin(M_PI * Te / Tp);
-    }
-    else {
-        return -Ee / (epsilon * Ta) * (exp(-epsilon * (t - Te)) - exp(-epsilon * (T0 - Te)));
+        return -Ee * exp(alpha * (t - Te)) * sin(M_PI * t / Tp) /
+               sin(M_PI * Te / Tp);
+    } else {
+        return -Ee / (epsilon * Ta) *
+               (exp(-epsilon * (t - Te)) - exp(-epsilon * (T0 - Te)));
     }
 }
 
-void lf::calculateModelParameters()
-{
+bool lf::calculateModelParameters() {
     Ee = E;
     Te = Oq * T0;
-    Tp = am * Oq * T0;
+    Tp = (am > 0.5 ? am : 0.5001) * Oq * T0;
     Ta = Qa * (1 - Oq) * T0;
 
+    // epsilon is expressed by an implicit equation
+    const auto fn_e = [=](double e) {
+        return 1.0 - exp(-e * (T0 - Te)) - e * Ta;
+    };
+    epsilon = fzero(1.0 / (Ta + 1e-9), fn_e, 1e-10);
+
+    // If epsilon did not solve to anything revert the param change.
+    if (std::isnan(epsilon)) return false;
+
+    // alpha is expressed by another implicit equation
     const double wg = M_PI / Tp;
 
-    // e is expressed by an implicit equation
-    const auto fb = [=](double e) {
-        return 1.0 - std::exp(-e * (T0 - Te)) - e * Ta;
+    const auto fn_a = [=](double a) {
+        return 1.0 / (a * a + wg * wg) *
+                   (exp(-a * Te) * wg / sin(wg * Te) + a - wg / tan(wg * Te)) -
+               ((T0 - Te) / (exp(epsilon * (T0 - Te)) - 1) - 1 / epsilon);
     };
-    const auto dfb = [=](double e) {
-        return (T0 - Te) * std::exp(-e * (T0 - Te)) - Ta;
-    };
-    const double e = fzero(fb, dfb, 1.0 / (Ta + 1e-13));
 
-    // a is expressed by another implicit equation
-    // integral{0, T0} ULF(t) dt, where ULF(t) is the LF model equation
-    const double A = (1.0 - std::exp(-e * (T0 - Te))) / (e * e * Ta) - (T0 - Te) * std::exp(-e * (T0 - Te)) / (e * Ta);
-    const auto fa = [=](double a) {
-        return (a * a + wg * wg) * std::sin(wg * Te) * A + wg * std::exp(-a * Te) + a * std::sin(wg * Te) - wg * std::cos(wg * Te);
-    };
-    const auto dfa = [=](double a) {
-        return (2 * A * a + 1) * std::sin(wg * Te) - wg * Te * std::exp(-a * Te);
-    };
-    const double a = fzero(fa, dfa, 4.42);
+    // Find the first interval with a zero crossing
+    std::array ints{-1e20, -1e9, -1e8, -1e7, -1e6, -1e5, -1e4,
+                    -1e3,  -1e2, -1e1, 0.0,  1e1,  1e2,  1e3,
+                    1e4,   1e5,  1e6,  1e7,  1e8,  1e9,  1e20};
+    double fa, fb;
+    double a, b;
 
-    epsilon = e;
-    alpha = a;
+    for (int i = 0; i < ints.size() - 1; ++i) {
+        a = ints[i];
+        fa = fn_a(a);
+
+        b = ints[i + 1];
+        fb = fn_a(b);
+
+        if (sgn(fa) * sgn(fb) <= 0) break;
+    }
+
+    b = ints[0];
+    fb = fn_a(b);
+    for (int i = 1; i < ints.size(); ++i) {
+        a = b;
+        fa = fb;
+
+        b = ints[i];
+        fb = fn_a(b);
+
+        if (sgn(fa) * sgn(fb) <= 0) {
+            break;
+        }
+    }
+
+    alpha = fzero(a, b, fn_a, 1e-10);
+
+    // If alpha did not solve to anything revert the param change.
+    if (std::isnan(alpha)) return false;
+
+    return true;
 }
 
-void lf::onParameterChange(const parameter& param)
-{
+bool lf::onParameterChange(const parameter& param) {
     if (param.name() == "Oq") {
         Oq = param.value<double>();
-    }
-    else if (param.name() == "am") {
+    } else if (param.name() == "am") {
         am = param.value<double>();
-    }
-    else if (param.name() == "Qa") {
+    } else if (param.name() == "Qa") {
         Qa = param.value<double>();
     }
-    calculateModelParameters();
+    return calculateModelParameters();
 }

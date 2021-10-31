@@ -27,21 +27,20 @@
 **
 ****************************************************************************/
 
+#include "qcolorxyseries.h"
+
+#include <qchartglobal.h>
 
 #include <QAbstractAxis>
 #include <QPainter>
 
-#include <qchartglobal.h>
-#include "qcolorxyseries.h"
-#include "qcolorxyseries_p.h"
 #include "../coloraxis/qcoloraxis.h"
+#include "qcolorxyseries_p.h"
 
 QT_CHARTS_BEGIN_NAMESPACE
 
 QColorXYSeries::QColorXYSeries(QColorXYSeriesPrivate &d, QObject *parent)
-    : QXYSeries(d, parent)
-{
-}
+    : QXYSeries(d, parent) {}
 
 /*!
     Removes the configuration of a point located at \a index
@@ -51,8 +50,7 @@ QColorXYSeries::QColorXYSeries(QColorXYSeriesPrivate &d, QObject *parent)
     \sa clearPointsConfiguration(), setPointConfiguration()
     \since 6.2
 */
-void QColorXYSeries::clearPointConfiguration(const int index)
-{
+void QColorXYSeries::clearPointConfiguration(const int index) {
     Q_D(QColorXYSeries);
     if (d->m_pointsConfiguration.contains(index)) {
         d->m_pointsConfiguration.remove(index);
@@ -61,20 +59,20 @@ void QColorXYSeries::clearPointConfiguration(const int index)
 }
 
 /*!
-    Removes the configuration property identified by \a key from the point at \a index
-    and restores the default look derived from the series' settings.
+    Removes the configuration property identified by \a key from the point at \a
+   index and restores the default look derived from the series' settings.
 
     Removes the configuration type, such as color or size,
-    specified by \a key from the point at \a index with configuration customizations,
-    allowing that configuration property to be rendered as the default
-    specified in the series' properties.
+    specified by \a key from the point at \a index with configuration
+   customizations, allowing that configuration property to be rendered as the
+   default specified in the series' properties.
 
     \note It doesn't affect the configuration of other points.
     \sa clearPointsConfiguration(), setPointConfiguration()
     \since 6.2
 */
-void QColorXYSeries::clearPointConfiguration(const int index, const QColorXYSeries::PointConfiguration key)
-{
+void QColorXYSeries::clearPointConfiguration(
+    const int index, const QColorXYSeries::PointConfiguration key) {
     Q_D(QColorXYSeries);
     if (d->m_pointsConfiguration.contains(index)) {
         auto &conf = d->m_pointsConfiguration[index];
@@ -93,8 +91,7 @@ void QColorXYSeries::clearPointConfiguration(const int index, const QColorXYSeri
     \sa setPointConfiguration()
     \since 6.2
 */
-void QColorXYSeries::clearPointsConfiguration()
-{
+void QColorXYSeries::clearPointsConfiguration() {
     Q_D(QColorXYSeries);
     d->m_pointsConfiguration.clear();
     emit pointsConfigurationChanged(d->m_pointsConfiguration);
@@ -112,8 +109,8 @@ void QColorXYSeries::clearPointsConfiguration()
     \sa clearPointsConfiguration(), setPointConfiguration()
     \since 6.2
 */
-void QColorXYSeries::clearPointsConfiguration(const QColorXYSeries::PointConfiguration key)
-{
+void QColorXYSeries::clearPointsConfiguration(
+    const QColorXYSeries::PointConfiguration key) {
     Q_D(QColorXYSeries);
     bool needsUpdate = false;
     for (const int &index : d->m_pointsConfiguration.keys()) {
@@ -125,25 +122,27 @@ void QColorXYSeries::clearPointsConfiguration(const QColorXYSeries::PointConfigu
         }
     }
 
-    if (needsUpdate)
-        emit pointsConfigurationChanged(d->m_pointsConfiguration);
+    if (needsUpdate) emit pointsConfigurationChanged(d->m_pointsConfiguration);
 }
 
 /*!
     Enables customizing the appearance of a point located at \a index with
     desired \a configuration.
 
-    With points configuration you can change various aspects of every point's appearance.
+    With points configuration you can change various aspects of every point's
+   appearance.
 
-    A point's configuration is represented as a hash map with QColorXYSeries::pointConfiguration
-    keys and QVariant values. For example:
+    A point's configuration is represented as a hash map with
+   QColorXYSeries::pointConfiguration keys and QVariant values. For example:
     \code
     QLineSeries *series = new QLineSeries();
     series->setName("Customized serie");
     series->setPointsVisible(true);
 
-    *series << QPointF(0, 6) << QPointF(2, 4) << QPointF(3, 6) << QPointF(7, 4) << QPointF(10, 5)
-            << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18, 3)
+    *series << QPointF(0, 6) << QPointF(2, 4) << QPointF(3, 6) << QPointF(7, 4)
+   << QPointF(10, 5)
+            << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18,
+   3)
             << QPointF(20, 2);
 
     QChart *chart = new QChart();
@@ -174,8 +173,8 @@ void QColorXYSeries::clearPointsConfiguration(const QColorXYSeries::PointConfigu
     \since 6.2
 */
 void QColorXYSeries::setPointConfiguration(
-        const int index, const QHash<QColorXYSeries::PointConfiguration, QVariant> &configuration)
-{
+    const int index,
+    const QHash<QColorXYSeries::PointConfiguration, QVariant> &configuration) {
     Q_D(QColorXYSeries);
     if (d->m_pointsConfiguration[index] != configuration) {
         d->m_pointsConfiguration[index] = configuration;
@@ -186,16 +185,15 @@ void QColorXYSeries::setPointConfiguration(
 /*!
     Enables customizing a particular aspect of a point's configuration.
 
-    \note Points configuration concept provides a flexible way to configure various aspects
-    of a point's appearance. Thus, values need to have an elastic type such as QVariant.
-    See QColorXYSeries::PointConfiguration to see what \a value should be passed
-    for certain \a key.
-    \sa pointsConfiguration()
+    \note Points configuration concept provides a flexible way to configure
+   various aspects of a point's appearance. Thus, values need to have an elastic
+   type such as QVariant. See QColorXYSeries::PointConfiguration to see what \a
+   value should be passed for certain \a key. \sa pointsConfiguration()
     \since 6.2
 */
-void QColorXYSeries::setPointConfiguration(const int index, const QColorXYSeries::PointConfiguration key,
-                                      const QVariant &value)
-{
+void QColorXYSeries::setPointConfiguration(
+    const int index, const QColorXYSeries::PointConfiguration key,
+    const QVariant &value) {
     Q_D(QColorXYSeries);
     QHash<QColorXYSeries::PointConfiguration, QVariant> conf;
     if (d->m_pointsConfiguration.contains(index))
@@ -203,8 +201,7 @@ void QColorXYSeries::setPointConfiguration(const int index, const QColorXYSeries
 
     bool callSignal = false;
     if (conf.contains(key)) {
-        if (conf[key] != value)
-            callSignal = true;
+        if (conf[key] != value) callSignal = true;
     } else {
         callSignal = true;
     }
@@ -225,8 +222,8 @@ void QColorXYSeries::setPointConfiguration(const int index, const QColorXYSeries
     \since 6.2
 */
 void QColorXYSeries::setPointsConfiguration(
-        const QHash<int, QHash<QColorXYSeries::PointConfiguration, QVariant>> &pointsConfiguration)
-{
+    const QHash<int, QHash<QColorXYSeries::PointConfiguration, QVariant>>
+        &pointsConfiguration) {
     Q_D(QColorXYSeries);
     if (d->m_pointsConfiguration != pointsConfiguration) {
         d->m_pointsConfiguration = pointsConfiguration;
@@ -237,41 +234,43 @@ void QColorXYSeries::setPointsConfiguration(
 /*!
     Returns a map representing the configuration of a point at \a index.
 
-    With points configuration you can change various aspects of each point's look.
+    With points configuration you can change various aspects of each point's
+   look.
 
     \sa setPointConfiguration()
     \since 6.2
 */
-QHash<QColorXYSeries::PointConfiguration, QVariant> QColorXYSeries::pointConfiguration(const int index) const
-{
+QHash<QColorXYSeries::PointConfiguration, QVariant>
+QColorXYSeries::pointConfiguration(const int index) const {
     Q_D(const QColorXYSeries);
     return d->m_pointsConfiguration[index];
 }
 
 /*!
-    Returns a map with points' indexes as keys and points' configuration as values.
+    Returns a map with points' indexes as keys and points' configuration as
+   values.
 
     \sa setPointConfiguration(), pointConfiguration()
     \since 6.2
 */
-QHash<int, QHash<QColorXYSeries::PointConfiguration, QVariant>> QColorXYSeries::pointsConfiguration() const
-{
+QHash<int, QHash<QColorXYSeries::PointConfiguration, QVariant>>
+QColorXYSeries::pointsConfiguration() const {
     Q_D(const QColorXYSeries);
     return d->m_pointsConfiguration;
 }
 
 /*!
     Sets the points' sizes according to a passed list of values. Values from
-    \a sourceData are sorted and mapped to a point size which is between \a minSize
-    and \a maxSize.
+    \a sourceData are sorted and mapped to a point size which is between \a
+   minSize and \a maxSize.
 
-    \note If \a sourceData length is smaller than number of points in the series, then
-    size of the points at the end of the series will stay the same.
+    \note If \a sourceData length is smaller than number of points in the
+   series, then size of the points at the end of the series will stay the same.
     \sa setPointConfiguration(), pointConfiguration()
     \since 6.2
 */
-void QColorXYSeries::sizeBy(const QVector<qreal> &sourceData, const qreal minSize, const qreal maxSize)
-{
+void QColorXYSeries::sizeBy(const QVector<qreal> &sourceData,
+                            const qreal minSize, const qreal maxSize) {
     Q_D(QColorXYSeries);
 
     Q_ASSERT(minSize <= maxSize);
@@ -293,7 +292,8 @@ void QColorXYSeries::sizeBy(const QVector<qreal> &sourceData, const qreal minSiz
             const qreal percentage = startValue / range;
             pointSize = qMax(minSize, percentage * maxSize);
         }
-        setPointConfiguration(i, QColorXYSeries::PointConfiguration::Size, pointSize);
+        setPointConfiguration(i, QColorXYSeries::PointConfiguration::Size,
+                              pointSize);
     }
 }
 
@@ -307,13 +307,12 @@ void QColorXYSeries::sizeBy(const QVector<qreal> &sourceData, const qreal minSiz
     \sa setPointConfiguration(), pointConfiguration(), QColorAxis
     \since 6.2
 */
-void QColorXYSeries::colorBy(const QVector<qreal> &sourceData, const QLinearGradient &gradient)
-{
+void QColorXYSeries::colorBy(const QVector<qreal> &sourceData,
+                             const QLinearGradient &gradient) {
     Q_D(QColorXYSeries);
 
     d->m_colorByData = sourceData;
-    if (d->m_colorByData.isEmpty())
-        return;
+    if (d->m_colorByData.isEmpty()) return;
 
     const qreal imgSize = 100.0;
 
@@ -336,7 +335,8 @@ void QColorXYSeries::colorBy(const QVector<qreal> &sourceData, const QLinearGrad
         if (axis->type() == QColorAxis::AxisTypeColor) {
             QColorAxis *colorAxis = static_cast<QColorAxis *>(axis);
             if (!axisFound) {
-                usedGradient = QLinearGradient(QPointF(0,0), QPointF(0, imgSize));
+                usedGradient =
+                    QLinearGradient(QPointF(0, 0), QPointF(0, imgSize));
                 const auto stops = colorAxis->gradient().stops();
                 for (const auto &stop : stops)
                     usedGradient.setColorAt(stop.first, stop.second);
@@ -350,8 +350,7 @@ void QColorXYSeries::colorBy(const QVector<qreal> &sourceData, const QLinearGrad
                 axisFound = true;
             }
 
-            if (colorAxis->autoRange())
-                colorAxis->setRange(min, max);
+            if (colorAxis->autoRange()) colorAxis->setRange(min, max);
         }
     }
 
@@ -359,27 +358,26 @@ void QColorXYSeries::colorBy(const QVector<qreal> &sourceData, const QLinearGrad
     QPainter painter(&image);
     painter.fillRect(image.rect(), usedGradient);
 
-    // To ensure that negative values will be well handled, distance from min to 0
-    // will be added to min and every single value. This will move entire values
-    // list to positive only values.
+    // To ensure that negative values will be well handled, distance from min to
+    // 0 will be added to min and every single value. This will move entire
+    // values list to positive only values.
     const qreal diff = min < 0 ? qAbs(min) : 0;
     min += diff;
 
     for (int i = 0; i < sourceData.size() && i < d->m_points.size(); ++i) {
         const qreal startValue = qMax(0.0, sourceData.at(i) + diff - min);
         const qreal percentage = startValue / range;
-        QColor color = image.pixelColor(0, qMin(percentage * imgSize, imgSize - 1));
-        setPointConfiguration(i, QColorXYSeries::PointConfiguration::Color, color);
+        QColor color =
+            image.pixelColor(0, qMin(percentage * imgSize, imgSize - 1));
+        setPointConfiguration(i, QColorXYSeries::PointConfiguration::Color,
+                              color);
     }
 }
 
 QColorXYSeriesPrivate::QColorXYSeriesPrivate(QColorXYSeries *q)
-    : QXYSeriesPrivate(q)
-{
-}
+    : QXYSeriesPrivate(q) {}
 
-QVector<qreal> QColorXYSeriesPrivate::colorByData() const
-{
+QVector<qreal> QColorXYSeriesPrivate::colorByData() const {
     return m_colorByData;
 }
 

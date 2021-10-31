@@ -16,14 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "source_generator.h"
 
 #include <algorithm>
 #include <cmath>
 
-#include "source_generator.h"
-#include "noise.h"
+#include "../filter/butterworth.h"
+#include "../filter/sos_filter.h"
 #include "../source/abstract_source.h"
 #include "../source/lf.h"
+#include "noise.h"
 
 using namespace babblesynth::generator;
 
@@ -31,8 +33,9 @@ source_generator::source_generator(int sampleRate)
     : parameter_holder(),
       m_pitch(true),
       m_amplitude(false),
-      m_sampleRate(sampleRate)
-{
+      m_sampleRate(sampleRate),
+      m_antialiasFilter(
+          filter::butterworth::lowPass(8, sampleRate / 2 - 2000, sampleRate)) {
     addParameter("Source type", source::sources.valueOf("LF"));
     addParameter("Pitch plan", variable_plan(220).stepToValueAtTime(220, 1.0));
     addParameter("Amplitude plan", variable_plan(1).stepToValueAtTime(1, 1.0));
@@ -40,46 +43,47 @@ source_generator::source_generator(int sampleRate)
     addParameter("Aspiration", 0.10).setMin(0).setMax(1);
 }
 
-void source_generator::onParameterChange(const parameter& param)
-{
+bool source_generator::onParameterChange(const parameter& param) {
     if (param.name() == "Source type") {
         const auto sourceName = param.value<enumeration_value>().name();
         if (sourceName == "LF") {
             m_source = std::make_unique<source::lf>();
+        } else {
+            return false;
         }
-    }
-    else if (param.name() == "Pitch plan") {
+    } else if (param.name() == "Pitch plan") {
         m_pitch.setPlan(param.value<variable_plan>());
-    }
-    else if (param.name() == "Amplitude plan") {
+    } else if (param.name() == "Amplitude plan") {
         m_amplitude.setPlan(param.value<variable_plan>());
-    }
-    else if (param.name() == "Aspiration") {
+    } else if (param.name() == "Aspiration") {
         m_aspirationPercentage = param.value<double>();
-    }
-    else if (param.name() == "Jitter") {
+    } else if (param.name() == "Jitter") {
         m_jitterPercentage = param.value<double>();
     }
+
+    return true;
 }
 
-babblesynth::source::abstract_source *source_generator::getSource()
-{
+babblesynth::source::abstract_source* source_generator::getSource() {
     return m_source.get();
 }
 
-std::vector<double> source_generator::generate(std::vector<std::pair<int, int>>& periods)
-{
+std::vector<double> source_generator::generate(
+    std::vector<std::pair<int, int>>& periods, double* Oq) {
     const double duration = m_pitch.maxTime();
     const int samples = std::ceil(duration * m_sampleRate);
 
     std::vector<double> output(samples, 0);
     std::vector<double> noise = noise::colored(samples, -4);
 
-    double noiseAmplitude = std::max(-*std::min_element(noise.begin(), noise.end()),
-                                     +*std::max_element(noise.begin(), noise.end()));
+    double noiseAmplitude =
+        std::max(-*std::min_element(noise.begin(), noise.end()),
+                 +*std::max_element(noise.begin(), noise.end()));
+
+    *Oq = m_source->getParameter("Oq").value<double>();
 
     double phase = 0;
-    double c = 0; // running compensation for lost low-order bits
+    double c = 0;  // running compensation for lost low-order bits
 
     double lastNoise = noise[0] / noiseAmplitude;
 
@@ -87,18 +91,28 @@ std::vector<double> source_generator::generate(std::vector<std::pair<int, int>>&
 
     double maxAmplitude = 1e-10;
 
+    auto aafiltz = std::vector<std::array<double, 2>>(m_antialiasFilter.size(),
+                                                      {0.0, 0.0});
+
     for (int index = 0; index < samples; ++index) {
         const double time = index / double(m_sampleRate);
 
         const double f0 = m_pitch.evaluateAtTime(time);
-        
+
         const double jitterHz = f0 * m_jitterPercentage * lastNoise / 2;
 
         const double phaseDelta = 2 * M_PI * (f0 + jitterHz) / m_sampleRate;
 
         m_amplitude.update(time);
 
-        output[index] = m_source->evaluateAtPhase(phase) + m_aspirationPercentage * noise[index] / noiseAmplitude;
+        output[index] = m_source->evaluateAtPhase(phase);
+
+        // Only add aspiration noise during the open phase.
+        if (phase / 2 * M_PI < *Oq) {
+            output[index] +=
+                m_aspirationPercentage * noise[index] / noiseAmplitude;
+        }
+
         output[index] *= m_amplitude.evaluateAtTime(time);
 
         if (std::abs(output[index]) > maxAmplitude) {
@@ -110,7 +124,7 @@ std::vector<double> source_generator::generate(std::vector<std::pair<int, int>>&
         const double t = phase + y;
         c = (t - phase) - y;
         phase = t;
-        
+
         // modulo 2*pi
         if (phase > 2 * M_PI) {
             phase -= 2 * M_PI;
@@ -123,5 +137,8 @@ std::vector<double> source_generator::generate(std::vector<std::pair<int, int>>&
     // Remove the last partial period.
     output.resize(periodStart);
 
-    return output;
+    auto antialiasedOutput = output;
+    filter::sosfilt(m_antialiasFilter, output, antialiasedOutput, 0,
+                    output.size() - 1, aafiltz);
+    return antialiasedOutput;
 }

@@ -16,13 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include <QtWidgets>
 
 #include "app_window.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     QApplication::setWindowIcon(QIcon(":/icons/appicon.ico"));
 
     QApplication app(argc, argv);

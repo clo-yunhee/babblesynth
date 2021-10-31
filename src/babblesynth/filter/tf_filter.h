@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_TF_FILTER
 #define BABBLESYNTH_TF_FILTER
 
@@ -27,20 +26,16 @@
 namespace babblesynth {
 namespace filter {
 
-void lfilter(const std::vector<double>& b,
-             const std::vector<double>& a,
-             const std::vector<double>& x,
-             std::vector<double>& y,
-             int start, int end,
-             std::vector<double>& z);
+void lfilter(const std::vector<double>& b, const std::vector<double>& a,
+             const std::vector<double>& x, std::vector<double>& y, int start,
+             int end, std::vector<double>& z);
 
 std::vector<double> lfiltic(const std::vector<double>& b,
                             const std::vector<double>& a,
                             const std::vector<double>& x,
-                            const std::vector<double>& y,
-                            int end);
+                            const std::vector<double>& y, int end);
 
-} // filter
-} // babblesynth
+}  // namespace filter
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_TF_FILTER
+#endif  // BABBLESYNTH_TF_FILTER

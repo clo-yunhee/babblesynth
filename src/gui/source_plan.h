@@ -16,49 +16,79 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_SOURCE_PLAN_H
 #define BABBLESYNTH_SOURCE_PLAN_H
 
-#include <QtWidgets>
-#include <QtCharts>
 #include <babblesynth.h>
 
+#include <QtCharts>
+#include <QtWidgets>
+
+#include "chart_view.h"
 #include "colorplot/colorplot.h"
 #include "source_plan_item.h"
 
 namespace babblesynth {
 namespace gui {
-    
+
 class SourcePlan : public QWidget {
     Q_OBJECT
-    
-public:
-    SourcePlan(QWidget *parent = nullptr);
 
-signals:
+   public:
+    SourcePlan(QWidget* parent = nullptr);
+
+   signals:
     void updated();
 
-private slots:
-    void newPlanItem();
-    void removePlanItem(SourcePlanItem *item);
-    void updatePlans();
-
-private:
-    void initialPlanItem();
+   public slots:
     void redrawGraph();
 
-    QVBoxLayout *m_segments;
-    SourcePlanItem *m_initialPlanItem;
-    QList<SourcePlanItem *> m_planItems;
+   private slots:
+    void updatePlans();
 
-    QColorLineSeries *m_pitchGraph;
-    QValueAxis *m_timeAxis;
+    void onSeriesHovered(const QString& series, const QPointF& point,
+                         int index);
+    void onSeriesLeft(const QString& series);
 
-    QChartView *m_chartView;
+    void onSeriesDoubleClicked(const QString& series, const QPointF& point,
+                               int index);
+    void onSeriesRightClicked(const QString& series, const QPointF& point,
+                              int index);
+
+    void onSeriesPressed(const QString& series, const QPointF& point,
+                         int index);
+    void onSeriesReleased(const QString& series);
+
+    void onSeriesDragging(const QString& series, QPointF point);
+
+   private:
+    enum PointStyle { Normal, Hover, Drag, HoverSegment };
+
+    void setPointStyle(int index, PointStyle style);
+    void setGraphPointStyle(int index, PointStyle style);
+
+    void setGraphStyleBetweenPoints(int left, int right, PointStyle style);
+
+    QList<QPointF> m_pitch;
+    QList<QPointF> m_amplitude;
+
+    QColorLineSeries* m_pitchGraph;
+    QColorLineSeries* m_pointGraph;
+    QValueAxis* m_timeAxis;
+    QValueAxis* m_valueAxis;
+
+    ChartView* m_chartView;
+
+    bool m_isDragging;
+    bool m_isDraggingSegment;
+    int m_firstPointIndexBeingDragged;
+    int m_secondPointIndexBeingDragged;
+    double m_dragPointOriginY;
+    double m_firstPointOriginY;
+    double m_secondPointOriginY;
 };
 
-}
-}
+}  // namespace gui
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_SOURCE_PLAN_H
+#endif  // BABBLESYNTH_SOURCE_PLAN_H

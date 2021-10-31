@@ -16,16 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "app_window.h"
 
 using namespace babblesynth::gui;
 
 std::shared_ptr<AppState> babblesynth::gui::appState;
 
-AppWindow::AppWindow()
-    : QMainWindow()
-{
+AppWindow::AppWindow() : QMainWindow() {
     setObjectName("SourceParameters");
     setWindowTitle("BabbleSynth");
 
@@ -40,23 +37,29 @@ AppWindow::AppWindow()
     m_sourcePlan = new SourcePlan(this);
     m_filterTracks = new FilterTracks(5, this);
 
-    QObject::connect(m_sourcePlan, &SourcePlan::updated, m_filterTracks, &FilterTracks::redrawGraph);
+    QObject::connect(m_sourcePlan, &SourcePlan::updated, m_filterTracks,
+                     &FilterTracks::redrawGraph);
 
     QWidget *centralWidget = new QWidget;
 
-    QPushButton *sourceButton = new QPushButton(tr("Source parameters"), centralWidget);
-    QObject::connect(sourceButton, &QPushButton::pressed, m_sourceParameters, &QWidget::show);
+    QPushButton *sourceButton =
+        new QPushButton(tr("Source parameters"), centralWidget);
+    QObject::connect(sourceButton, &QPushButton::pressed, m_sourceParameters,
+                     &QWidget::show);
 
     /*
-    QPushButton *filterButton = new QPushButton(tr("Filter tracks"), centralWidget);
-    QObject::connect(filterButton, &QPushButton::pressed, m_filterTracks, &QWidget::show);
+    QPushButton *filterButton = new QPushButton(tr("Filter tracks"),
+    centralWidget); QObject::connect(filterButton, &QPushButton::pressed,
+    m_filterTracks, &QWidget::show);
 
     QPushButton *pitchPlan = new QPushButton(tr("Edit pitch track"));
-    QObject::connect(pitchPlan, &QPushButton::pressed, m_sourcePlan, &QWidget::show);
+    QObject::connect(pitchPlan, &QPushButton::pressed, m_sourcePlan,
+    &QWidget::show);
     */
-    
+
     QPushButton *playButton = new QPushButton(tr("Play"), centralWidget);
-    QObject::connect(playButton, &QPushButton::pressed, this, &AppWindow::renderAndPlay);
+    QObject::connect(playButton, &QPushButton::pressed, this,
+                     &AppWindow::renderAndPlay);
 
     QVBoxLayout *leftLayout = new QVBoxLayout;
     leftLayout->addWidget(m_filterTracks, 2);
@@ -83,22 +86,19 @@ AppWindow::AppWindow()
     setCentralWidget(centralWidget);
 }
 
-AppWindow::~AppWindow()
-{
-    delete m_sourceParameters;
-}
+AppWindow::~AppWindow() { delete m_sourceParameters; }
 
-void AppWindow::renderAndPlay()
-{
+void AppWindow::renderAndPlay() {
     std::vector<std::pair<int, int>> pitchPeriods;
-    std::vector<double> glottalSource = appState->source()->generate(pitchPeriods);
+    double Oq;
 
-    std::vector<double> output = appState->formantFilter()->generateFrom(glottalSource, pitchPeriods);
+    std::vector<double> glottalSource =
+        appState->source()->generate(pitchPeriods, &Oq);
+
+    std::vector<double> output = appState->formantFilter()->generateFrom(
+        glottalSource, pitchPeriods, Oq);
 
     m_audioPlayer->play(output);
 }
 
-void AppWindow::closeEvent(QCloseEvent *event)
-{
-    qApp->quit();
-}
+void AppWindow::closeEvent(QCloseEvent *event) { qApp->quit(); }

@@ -16,28 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include <cmath>
 #include <complex>
 // #include <iostream>
 #include <numeric>
 
+#include "../generator/noise.h"
 #include "formant_filter.h"
 #include "sos_filter.h"
 #include "tf_filter.h"
-#include "../generator/noise.h"
 
 using namespace babblesynth::filter;
 
 formant_filter::formant_filter(int sampleRate)
-    : parameter_holder(false),
+    : parameter_holder(),
       m_F1(true),
       m_F2(true),
       m_F3(true),
       m_F4(true),
       m_F5(true),
-      m_sampleRate(sampleRate)
-{
+      m_sampleRate(sampleRate) {
     addParameter("F1 plan", variable_plan(1000));
     addParameter("F2 plan", variable_plan(1300));
     addParameter("F3 plan", variable_plan(2400));
@@ -45,8 +43,9 @@ formant_filter::formant_filter(int sampleRate)
     addParameter("F5 plan", variable_plan(3800));
 }
 
-std::vector<double> formant_filter::generateFrom(const std::vector<double>& input, const std::vector<std::pair<int, int>>& periods)
-{
+/*std::vector<double> formant_filter::generateFrom(
+    const std::vector<double>& input,
+    const std::vector<std::pair<int, int>>& periods) {
     const int samples = input.size();
 
     std::vector<double> lfilt_output = input;
@@ -69,12 +68,14 @@ std::vector<double> formant_filter::generateFrom(const std::vector<double>& inpu
         designFilter({F1, F2, F3, F4, F5});
 
         lfilter(m_B, m_A, input, lfilt_output, startIndex, endIndex, m_Z);
-        sosfilt(m_filter, input, sosfilt_output, startIndex, endIndex, m_filterState);
+        sosfilt(m_filter, input, sosfilt_output, startIndex, endIndex,
+                m_filterState);
     }
 
     for (int i = 0; i < samples; ++i) {
         if (std::isnan(lfilt_output[i]) || std::isinf(lfilt_output[i])) {
-            //std::cout << "lfilter overflowed, substituting with sosfilt result" << std::endl;
+            // std::cout << "lfilter overflowed, substituting with sosfilt
+            // result" << std::endl;
             lfilt_output[i] = sosfilt_output[i];
         }
     }
@@ -93,17 +94,71 @@ std::vector<double> formant_filter::generateFrom(const std::vector<double>& inpu
     }
 
     return lfilt_output;
+}*/
+
+std::vector<double> formant_filter::generateFrom(
+    const std::vector<double>& input,
+    const std::vector<std::pair<int, int>>& periods, double Oq) {
+    const int samples = input.size();
+
+    std::vector<double> output = input;
+
+    m_filterState.clear();
+
+    for (const auto& [startIndex, endIndex] : periods) {
+        const double gci = startIndex + Oq * (endIndex - startIndex);
+
+        const double openTime = ((startIndex + gci) / 2) / double(m_sampleRate);
+        const double closedTime = ((gci + endIndex) / 2) / double(m_sampleRate);
+
+        const double F1o = m_F1.evaluateAtTime(openTime);
+        const double F2o = m_F2.evaluateAtTime(openTime);
+        const double F3o = m_F3.evaluateAtTime(openTime);
+        const double F4o = m_F4.evaluateAtTime(openTime);
+        const double F5o = m_F5.evaluateAtTime(openTime);
+
+        designFilter({F1o, F2o, F3o, F4o, F5o});
+
+        lfilter(m_B, m_A, input, output, startIndex, gci - 1, m_Z);
+        // sosfilt(m_filter, input, output, startIndex, gci - 1, m_filterState);
+
+        const double F1c = m_F1.evaluateAtTime(closedTime);
+        const double F2c = m_F2.evaluateAtTime(closedTime);
+        const double F3c = m_F3.evaluateAtTime(closedTime);
+        const double F4c = m_F4.evaluateAtTime(closedTime);
+        const double F5c = m_F5.evaluateAtTime(closedTime);  // + 50;
+
+        designFilter({F1c, F2c, F3c, F4c, F5c});
+
+        lfilter(m_B, m_A, input, output, gci, endIndex, m_Z);
+        // sosfilt(m_filter, input, output, gci, endIndex, m_filterState);
+    }
+
+    double maxAmplitude = 1e-10;
+
+    for (int i = 0; i < samples; ++i) {
+        const double xa = std::abs(output[i]);
+        if (xa > maxAmplitude) {
+            maxAmplitude = xa;
+        }
+    }
+
+    for (int i = 0; i < samples; ++i) {
+        output[i] /= maxAmplitude;
+    }
+
+    return output;
 }
 
-static std::vector<double> conv(const std::vector<double>& a, const std::vector<double>& b)
-{
+static std::vector<double> conv(const std::vector<double>& a,
+                                const std::vector<double>& b) {
     const int na = a.size();
     const int nb = b.size();
     const int ny = na + nb - 1;
-    
+
     std::vector<double> y(ny);
 
-	for (int i = 0; i < ny; ++i) {
+    for (int i = 0; i < ny; ++i) {
         double sum = 0;
         double c = 0;
 
@@ -123,9 +178,8 @@ static std::vector<double> conv(const std::vector<double>& a, const std::vector<
     return y;
 }
 
-void formant_filter::designFilter(const std::vector<double>& freqs)
-{
-    constexpr std::array bandwidths {90, 130, 160, 140, 180};
+void formant_filter::designFilter(const std::vector<double>& freqs) {
+    constexpr std::array bandwidths{90, 130, 160, 140, 180};
 
     std::vector<std::vector<double>> Bs;
     std::vector<std::vector<double>> As;
@@ -150,8 +204,7 @@ void formant_filter::designFilter(const std::vector<double>& freqs)
             sum += freqs[i] / (i + 1);
         }
         avg = sum / (freqs.size() - 2);
-    }
-    else {
+    } else {
         avg = (freqs[0] + freqs[1]) / 2;
     }
     avg += 300;
@@ -161,7 +214,7 @@ void formant_filter::designFilter(const std::vector<double>& freqs)
 
     while (Bs.size() < 10) {
         const double bandwidth = 0.3 * freq;
-        
+
         r = designFilterSection(freq, bandwidth, b, a);
 
         Bs.push_back(b);
@@ -174,7 +227,8 @@ void formant_filter::designFilter(const std::vector<double>& freqs)
     // Sort the sections in increasing R.
     std::vector<int> idx(Rs.size());
     std::iota(idx.begin(), idx.end(), 0);
-    std::sort(idx.begin(), idx.end(), [&Rs](int i, int j) { return Rs[i] < Rs[j]; });
+    std::sort(idx.begin(), idx.end(),
+              [&Rs](int i, int j) { return Rs[i] < Rs[j]; });
 
     std::vector<double> B = Bs[idx[0]];
     std::vector<double> A = As[idx[0]];
@@ -186,10 +240,8 @@ void formant_filter::designFilter(const std::vector<double>& freqs)
 
     if (A[0] != 1) {
         const double a0 = A[0];
-        for (auto& x : B)
-            x /= a0;
-        for (auto& x : A)
-            x /= a0;
+        for (auto& x : B) x /= a0;
+        for (auto& x : A) x /= a0;
     }
 
     m_B = B;
@@ -209,34 +261,32 @@ void formant_filter::designFilter(const std::vector<double>& freqs)
     m_filterState.resize(Bs.size(), {0.0, 0.0});
 }
 
-double formant_filter::designFilterSection(double f, double bw, std::vector<double>& b, std::vector<double>& a)
-{
+double formant_filter::designFilterSection(double f, double bw,
+                                           std::vector<double>& b,
+                                           std::vector<double>& a) {
     const double R = exp(-M_PI * bw / m_sampleRate);
     const double theta = 2 * M_PI * f / m_sampleRate;
 
     const double b0 = (1 - R) * sqrt(1 - 2 * R * cos(2 * theta) + (R * R));
 
-    b = { b0, 0, 0 };
-    a = { 1, -2 * R * cos(theta), R * R };
+    b = {b0, 0, 0};
+    a = {1, -2 * R * cos(theta), R * R};
 
     return R;
 }
 
-void formant_filter::onParameterChange(const parameter& param)
-{
+bool formant_filter::onParameterChange(const parameter& param) {
     if (param.name() == "F1 plan") {
         m_F1.setPlan(param.value<variable_plan>());
-    }
-    else if (param.name() == "F2 plan") {
+    } else if (param.name() == "F2 plan") {
         m_F2.setPlan(param.value<variable_plan>());
-    }
-    else if (param.name() == "F3 plan") {
+    } else if (param.name() == "F3 plan") {
         m_F3.setPlan(param.value<variable_plan>());
-    }
-    else if (param.name() == "F4 plan") {
+    } else if (param.name() == "F4 plan") {
         m_F4.setPlan(param.value<variable_plan>());
-    }
-    else if (param.name() == "F5 plan") {
+    } else if (param.name() == "F5 plan") {
         m_F5.setPlan(param.value<variable_plan>());
     }
+
+    return true;
 }

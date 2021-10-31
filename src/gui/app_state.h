@@ -16,18 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_APP_STATE_H
 #define BABBLESYNTH_APP_STATE_H
 
-#include <memory>
 #include <babblesynth.h>
+
+#include <memory>
 
 namespace babblesynth {
 namespace gui {
-    
+
 class AppState {
-public:
+   public:
     AppState(int sampleRate = 48000);
 
     void setSampleRate(int sampleRate);
@@ -41,7 +41,7 @@ public:
 
     void updatePlans();
 
-private:
+   private:
     int m_sampleRate;
 
     std::unique_ptr<babblesynth::generator::source_generator> m_sourceGenerator;
@@ -58,7 +58,7 @@ private:
 
 extern std::shared_ptr<AppState> appState;
 
-}
-}
+}  // namespace gui
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_APP_STATE_H
+#endif  // BABBLESYNTH_APP_STATE_H

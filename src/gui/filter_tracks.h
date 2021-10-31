@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_FILTER_TRACKS_H
 #define BABBLESYNTH_FILTER_TRACKS_H
 
-#include <QtWidgets>
-#include <QtCharts>
 #include <babblesynth.h>
 
-#include "colorplot/colorplot.h"
+#include <QtCharts>
+#include <QtWidgets>
+
 #include "chart_view.h"
+#include "colorplot/colorplot.h"
 
 namespace babblesynth {
 namespace gui {
@@ -33,46 +33,49 @@ namespace gui {
 class FilterTracks : public QWidget {
     Q_OBJECT
 
-public:
-    FilterTracks(int nFormants, QWidget *parent = nullptr);
+   public:
+    FilterTracks(int nFormants, QWidget* parent = nullptr);
 
-public slots:
+   public slots:
     void redrawGraph();
 
-private slots:
+   private slots:
     void updatePlans();
 
-    void onSeriesHovered(const QString& series, const QPointF& point, int index);
+    void onSeriesHovered(const QString& series, const QPointF& point,
+                         int index);
     void onSeriesLeft(const QString& series);
 
-    void onSeriesDoubleClicked(const QString& series, const QPointF& point, int index);
-    void onSeriesRightClicked(const QString& series, const QPointF& point, int index);
+    void onSeriesDoubleClicked(const QString& series, const QPointF& point,
+                               int index);
+    void onSeriesRightClicked(const QString& series, const QPointF& point,
+                              int index);
 
-    void onSeriesPressed(const QString& series, const QPointF& point, int index);
+    void onSeriesPressed(const QString& series, const QPointF& point,
+                         int index);
     void onSeriesReleased(const QString& series);
 
-    void onSeriesDragging(const QString& series, const QPointF& point);
+    void onSeriesDragging(const QString& series, QPointF point);
 
-private:
-    enum PointStyle {
-        Normal, Hover, Drag, HoverSegment
-    };
+   private:
+    enum PointStyle { Normal, Hover, Drag, HoverSegment };
 
     void setPointStyle(int formant, int index, PointStyle style);
     void setGraphPointStyle(int formant, int index, PointStyle style);
 
-    void setGraphStyleBetweenPoints(int formant, int left, int right, PointStyle style);
+    void setGraphStyleBetweenPoints(int formant, int left, int right,
+                                    PointStyle style);
 
     QVector<QList<QPointF>> m_points;
 
     int m_nFormants;
-    QVector<QColorLineSeries *> m_formantGraph;
-    QVector<QColorLineSeries *> m_formantPoints;
-    QColorLineSeries *m_pitchGraph;
-    QValueAxis *m_timeAxis;
-    QValueAxis *m_valueAxis;
+    QVector<QColorLineSeries*> m_formantGraph;
+    QVector<QColorLineSeries*> m_formantPoints;
+    QColorLineSeries* m_pitchGraph;
+    QValueAxis* m_timeAxis;
+    QValueAxis* m_valueAxis;
 
-    ChartView *m_chartView;
+    ChartView* m_chartView;
 
     bool m_isDragging;
     int m_formantBeingDragged;
@@ -83,10 +86,9 @@ private:
     double m_dragPointOriginY;
     double m_firstPointOriginY;
     double m_secondPointOriginY;
-
 };
 
-}
-}
+}  // namespace gui
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_FILTER_TRACKS_H
+#endif  // BABBLESYNTH_FILTER_TRACKS_H

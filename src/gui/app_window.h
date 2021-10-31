@@ -16,34 +16,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_APP_WINDOW_H
 #define BABBLESYNTH_APP_WINDOW_H
 
 #include <QtWidgets>
 
 #include "audio_player.h"
+#include "filter_tracks.h"
 #include "source_parameters.h"
 #include "source_plan.h"
-#include "filter_tracks.h"
 
 namespace babblesynth {
 namespace gui {
 
 class AppWindow : public QMainWindow {
     Q_OBJECT
-    
-public:
+
+   public:
     AppWindow();
     ~AppWindow();
 
-private slots:
+   private slots:
     void renderAndPlay();
 
-protected:
+   protected:
     void closeEvent(QCloseEvent *event) override;
 
-private:
+   private:
     int m_sampleRate;
 
     AudioPlayer *m_audioPlayer;
@@ -52,7 +51,7 @@ private:
     FilterTracks *m_filterTracks;
 };
 
-}
-}
+}  // namespace gui
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_APP_WINDOW_H
+#endif  // BABBLESYNTH_APP_WINDOW_H

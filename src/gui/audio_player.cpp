@@ -16,19 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "audio_player.h"
 
 #include <stdexcept>
 
-#include "audio_player.h"
-
 using namespace babblesynth::gui;
 
-static void f64_to_s16(QByteArray& dst, const std::vector<double>& src)
-{
+static void f64_to_s16(QByteArray& dst, const std::vector<double>& src) {
     const int sampleCount = src.size();
     dst.resize(sizeof(int16_t) * sampleCount);
 
-    int16_t *pDst = reinterpret_cast<int16_t *>(dst.data());
+    int16_t* pDst = reinterpret_cast<int16_t*>(dst.data());
 
     int r;
     size_t i;
@@ -43,18 +41,14 @@ static void f64_to_s16(QByteArray& dst, const std::vector<double>& src)
     }
 }
 
-
-AudioPlayer::AudioPlayer(int sampleRate, QObject *parent)
-    : QObject(parent),
-      m_audio(nullptr)
-{
+AudioPlayer::AudioPlayer(int sampleRate, QObject* parent)
+    : QObject(parent), m_audio(nullptr) {
     m_deviceInfo = QAudioDeviceInfo::defaultOutputDevice();
     setSampleRate(sampleRate);
     m_buffer.setBuffer(&m_data);
 }
 
-void AudioPlayer::setSampleRate(int sampleRate)
-{
+void AudioPlayer::setSampleRate(int sampleRate) {
     m_sampleRate = sampleRate;
 
     m_audioFormat.setSampleRate(sampleRate);
@@ -74,11 +68,11 @@ void AudioPlayer::setSampleRate(int sampleRate)
 
     m_audio = new QAudioOutput(m_deviceInfo, m_audioFormat, this);
     m_audio->setVolume(0.6);
-    QObject::connect(m_audio, &QAudioOutput::stateChanged, this, &AudioPlayer::onStateChanged);
+    QObject::connect(m_audio, &QAudioOutput::stateChanged, this,
+                     &AudioPlayer::onStateChanged);
 }
 
-void AudioPlayer::play(const std::vector<double>& data)
-{
+void AudioPlayer::play(const std::vector<double>& data) {
     if (m_playing) {
         m_audio->stop();
     }
@@ -87,23 +81,22 @@ void AudioPlayer::play(const std::vector<double>& data)
     m_audio->start(&m_buffer);
 }
 
-void AudioPlayer::onStateChanged(QAudio::State state)
-{
+void AudioPlayer::onStateChanged(QAudio::State state) {
     switch (state) {
-    case QAudio::ActiveState:
-        m_playing = true;
-        break;
-    case QAudio::IdleState:
-        m_audio->stop();
-        m_buffer.close();
-        m_playing = false;
-        break;
-    case QAudio::StoppedState:
-        if (m_audio->error() != QAudio::NoError) {
-            qWarning() << "Audio device stopped unexpectedly";
-        }
-        break;
-    default:
-        break;
+        case QAudio::ActiveState:
+            m_playing = true;
+            break;
+        case QAudio::IdleState:
+            m_audio->stop();
+            m_buffer.close();
+            m_playing = false;
+            break;
+        case QAudio::StoppedState:
+            if (m_audio->error() != QAudio::NoError) {
+                qWarning() << "Audio device stopped unexpectedly";
+            }
+            break;
+        default:
+            break;
     }
 }

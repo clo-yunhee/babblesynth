@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_SOURCE_GENERATOR_H
 #define BABBLESYNTH_SOURCE_GENERATOR_H
 
@@ -26,16 +25,17 @@ namespace babblesynth {
 namespace generator {
 
 class source_generator : public parameter_holder {
-public:
+   public:
     explicit source_generator(int sampleRate);
     virtual ~source_generator() = default;
 
-    std::vector<double> generate(std::vector<std::pair<int, int>>& periods);
+    std::vector<double> generate(std::vector<std::pair<int, int>>& periods,
+                                 double* Oq);
 
-    source::abstract_source *getSource();
+    source::abstract_source* getSource();
 
-private:
-    void onParameterChange(const parameter& param) override;
+   private:
+    bool onParameterChange(const parameter& param) override;
 
     std::unique_ptr<source::abstract_source> m_source;
 
@@ -45,9 +45,11 @@ private:
     double m_aspirationPercentage;
 
     int m_sampleRate;
+
+    std::vector<std::array<double, 6>> m_antialiasFilter;
 };
 
-} // generator
-} // babblesynth
+}  // namespace generator
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_SOURCE_GENERATOR_H
+#endif  // BABBLESYNTH_SOURCE_GENERATOR_H

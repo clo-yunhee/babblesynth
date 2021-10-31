@@ -1,4 +1,4 @@
-add_executable(babblesynth-cli 
+add_executable(babblesynth-cli EXCLUDE_FROM_ALL
     main.cpp
 )
 

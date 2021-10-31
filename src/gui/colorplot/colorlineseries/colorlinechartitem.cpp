@@ -27,20 +27,23 @@
 **
 ****************************************************************************/
 
-#include "colorlinechartitem_p.h"
-#include "qcolorlineseries.h"
-#include "qcolorlineseries_p.h"
 #include <private/chartpresenter_p.h>
-#include <private/polardomain_p.h>
-#include <private/chartthememanager_p.h>
 #include <private/charttheme_p.h>
+#include <private/chartthememanager_p.h>
+#include <private/polardomain_p.h>
+
 #include <QtGui/QPainter>
 #include <QtWidgets/QGraphicsSceneMouseEvent>
 
+#include "colorlinechartitem_p.h"
+#include "qcolorlineseries.h"
+#include "qcolorlineseries_p.h"
+
 QT_CHARTS_BEGIN_NAMESPACE
 
-ColorLineChartItem::ColorLineChartItem(QColorLineSeries *series, QGraphicsItem *item)
-    : ColorXYChart(series,item),
+ColorLineChartItem::ColorLineChartItem(QColorLineSeries *series,
+                                       QGraphicsItem *item)
+    : ColorXYChart(series, item),
       m_series(series),
       m_pointsVisible(false),
       m_chartType(QChart::ChartTypeUndefined),
@@ -49,42 +52,37 @@ ColorLineChartItem::ColorLineChartItem(QColorLineSeries *series, QGraphicsItem *
       m_pointLabelsFont(series->pointLabelsFont()),
       m_pointLabelsColor(series->pointLabelsColor()),
       m_pointLabelsClipping(true),
-      m_mousePressed(false)
-{
+      m_mousePressed(false) {
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setZValue(ChartPresenter::LineChartZValue);
-    connect(series->d_func(), &QXYSeriesPrivate::updated, this, &ColorLineChartItem::handleSeriesUpdated);
-    connect(series, &QXYSeries::visibleChanged, this, &ColorLineChartItem::handleSeriesUpdated);
-    connect(series, &QXYSeries::opacityChanged, this, &ColorLineChartItem::handleSeriesUpdated);
-    connect(series, &QXYSeries::pointLabelsFormatChanged,
-            this, &ColorLineChartItem::handleSeriesUpdated);
-    connect(series, &QXYSeries::pointLabelsVisibilityChanged,
-            this, &ColorLineChartItem::handleSeriesUpdated);
-    connect(series, &QXYSeries::pointLabelsFontChanged,
-            this, &ColorLineChartItem::handleSeriesUpdated);
-    connect(series, &QXYSeries::pointLabelsColorChanged,
-            this, &ColorLineChartItem::handleSeriesUpdated);
-    connect(series, &QXYSeries::pointLabelsClippingChanged,
-            this, &ColorLineChartItem::handleSeriesUpdated);
-    connect(series, &QColorLineSeries::pointsConfigurationChanged,
-            this, &ColorLineChartItem::handleSeriesUpdated);
+    connect(series->d_func(), &QXYSeriesPrivate::updated, this,
+            &ColorLineChartItem::handleSeriesUpdated);
+    connect(series, &QXYSeries::visibleChanged, this,
+            &ColorLineChartItem::handleSeriesUpdated);
+    connect(series, &QXYSeries::opacityChanged, this,
+            &ColorLineChartItem::handleSeriesUpdated);
+    connect(series, &QXYSeries::pointLabelsFormatChanged, this,
+            &ColorLineChartItem::handleSeriesUpdated);
+    connect(series, &QXYSeries::pointLabelsVisibilityChanged, this,
+            &ColorLineChartItem::handleSeriesUpdated);
+    connect(series, &QXYSeries::pointLabelsFontChanged, this,
+            &ColorLineChartItem::handleSeriesUpdated);
+    connect(series, &QXYSeries::pointLabelsColorChanged, this,
+            &ColorLineChartItem::handleSeriesUpdated);
+    connect(series, &QXYSeries::pointLabelsClippingChanged, this,
+            &ColorLineChartItem::handleSeriesUpdated);
+    connect(series, &QColorLineSeries::pointsConfigurationChanged, this,
+            &ColorLineChartItem::handleSeriesUpdated);
 
     handleSeriesUpdated();
 }
 
-QRectF ColorLineChartItem::boundingRect() const
-{
-    return m_rect;
-}
+QRectF ColorLineChartItem::boundingRect() const { return m_rect; }
 
-QPainterPath ColorLineChartItem::shape() const
-{
-    return m_shapePath;
-}
+QPainterPath ColorLineChartItem::shape() const { return m_shapePath; }
 
-void ColorLineChartItem::updateGeometry()
-{
+void ColorLineChartItem::updateGeometry() {
     if (m_series->useOpenGL()) {
         if (!m_rect.isEmpty()) {
             prepareGeometryChange();
@@ -95,8 +93,8 @@ void ColorLineChartItem::updateGeometry()
         return;
     }
 
-    // Store the points to a local variable so that the old line gets properly cleared
-    // when animation starts.
+    // Store the points to a local variable so that the old line gets properly
+    // cleared when animation starts.
     m_linePoints = geometryPoints();
     const QVector<QPointF> &points = m_linePoints;
 
@@ -113,8 +111,9 @@ void ColorLineChartItem::updateGeometry()
     // Use worst case scenario to determine required margin.
     qreal margin = m_linePen.width() * 1.42;
 
-    // Area series use component line series that aren't necessarily added to the chart themselves,
-    // so check if chart type is forced before trying to obtain it from the chart.
+    // Area series use component line series that aren't necessarily added to
+    // the chart themselves, so check if chart type is forced before trying to
+    // obtain it from the chart.
     QChart::ChartType chartType = m_chartType;
     if (chartType == QChart::ChartTypeUndefined)
         chartType = m_series->chart()->chartType();
@@ -134,7 +133,8 @@ void ColorLineChartItem::updateGeometry()
         QPointF previousGeometryPoint = points.at(0);
         int size = m_linePen.width();
         bool pointOffGrid = false;
-        bool previousPointWasOffGrid = (currentSeriesPoint.x() < minX || currentSeriesPoint.x() > maxX);
+        bool previousPointWasOffGrid =
+            (currentSeriesPoint.x() < minX || currentSeriesPoint.x() > maxX);
 
         qreal domainRadius = domain()->size().height() / 2.0;
         const QPointF centerPoint(domainRadius, domainRadius);
@@ -154,25 +154,29 @@ void ColorLineChartItem::updateGeometry()
         qreal rightMarginLine = centerPoint.x() + margin;
         qreal horizontal = centerPoint.y();
 
-        // See ScatterChartItem::updateGeometry() for explanation why seriesLastIndex is needed
+        // See ScatterChartItem::updateGeometry() for explanation why
+        // seriesLastIndex is needed
         const int seriesLastIndex = m_series->count() - 1;
 
         for (int i = 1; i < points.size(); i++) {
-            // Interpolating line fragments would be ugly when thick pen is used,
-            // so we work around it by utilizing three separate
-            // paths for line segments and clip those with custom regions at paint time.
-            // "Right" path contains segments that cross the axis line with visible point on the
-            // right side of the axis line, as well as segments that have one point within the margin
-            // on the right side of the axis line and another point on the right side of the chart.
-            // "Left" path contains points with similarly on the left side.
-            // "Full" path contains rest of the points.
-            // This doesn't yield perfect results always. E.g. when segment covers more than 90
-            // degrees and both of the points are within the margin, one in the top half and one in the
-            // bottom half of the chart, the bottom one gets clipped incorrectly.
-            // However, this should be rare occurrence in any sensible chart.
+            // Interpolating line fragments would be ugly when thick pen is
+            // used, so we work around it by utilizing three separate paths for
+            // line segments and clip those with custom regions at paint time.
+            // "Right" path contains segments that cross the axis line with
+            // visible point on the right side of the axis line, as well as
+            // segments that have one point within the margin on the right side
+            // of the axis line and another point on the right side of the
+            // chart. "Left" path contains points with similarly on the left
+            // side. "Full" path contains rest of the points. This doesn't yield
+            // perfect results always. E.g. when segment covers more than 90
+            // degrees and both of the points are within the margin, one in the
+            // top half and one in the bottom half of the chart, the bottom one
+            // gets clipped incorrectly. However, this should be rare occurrence
+            // in any sensible chart.
             currentSeriesPoint = m_series->at(qMin(seriesLastIndex, i));
             currentGeometryPoint = points.at(i);
-            pointOffGrid = (currentSeriesPoint.x() < minX || currentSeriesPoint.x() > maxX);
+            pointOffGrid = (currentSeriesPoint.x() < minX ||
+                            currentSeriesPoint.x() > maxX);
 
             // Draw something unless both off-grid
             if (!pointOffGrid || !previousPointWasOffGrid) {
@@ -180,33 +184,51 @@ void ColorLineChartItem::updateGeometry()
                 qreal y;
                 if (pointOffGrid != previousPointWasOffGrid) {
                     if (currentGeometryPoint.x() == previousGeometryPoint.x()) {
-                        y = currentGeometryPoint.y() + (currentGeometryPoint.y() - previousGeometryPoint.y()) / 2.0;
+                        y = currentGeometryPoint.y() +
+                            (currentGeometryPoint.y() -
+                             previousGeometryPoint.y()) /
+                                2.0;
                     } else {
-                        qreal ratio = (centerPoint.x() - currentGeometryPoint.x()) / (currentGeometryPoint.x() - previousGeometryPoint.x());
-                        y = currentGeometryPoint.y() + (currentGeometryPoint.y() - previousGeometryPoint.y()) * ratio;
+                        qreal ratio =
+                            (centerPoint.x() - currentGeometryPoint.x()) /
+                            (currentGeometryPoint.x() -
+                             previousGeometryPoint.x());
+                        y = currentGeometryPoint.y() +
+                            (currentGeometryPoint.y() -
+                             previousGeometryPoint.y()) *
+                                ratio;
                     }
                     intersectionPoint = QPointF(centerPoint.x(), y);
                 }
 
-                bool dummyOk; // We know points are ok, but this is needed
+                bool dummyOk;  // We know points are ok, but this is needed
                 qreal currentAngle = 0;
                 qreal previousAngle = 0;
-                if (const PolarDomain *pd = qobject_cast<const PolarDomain *>(domain())) {
-                    currentAngle = pd->toAngularCoordinate(currentSeriesPoint.x(), dummyOk);
-                    previousAngle = pd->toAngularCoordinate(m_series->at(i - 1).x(), dummyOk);
+                if (const PolarDomain *pd =
+                        qobject_cast<const PolarDomain *>(domain())) {
+                    currentAngle = pd->toAngularCoordinate(
+                        currentSeriesPoint.x(), dummyOk);
+                    previousAngle = pd->toAngularCoordinate(
+                        m_series->at(i - 1).x(), dummyOk);
                 } else {
-                    qWarning() << Q_FUNC_INFO << "Unexpected domain: " << domain();
+                    qWarning()
+                        << Q_FUNC_INFO << "Unexpected domain: " << domain();
                 }
                 if ((qAbs(currentAngle - previousAngle) > 180.0)) {
-                    // If the angle between two points is over 180 degrees (half X range),
-                    // any direct segment between them becomes meaningless.
-                    // In this case two line segments are drawn instead, from previous
-                    // point to the center and from center to current point.
-                    if ((previousAngle < 0.0 || (previousAngle <= 180.0 && previousGeometryPoint.x() < rightMarginLine))
-                        && previousGeometryPoint.y() < horizontal) {
+                    // If the angle between two points is over 180 degrees (half
+                    // X range), any direct segment between them becomes
+                    // meaningless. In this case two line segments are drawn
+                    // instead, from previous point to the center and from
+                    // center to current point.
+                    if ((previousAngle < 0.0 ||
+                         (previousAngle <= 180.0 &&
+                          previousGeometryPoint.x() < rightMarginLine)) &&
+                        previousGeometryPoint.y() < horizontal) {
                         currentSegmentPath = &linePathRight;
-                    } else if ((previousAngle > 360.0 || (previousAngle > 180.0 && previousGeometryPoint.x() > leftMarginLine))
-                                && previousGeometryPoint.y() < horizontal) {
+                    } else if ((previousAngle > 360.0 ||
+                                (previousAngle > 180.0 &&
+                                 previousGeometryPoint.x() > leftMarginLine)) &&
+                               previousGeometryPoint.y() < horizontal) {
                         currentSegmentPath = &linePathLeft;
                     } else if (previousAngle > 0.0 && previousAngle < 360.0) {
                         currentSegmentPath = &linePath;
@@ -226,11 +248,15 @@ void ColorLineChartItem::updateGeometry()
 
                     previousSegmentPath = currentSegmentPath;
 
-                    if ((currentAngle < 0.0 || (currentAngle <= 180.0 && currentGeometryPoint.x() < rightMarginLine))
-                        && currentGeometryPoint.y() < horizontal) {
+                    if ((currentAngle < 0.0 ||
+                         (currentAngle <= 180.0 &&
+                          currentGeometryPoint.x() < rightMarginLine)) &&
+                        currentGeometryPoint.y() < horizontal) {
                         currentSegmentPath = &linePathRight;
-                    } else if ((currentAngle > 360.0 || (currentAngle > 180.0 &&currentGeometryPoint.x() > leftMarginLine))
-                                && currentGeometryPoint.y() < horizontal) {
+                    } else if ((currentAngle > 360.0 ||
+                                (currentAngle > 180.0 &&
+                                 currentGeometryPoint.x() > leftMarginLine)) &&
+                               currentGeometryPoint.y() < horizontal) {
                         currentSegmentPath = &linePathLeft;
                     } else if (currentAngle > 0.0 && currentAngle < 360.0) {
                         currentSegmentPath = &linePath;
@@ -241,8 +267,7 @@ void ColorLineChartItem::updateGeometry()
                     if (currentSegmentPath) {
                         if (previousSegmentPath != currentSegmentPath)
                             currentSegmentPath->moveTo(centerPoint);
-                        if (!previousSegmentPath)
-                            fullPath.moveTo(centerPoint);
+                        if (!previousSegmentPath) fullPath.moveTo(centerPoint);
 
                         currentSegmentPath->lineTo(currentGeometryPoint);
                         if (pointOffGrid)
@@ -251,15 +276,20 @@ void ColorLineChartItem::updateGeometry()
                             fullPath.lineTo(currentGeometryPoint);
                     }
                 } else {
-                    if (previousAngle < 0.0 || currentAngle < 0.0
-                        || ((previousAngle <= 180.0 && currentAngle <= 180.0)
-                            && ((previousGeometryPoint.x() < rightMarginLine && previousGeometryPoint.y() < horizontal)
-                                || (currentGeometryPoint.x() < rightMarginLine && currentGeometryPoint.y() < horizontal)))) {
+                    if (previousAngle < 0.0 || currentAngle < 0.0 ||
+                        ((previousAngle <= 180.0 && currentAngle <= 180.0) &&
+                         ((previousGeometryPoint.x() < rightMarginLine &&
+                           previousGeometryPoint.y() < horizontal) ||
+                          (currentGeometryPoint.x() < rightMarginLine &&
+                           currentGeometryPoint.y() < horizontal)))) {
                         currentSegmentPath = &linePathRight;
-                    } else if (previousAngle > 360.0 || currentAngle > 360.0
-                               || ((previousAngle > 180.0 && currentAngle > 180.0)
-                                   && ((previousGeometryPoint.x() > leftMarginLine && previousGeometryPoint.y() < horizontal)
-                                       || (currentGeometryPoint.x() > leftMarginLine && currentGeometryPoint.y() < horizontal)))) {
+                    } else if (previousAngle > 360.0 || currentAngle > 360.0 ||
+                               ((previousAngle > 180.0 &&
+                                 currentAngle > 180.0) &&
+                                ((previousGeometryPoint.x() > leftMarginLine &&
+                                  previousGeometryPoint.y() < horizontal) ||
+                                 (currentGeometryPoint.x() > leftMarginLine &&
+                                  currentGeometryPoint.y() < horizontal)))) {
                         currentSegmentPath = &linePathLeft;
                     } else {
                         currentSegmentPath = &linePath;
@@ -281,7 +311,8 @@ void ColorLineChartItem::updateGeometry()
             }
 
             previousPointWasOffGrid = pointOffGrid;
-            if (m_pointsVisible && !pointOffGrid && currentSeriesPoint.y() >= minY) {
+            if (m_pointsVisible && !pointOffGrid &&
+                currentSeriesPoint.y() >= minY) {
                 linePath.addEllipse(points.at(i), size, size);
                 fullPath.addEllipse(points.at(i), size, size);
                 linePath.moveTo(points.at(i));
@@ -292,20 +323,21 @@ void ColorLineChartItem::updateGeometry()
         }
         m_linePathPolarRight = linePathRight;
         m_linePathPolarLeft = linePathLeft;
-        // Note: This construction of m_fullpath is not perfect. The partial segments that are
-        // outside left/right clip regions at axis boundary still generate hover/click events,
-        // because shape doesn't get clipped. It doesn't seem possible to do sensibly.
-    } else { // not polar
+        // Note: This construction of m_fullpath is not perfect. The partial
+        // segments that are outside left/right clip regions at axis boundary
+        // still generate hover/click events, because shape doesn't get clipped.
+        // It doesn't seem possible to do sensibly.
+    } else {  // not polar
         linePath.moveTo(points.at(0));
-        for (int i = 1; i < points.size(); i++)
-            linePath.lineTo(points.at(i));
+        for (int i = 1; i < points.size(); i++) linePath.lineTo(points.at(i));
         fullPath = linePath;
     }
 
     QPainterPathStroker stroker;
-    // QPainter::drawLine does not respect join styles, for example BevelJoin becomes MiterJoin.
-    // This is why we are prepared for the "worst case" scenario, i.e. use always MiterJoin and
-    // multiply line width with square root of two when defining shape and bounding rectangle.
+    // QPainter::drawLine does not respect join styles, for example BevelJoin
+    // becomes MiterJoin. This is why we are prepared for the "worst case"
+    // scenario, i.e. use always MiterJoin and multiply line width with square
+    // root of two when defining shape and bounding rectangle.
     stroker.setWidth(margin);
     stroker.setJoinStyle(Qt::MiterJoin);
     stroker.setCapStyle(Qt::SquareCap);
@@ -313,14 +345,14 @@ void ColorLineChartItem::updateGeometry()
 
     QPainterPath checkShapePath = stroker.createStroke(fullPath);
 
-    // Only zoom in if the bounding rects of the paths fit inside int limits. QWidget::update() uses
-    // a region that has to be compatible with QRect.
-    if (checkShapePath.boundingRect().height() <= INT_MAX
-            && checkShapePath.boundingRect().width() <= INT_MAX
-            && linePath.boundingRect().height() <= INT_MAX
-            && linePath.boundingRect().width() <= INT_MAX
-            && fullPath.boundingRect().height() <= INT_MAX
-            && fullPath.boundingRect().width() <= INT_MAX) {
+    // Only zoom in if the bounding rects of the paths fit inside int limits.
+    // QWidget::update() uses a region that has to be compatible with QRect.
+    if (checkShapePath.boundingRect().height() <= INT_MAX &&
+        checkShapePath.boundingRect().width() <= INT_MAX &&
+        linePath.boundingRect().height() <= INT_MAX &&
+        linePath.boundingRect().width() <= INT_MAX &&
+        fullPath.boundingRect().height() <= INT_MAX &&
+        fullPath.boundingRect().width() <= INT_MAX) {
         prepareGeometryChange();
 
         m_linePath = linePath;
@@ -333,13 +365,12 @@ void ColorLineChartItem::updateGeometry()
     }
 }
 
-void ColorLineChartItem::handleSeriesUpdated()
-{
+void ColorLineChartItem::handleSeriesUpdated() {
     // If points visibility has changed, a geometry update is needed.
     // Also, if pen changes when points are visible, geometry update is needed.
     bool doGeometryUpdate =
-        (m_pointsVisible != m_series->pointsVisible())
-        || (m_series->pointsVisible() && (m_linePen != m_series->pen()));
+        (m_pointsVisible != m_series->pointsVisible()) ||
+        (m_series->pointsVisible() && (m_linePen != m_series->pen()));
     bool visibleChanged = m_series->isVisible() != isVisible();
     setVisible(m_series->isVisible());
     setOpacity(m_series->opacity());
@@ -350,32 +381,34 @@ void ColorLineChartItem::handleSeriesUpdated()
     m_pointLabelsFont = m_series->pointLabelsFont();
     m_pointLabelsColor = m_series->pointLabelsColor();
     m_pointsConfiguration = m_series->pointsConfiguration();
-    bool labelClippingChanged = m_pointLabelsClipping != m_series->pointLabelsClipping();
+    bool labelClippingChanged =
+        m_pointLabelsClipping != m_series->pointLabelsClipping();
     m_pointLabelsClipping = m_series->pointLabelsClipping();
     if (doGeometryUpdate)
         updateGeometry();
     else if (m_series->useOpenGL() && visibleChanged)
         refreshGlChart();
 
-    // Update whole chart in case label clipping changed as labels can be outside series area
+    // Update whole chart in case label clipping changed as labels can be
+    // outside series area
     if (labelClippingChanged)
         m_series->chart()->update();
     else
         update();
 }
 
-void ColorLineChartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
+void ColorLineChartItem::paint(QPainter *painter,
+                               const QStyleOptionGraphicsItem *option,
+                               QWidget *widget) {
     Q_UNUSED(widget);
     Q_UNUSED(option);
 
-    if (m_series->useOpenGL())
-        return;
+    if (m_series->useOpenGL()) return;
 
     QRectF clipRect = QRectF(QPointF(0, 0), domain()->size());
-    // Adjust clip rect half a pixel in required dimensions to make it include lines along the
-    // plot area edges, but never increase clip so much that any portion of the line is draw beyond
-    // the plot area.
+    // Adjust clip rect half a pixel in required dimensions to make it include
+    // lines along the plot area edges, but never increase clip so much that any
+    // portion of the line is draw beyond the plot area.
     const qreal x1 = pos().x() - int(pos().x());
     const qreal y1 = pos().y() - int(pos().y());
     const qreal x2 = (clipRect.width() + 0.5) - int(clipRect.width() + 0.5);
@@ -388,23 +421,28 @@ void ColorLineChartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
 
     if (m_series->chart()->chartType() == QChart::ChartTypePolar) {
         qreal halfWidth = domain()->size().width() / 2.0;
-        QRectF clipRectLeft = QRectF(0, 0, halfWidth, domain()->size().height());
-        QRectF clipRectRight = QRectF(halfWidth, 0, halfWidth, domain()->size().height());
+        QRectF clipRectLeft =
+            QRectF(0, 0, halfWidth, domain()->size().height());
+        QRectF clipRectRight =
+            QRectF(halfWidth, 0, halfWidth, domain()->size().height());
         QRegion fullPolarClipRegion(clipRect.toRect(), QRegion::Ellipse);
-        QRegion clipRegionLeft(fullPolarClipRegion.intersected(clipRectLeft.toRect()));
-        QRegion clipRegionRight(fullPolarClipRegion.intersected(clipRectRight.toRect()));
+        QRegion clipRegionLeft(
+            fullPolarClipRegion.intersected(clipRectLeft.toRect()));
+        QRegion clipRegionRight(
+            fullPolarClipRegion.intersected(clipRectRight.toRect()));
         painter->setClipRegion(clipRegionLeft);
         painter->drawPath(m_linePathPolarLeft);
         painter->setClipRegion(clipRegionRight);
         painter->drawPath(m_linePathPolarRight);
         painter->setClipRegion(fullPolarClipRegion);
-        alwaysUsePath = true; // required for proper clipping
+        alwaysUsePath = true;  // required for proper clipping
     } else {
         painter->setClipRect(clipRect);
     }
 
     if (m_linePen.style() != Qt::SolidLine || alwaysUsePath) {
-        // If pen style is not solid line, use path painting to ensure proper pattern continuity
+        // If pen style is not solid line, use path painting to ensure proper
+        // pattern continuity
         painter->drawPath(m_linePath);
     } else {
         for (int i = 1; i < m_linePoints.size(); ++i)
@@ -416,7 +454,8 @@ void ColorLineChartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
             painter->setClipping(true);
         else
             painter->setClipping(false);
-        m_series->d_func()->drawSeriesPointLabels(painter, m_linePoints, m_linePen.width() / 2);
+        m_series->d_func()->drawSeriesPointLabels(painter, m_linePoints,
+                                                  m_linePen.width() / 2);
     }
 
     const bool simpleDraw = m_pointsConfiguration.isEmpty();
@@ -435,22 +474,32 @@ void ColorLineChartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
                 bool drawPoint = m_pointsVisible;
                 if (m_pointsConfiguration.contains(i)) {
                     const auto &conf = m_pointsConfiguration[i];
-                    if (conf.contains(QColorXYSeries::PointConfiguration::Visibility)) {
+                    if (conf.contains(
+                            QColorXYSeries::PointConfiguration::Visibility)) {
                         drawPoint =
-                                m_pointsConfiguration[i][QColorXYSeries::PointConfiguration::Visibility]
-                                        .toBool();
+                            m_pointsConfiguration
+                                [i]
+                                [QColorXYSeries::PointConfiguration::Visibility]
+                                    .toBool();
                     }
 
                     if (drawPoint) {
-                        if (conf.contains(QColorXYSeries::PointConfiguration::Size)) {
-                            ptSize = m_pointsConfiguration[i][QColorXYSeries::PointConfiguration::Size]
-                                             .toReal();
+                        if (conf.contains(
+                                QColorXYSeries::PointConfiguration::Size)) {
+                            ptSize =
+                                m_pointsConfiguration
+                                    [i]
+                                    [QColorXYSeries::PointConfiguration::Size]
+                                        .toReal();
                         }
 
-                        if (conf.contains(QColorXYSeries::PointConfiguration::Color)) {
+                        if (conf.contains(
+                                QColorXYSeries::PointConfiguration::Color)) {
                             painter->setBrush(
-                                    m_pointsConfiguration[i][QColorXYSeries::PointConfiguration::Color]
-                                            .value<QColor>());
+                                m_pointsConfiguration
+                                    [i]
+                                    [QColorXYSeries::PointConfiguration::Color]
+                                        .value<QColor>());
                         }
                     }
                 }
@@ -465,41 +514,39 @@ void ColorLineChartItem::paint(QPainter *painter, const QStyleOptionGraphicsItem
     painter->restore();
 }
 
-void ColorLineChartItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
+void ColorLineChartItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     emit ColorXYChart::pressed(domain()->calculateDomainPoint(event->pos()));
     m_lastMousePos = event->pos();
     m_mousePressed = true;
     QGraphicsItem::mousePressEvent(event);
 }
 
-void ColorLineChartItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
-{
-    emit ColorXYChart::hovered(domain()->calculateDomainPoint(event->pos()), true);
-//    event->accept();
+void ColorLineChartItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
+    emit ColorXYChart::hovered(domain()->calculateDomainPoint(event->pos()),
+                               true);
+    //    event->accept();
     QGraphicsItem::hoverEnterEvent(event);
 }
 
-void ColorLineChartItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
-{
-    emit ColorXYChart::hovered(domain()->calculateDomainPoint(event->pos()), false);
-//    event->accept();
+void ColorLineChartItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
+    emit ColorXYChart::hovered(domain()->calculateDomainPoint(event->pos()),
+                               false);
+    //    event->accept();
     QGraphicsItem::hoverEnterEvent(event);
 }
 
-void ColorLineChartItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
+void ColorLineChartItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     QPointF result = domain()->calculateDomainPoint(m_lastMousePos);
     emit ColorXYChart::released(result);
-    if (m_mousePressed)
-        emit ColorXYChart::clicked(result);
+    if (m_mousePressed) emit ColorXYChart::clicked(result);
     m_mousePressed = false;
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-void ColorLineChartItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
-{
-    emit ColorXYChart::doubleClicked(domain()->calculateDomainPoint(m_lastMousePos));
+void ColorLineChartItem::mouseDoubleClickEvent(
+    QGraphicsSceneMouseEvent *event) {
+    emit ColorXYChart::doubleClicked(
+        domain()->calculateDomainPoint(m_lastMousePos));
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
 

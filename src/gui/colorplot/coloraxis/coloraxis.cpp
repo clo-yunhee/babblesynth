@@ -27,18 +27,17 @@
 **
 ****************************************************************************/
 
-
 #include <QtMath>
+
 #include "coloraxis_p.h"
 
 QT_CHARTS_BEGIN_NAMESPACE
 
-QStringList ColorAxis::createColorLabels(qreal min, qreal max, int ticks, ChartPresenter *presenter) const
-{
+QStringList ColorAxis::createColorLabels(qreal min, qreal max, int ticks,
+                                         ChartPresenter *presenter) const {
     QStringList labels;
 
-    if (max <= min || ticks < 1)
-        return labels;
+    if (max <= min || ticks < 1) return labels;
 
     int n = qMax(int(-qFloor(std::log10((max - min) / (ticks - 1)))), 0) + 1;
     for (int i = 0; i < ticks; ++i) {

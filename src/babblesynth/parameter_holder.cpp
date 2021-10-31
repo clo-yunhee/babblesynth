@@ -16,16 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "parameter_holder.h"
 
 #include <functional>
 #include <stdexcept>
 
-#include "parameter_holder.h"
-
 using namespace babblesynth;
 
-const std::vector<std::string> parameter_holder::getParameterNames() const
-{
+const std::vector<std::string> parameter_holder::getParameterNames() const {
     std::vector<std::string> names;
     names.reserve(m_parameters.size());
 
@@ -35,17 +33,11 @@ const std::vector<std::string> parameter_holder::getParameterNames() const
     return names;
 }
 
-parameter_holder::parameter_holder(bool isQueued)
-    : m_isQueued(isQueued)
-{}
-
-parameter& parameter_holder::getParameter(int index)
-{
+parameter& parameter_holder::getParameter(int index) {
     return m_parameters.at(index);
 }
 
-parameter& parameter_holder::getParameter(const std::string& name)
-{
+parameter& parameter_holder::getParameter(const std::string& name) {
     for (auto& parameter : m_parameters) {
         if (parameter.name() == name) {
             return parameter;
@@ -54,13 +46,11 @@ parameter& parameter_holder::getParameter(const std::string& name)
     throw std::invalid_argument("No parameter found with that name");
 }
 
-const parameter& parameter_holder::getParameter(int index) const
-{
+const parameter& parameter_holder::getParameter(int index) const {
     return m_parameters.at(index);
 }
 
-const parameter& parameter_holder::getParameter(const std::string& name) const
-{
+const parameter& parameter_holder::getParameter(const std::string& name) const {
     for (const auto& parameter : m_parameters) {
         if (parameter.name() == name) {
             return parameter;
@@ -69,8 +59,7 @@ const parameter& parameter_holder::getParameter(const std::string& name) const
     throw std::invalid_argument("No parameter found with that name");
 }
 
-parameter& parameter_holder::addParameter(const parameter& newParam)
-{
+parameter& parameter_holder::addParameter(const parameter& newParam) {
     // Expect 10 parameters at most.
     if (m_parameters.capacity() < maxNumberOfParameters) {
         m_parameters.reserve(maxNumberOfParameters);
@@ -83,32 +72,11 @@ parameter& parameter_holder::addParameter(const parameter& newParam)
     m_parameters.push_back(newParam);
 
     parameter& param = m_parameters.back();
-    param.addObserver(std::bind(&parameter_holder::internalObserver, this, std::placeholders::_1));
+    param.addObserver(std::bind(&parameter_holder::onParameterChange, this,
+                                std::placeholders::_1));
 
     // Trigger an immediate event for init.
     onParameterChange(param);
 
     return param;
-}
-
-void parameter_holder::processEvents()
-{
-    if (!m_isQueued) {
-        throw std::logic_error("can't process event on a non-queued parameter holder");
-    }
-     
-    for (const auto updatedParam : m_updatedParameters) {
-        onParameterChange(*updatedParam);
-    }
-    m_updatedParameters.clear();
-}
-
-void parameter_holder::internalObserver(const parameter& updatedParam)
-{
-    if (m_isQueued) {
-        m_updatedParameters.emplace(&updatedParam);
-    }
-    else {
-        onParameterChange(updatedParam);
-    }
 }

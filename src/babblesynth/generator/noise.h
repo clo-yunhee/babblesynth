@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_NOISE_H
 #define BABBLESYNTH_NOISE_H
 
@@ -27,20 +26,17 @@ namespace babblesynth {
 namespace generator {
 
 namespace noise {
-    std::vector<double> white(int length);
-    std::vector<double> colored(int length, double alpha = 2);
+std::vector<double> white(int length);
+std::vector<double> colored(int length, double alpha = 2);
 
-    inline std::vector<double> brown(int length)
-    {
-        return colored(length, 2);
-    }
+inline std::vector<double> brown(int length) { return colored(length, 2); }
 
-    extern std::random_device rd;
-    extern std::mt19937 gen;
-    extern std::uniform_real_distribution<> dis;
-}
+extern std::random_device rd;
+extern std::mt19937 gen;
+extern std::uniform_real_distribution<> dis;
+}  // namespace noise
 
-} // generator
-} // babblesynth
+}  // namespace generator
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_NOISE_H
+#endif  // BABBLESYNTH_NOISE_H

@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "app_state.h"
 
 #include <stdexcept>
 
-#include "app_state.h"
 #include "filter/formant_filter.h"
 #include "generator/source_generator.h"
 #include "variable_plan.h"
@@ -27,71 +27,65 @@
 using namespace babblesynth::gui;
 
 AppState::AppState(int sampleRate)
-    : m_pitchPlan(true),
-      m_amplitudePlan(true),
-      m_F1_plan(false),
-      m_F2_plan(false),
-      m_F3_plan(false),
-      m_F4_plan(false),
-      m_F5_plan(false)
-{
+    : m_pitchPlan(false),
+      m_amplitudePlan(false),
+      m_F1_plan(true),
+      m_F2_plan(true),
+      m_F3_plan(true),
+      m_F4_plan(true),
+      m_F5_plan(true) {
     setSampleRate(sampleRate);
     m_pitchPlan.reset(140).stepToValueAtTime(140, 1.0);
-    m_amplitudePlan.reset(1).stepToValueAtTime(1, 0.95).cubicToValueAtTime(0, 1.0);
-    m_F1_plan.reset(700).stepToValueAtTime(700, 0.35).cubicToValueAtTime(1100, 0.9);
-    m_F2_plan.reset(1200).stepToValueAtTime(1200, 0.35).cubicToValueAtTime(1300, 0.9);
+    m_amplitudePlan.reset(1).stepToValueAtTime(1, 0.95).cubicToValueAtTime(0,
+                                                                           1.0);
+    m_F1_plan.reset(700).stepToValueAtTime(700, 0.35).cubicToValueAtTime(1100,
+                                                                         0.9);
+    m_F2_plan.reset(1200)
+        .stepToValueAtTime(1200, 0.35)
+        .cubicToValueAtTime(1300, 0.9);
     m_F3_plan.reset(2400);
     m_F4_plan.reset(2900);
     m_F5_plan.reset(4200);
 }
 
-void AppState::setSampleRate(int sampleRate)
-{
+void AppState::setSampleRate(int sampleRate) {
     m_sampleRate = sampleRate;
     m_sourceGenerator.reset(new generator::source_generator(sampleRate));
     m_formantFilter.reset(new filter::formant_filter(sampleRate));
 }
 
-babblesynth::generator::source_generator *AppState::source()
-{
+babblesynth::generator::source_generator *AppState::source() {
     return m_sourceGenerator.get();
 }
 
-babblesynth::variable_plan *AppState::pitchPlan()
-{
-    return &m_pitchPlan;
-}
+babblesynth::variable_plan *AppState::pitchPlan() { return &m_pitchPlan; }
 
-babblesynth::variable_plan *AppState::amplitudePlan()
-{
+babblesynth::variable_plan *AppState::amplitudePlan() {
     return &m_amplitudePlan;
 }
 
-babblesynth::filter::formant_filter *AppState::formantFilter()
-{
+babblesynth::filter::formant_filter *AppState::formantFilter() {
     return m_formantFilter.get();
 }
 
-babblesynth::variable_plan *AppState::formantPlan(int n)
-{
+babblesynth::variable_plan *AppState::formantPlan(int n) {
     switch (n) {
-    case 0:
-        return &m_F1_plan;
-    case 1:
-        return &m_F2_plan;
-    case 2:
-        return &m_F3_plan;
-    case 3:
-        return &m_F4_plan;
-    case 4:
-        return &m_F5_plan;
-    default:
-        throw std::invalid_argument("invalid formant plan number");
+        case 0:
+            return &m_F1_plan;
+        case 1:
+            return &m_F2_plan;
+        case 2:
+            return &m_F3_plan;
+        case 3:
+            return &m_F4_plan;
+        case 4:
+            return &m_F5_plan;
+        default:
+            throw std::invalid_argument("invalid formant plan number");
     }
 }
 
-void AppState::updatePlans()
-{
+void AppState::updatePlans() {
     m_sourceGenerator->getParameter("Pitch plan").setValue(m_pitchPlan);
     m_sourceGenerator->getParameter("Amplitude plan").setValue(m_amplitudePlan);
 

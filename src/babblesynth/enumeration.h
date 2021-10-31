@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_ENUMERATION_H
 #define BABBLESYNTH_ENUMERATION_H
 
@@ -30,38 +29,27 @@
 
 namespace babblesynth {
 
-class enumeration_value
-{
-public:
+class enumeration_value {
+   public:
     explicit enumeration_value(const int index, const std::string& name)
-        : m_index(index), m_name(name)
-    {}
+        : m_index(index), m_name(name) {}
 
-    int index() const
-    {
-        return m_index;
-    }
+    int index() const { return m_index; }
 
-    const std::string& name() const
-    {
-        return m_name;
-    }
+    const std::string& name() const { return m_name; }
 
-private:
+   private:
     int m_index;
     std::string m_name;
 };
 
-class enumeration
-{
-public:
+class enumeration {
+   public:
     using value_type = enumeration_value;
 
-    template<class... T>
-    explicit enumeration(const T&... values)
-        : m_count(sizeof...(T))
-    {
-        const std::array names = { std::string(values...) };
+    template <class... T>
+    explicit enumeration(const T&... values) : m_count(sizeof...(T)) {
+        const std::array names = {std::string(values...)};
 
         m_values.reserve(m_count);
         m_indices.reserve(m_count);
@@ -72,42 +60,26 @@ public:
         }
     }
 
-    const int count()
-    {
-        return m_count;
-    }
+    const int count() { return m_count; }
 
-    const enumeration_value& valueOf(int index)
-    {
-        return m_values.at(index);
-    }
+    const enumeration_value& valueOf(int index) { return m_values.at(index); }
 
-    const std::string& nameOf(int index)
-    {
-        return valueOf(index).name();
-    }
+    const std::string& nameOf(int index) { return valueOf(index).name(); }
 
-    const int indexOf(const std::string& name)
-    {
-        return m_indices.at(name);
-    }
+    const int indexOf(const std::string& name) { return m_indices.at(name); }
 
-    const enumeration_value& valueOf(const std::string& name)
-    {
+    const enumeration_value& valueOf(const std::string& name) {
         return valueOf(indexOf(name));
     }
 
-    const std::vector<enumeration_value>& values()
-    {
-        return m_values;
-    }
+    const std::vector<enumeration_value>& values() { return m_values; }
 
-private:
+   private:
     int m_count;
     std::vector<enumeration_value> m_values;
     std::unordered_map<std::string, int> m_indices;
 };
 
-} // babblesynth
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_ENUMERATION_H
+#endif  // BABBLESYNTH_ENUMERATION_H

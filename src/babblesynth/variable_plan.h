@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_VARIABLE_PLAN_H
 #define BABBLESYNTH_VARIABLE_PLAN_H
 
@@ -25,14 +24,15 @@
 namespace babblesynth {
 
 class variable_plan {
-public:
+   public:
     enum transition {
         TransitionStep,
         TransitionLinear,
         TransitionCubic,
     };
 
-    explicit variable_plan(bool piecewiseMonotonic = false, double initialValue = 0);
+    explicit variable_plan(bool piecewiseMonotonic = false,
+                           double initialValue = 0);
     variable_plan(const variable_plan& orig);
     ~variable_plan();
 
@@ -41,14 +41,14 @@ public:
     variable_plan& stepToValueAtTime(double value, double time);
     variable_plan& linearToValueAtTime(double value, double time);
     variable_plan& cubicToValueAtTime(double value, double time);
-    
+
     variable_plan& reset(double initialValue);
 
     double evaluateAtTime(double time) const;
 
     double duration() const;
 
-private:
+   private:
     void addPoint(double time, double value, transition trans);
     void updateSpline();
 
@@ -63,9 +63,9 @@ private:
     std::vector<transition> m_transitions;
 
     // tk::spline m_spline; // Moved to the cpp file because anonymous namespace
-    void *m_spline;
+    void* m_spline;
 };
 
-} // babblesynth
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_VARIABLE_PLAN_H
+#endif  // BABBLESYNTH_VARIABLE_PLAN_H

@@ -39,27 +39,29 @@
 #ifndef QCOLORXYSERIES_P_H
 #define QCOLORXYSERIES_P_H
 
-#include "qcolorxyseries.h"
 #include <private/qxyseries_p.h>
+
+#include "qcolorxyseries.h"
 
 QT_CHARTS_BEGIN_NAMESPACE
 
 class QColorXYSeriesPrivate : public QXYSeriesPrivate {
     Q_OBJECT
 
-public:
+   public:
     QColorXYSeriesPrivate(QColorXYSeries *q);
 
     QVector<qreal> colorByData() const;
 
-protected:
-    QHash<int, QHash<QColorXYSeries::PointConfiguration, QVariant>> m_pointsConfiguration;
+   protected:
+    QHash<int, QHash<QColorXYSeries::PointConfiguration, QVariant>>
+        m_pointsConfiguration;
     QVector<qreal> m_colorByData;
 
-private:
+   private:
     Q_DECLARE_PUBLIC(QColorXYSeries)
 };
 
 QT_CHARTS_END_NAMESPACE
 
-#endif // QCOLORXYSERIES_P_H
+#endif  // QCOLORXYSERIES_P_H

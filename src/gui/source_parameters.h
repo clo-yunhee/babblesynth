@@ -16,36 +16,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_SOURCE_PARAMETERS_H
 #define BABBLESYNTH_SOURCE_PARAMETERS_H
 
-#include <QtWidgets>
-#include <QtCharts>
 #include <babblesynth.h>
+
+#include <QtCharts>
+#include <QtWidgets>
 
 namespace babblesynth {
 namespace gui {
-    
+
 class SourceParameters : public QWidget {
     Q_OBJECT
-    
-public:
+
+   public:
     SourceParameters(QWidget *parent = nullptr);
 
-private slots:
-    void onSourceTypeChanged(const QString&);
+   private slots:
+    void onSourceTypeChanged(const QString &);
 
-private:
+   private:
     void updateFields();
-    void addField(parameter& param);
+    void addField(parameter &param);
     void redrawGraph();
 
     QFormLayout *m_sourceParams;
     QLineSeries *m_sourceGraph;
 };
 
-}
-}
+}  // namespace gui
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_SOURCE_PARAMETERS_H
+#endif  // BABBLESYNTH_SOURCE_PARAMETERS_H

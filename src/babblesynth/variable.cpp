@@ -16,39 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "variable.h"
 
 using namespace babblesynth;
 
 variable::variable(bool isTrulyContinuous)
-    : m_isTrulyContinuous(isTrulyContinuous),
-      m_actualValue(0),
-      m_plan(0)
-{
-}
+    : m_isTrulyContinuous(isTrulyContinuous), m_actualValue(0), m_plan(0) {}
 
-void variable::setPlan(const variable_plan &plan)
-{
-    m_plan = plan;
-}
+void variable::setPlan(const variable_plan &plan) { m_plan = plan; }
 
-void variable::update(double time)
-{
+void variable::update(double time) {
     m_actualValue = m_plan.evaluateAtTime(time);
 }
 
-double variable::evaluateAtTime(double time) const
-{
+double variable::evaluateAtTime(double time) const {
     if (m_isTrulyContinuous) {
         return m_plan.evaluateAtTime(time);
-    }
-    else {
+    } else {
         return m_actualValue;
     }
 }
 
-double variable::maxTime() const
-{
-    return m_plan.duration();
-}
+double variable::maxTime() const { return m_plan.duration(); }

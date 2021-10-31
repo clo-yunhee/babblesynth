@@ -16,17 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <babblesynth.h>
+#include <dr_wav.h>
+
+#include <iostream>
 
 #include "filter/formant_filter.h"
 #include "source/abstract_source.h"
 #include "variable_plan.h"
-#include <iostream>
 
-#include <babblesynth.h>
-#include <dr_wav.h>
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int sampleRate = 48'000;
 
     std::cout << "Generating at " << sampleRate << " Hz sample rate\n";
@@ -50,7 +49,8 @@ int main(int argc, char *argv[])
     amplitude.linearToValueAtTime(0.8, 3.5);
     amplitude.linearToValueAtTime(0.2, 3.6);
 
-    source.getParameter("Source type").setValue(babblesynth::source::sources.valueOf("LF"));
+    source.getParameter("Source type")
+        .setValue(babblesynth::source::sources.valueOf("LF"));
     source.getParameter("Pitch plan").setValue(pitch);
     source.getParameter("Amplitude plan").setValue(amplitude);
     source.getParameter("Jitter amplitude").setValue(2);

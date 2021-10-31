@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_FORMANT_FILTER_H
 #define BABBLESYNTH_FORMANT_FILTER_H
 
@@ -27,21 +26,24 @@ namespace babblesynth {
 namespace filter {
 
 class formant_filter : public parameter_holder {
-public:
+   public:
     explicit formant_filter(int sampleRate);
     virtual ~formant_filter() = default;
 
-    std::vector<double> generateFrom(const std::vector<double>& input, const std::vector<std::pair<int, int>>& periods);
+    std::vector<double> generateFrom(
+        const std::vector<double>& input,
+        const std::vector<std::pair<int, int>>& periods, double Oq);
 
-private:
+   private:
     void designFilter(const std::vector<double>& freqs);
-    double designFilterSection(double f, double bw, std::vector<double>& b, std::vector<double>& a);
+    double designFilterSection(double f, double bw, std::vector<double>& b,
+                               std::vector<double>& a);
 
-    void onParameterChange(const parameter& param) override;
+    bool onParameterChange(const parameter& param) override;
 
     variable m_F1;
     variable m_F2;
-    
+
     variable m_F3;
     variable m_F4;
     variable m_F5;
@@ -56,7 +58,7 @@ private:
     int m_sampleRate;
 };
 
-} // filter
-} // babblesynth
+}  // namespace filter
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_FORMANT_FILTER_H
+#endif  // BABBLESYNTH_FORMANT_FILTER_H

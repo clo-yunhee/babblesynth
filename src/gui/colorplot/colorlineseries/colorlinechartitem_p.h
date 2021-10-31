@@ -39,36 +39,39 @@
 #ifndef COLORLINECHARTITEM_H
 #define COLORLINECHARTITEM_H
 
-#include <QtCharts/QChartGlobal>
-#include "../colorxyseries/colorxychart_p.h"
-#include <QtCharts/QChart>
-#include <QtGui/QPen>
 #include <QtCharts/private/qchartglobal_p.h>
+
+#include <QtCharts/QChart>
+#include <QtCharts/QChartGlobal>
+#include <QtGui/QPen>
+
+#include "../colorxyseries/colorxychart_p.h"
 
 QT_CHARTS_BEGIN_NAMESPACE
 
 class QColorLineSeries;
 class ChartPresenter;
 
-class ColorLineChartItem :  public ColorXYChart
-{
+class ColorLineChartItem : public ColorXYChart {
     Q_OBJECT
     Q_INTERFACES(QGraphicsItem)
-public:
-    explicit ColorLineChartItem(QColorLineSeries *series, QGraphicsItem *item = 0);
+   public:
+    explicit ColorLineChartItem(QColorLineSeries *series,
+                                QGraphicsItem *item = 0);
     ~ColorLineChartItem() {}
 
-    //from QGraphicsItem
+    // from QGraphicsItem
     QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+               QWidget *widget) override;
     QPainterPath shape() const override;
 
     QPainterPath path() const { return m_fullPath; }
 
-public Q_SLOTS:
+   public Q_SLOTS:
     void handleSeriesUpdated() override;
 
-protected:
+   protected:
     void updateGeometry() override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
@@ -76,9 +79,11 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
     void suppressPoints() { m_pointsVisible = false; }
-    void forceChartType(QChart::ChartType chartType) { m_chartType = chartType; }
+    void forceChartType(QChart::ChartType chartType) {
+        m_chartType = chartType;
+    }
 
-private:
+   private:
     QColorLineSeries *m_series;
     QPainterPath m_linePath;
     QPainterPath m_linePathPolarRight;

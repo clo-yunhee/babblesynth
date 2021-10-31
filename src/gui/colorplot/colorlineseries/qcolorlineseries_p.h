@@ -39,20 +39,21 @@
 #ifndef QCOLORLINESERIES_P_H
 #define QCOLORLINESERIES_P_H
 
-#include "qcolorlineseries.h"
-#include "../colorxyseries/qcolorxyseries_p.h"
 #include <QtCharts/private/qchartglobal_p.h>
+
+#include "../colorxyseries/qcolorxyseries_p.h"
+#include "qcolorlineseries.h"
 
 QT_CHARTS_BEGIN_NAMESPACE
 
-class QColorLineSeriesPrivate: public QColorXYSeriesPrivate
-{
-public:
-    QColorLineSeriesPrivate(QColorLineSeries *q);
+class QColorLineSeriesPrivate : public QColorXYSeriesPrivate {
+   public:
+    QColorLineSeriesPrivate(QColorLineSeries* q);
     void initializeGraphics(QGraphicsItem* parent) override;
-    void initializeTheme(int index, ChartTheme* theme, bool forced = false) override;
+    void initializeTheme(int index, ChartTheme* theme,
+                         bool forced = false) override;
 
-private:
+   private:
     Q_DECLARE_PUBLIC(QColorLineSeries)
 };
 

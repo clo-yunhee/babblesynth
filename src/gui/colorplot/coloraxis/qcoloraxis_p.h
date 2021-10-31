@@ -39,16 +39,16 @@
 #ifndef QCOLORAXIS_P_H
 #define QCOLORAXIS_P_H
 
-#include "qcoloraxis.h"
-#include <private/qabstractaxis_p.h>
 #include <QtCharts/private/qchartglobal_p.h>
+#include <private/qabstractaxis_p.h>
+
+#include "qcoloraxis.h"
 
 QT_CHARTS_BEGIN_NAMESPACE
 
-class QColorAxisPrivate : public QAbstractAxisPrivate
-{
+class QColorAxisPrivate : public QAbstractAxisPrivate {
     Q_OBJECT
-public:
+   public:
     explicit QColorAxisPrivate(QColorAxis *q);
     ~QColorAxisPrivate();
 
@@ -57,16 +57,16 @@ public:
 
     qreal min() override { return m_min; }
     qreal max() override { return m_max; }
-    void setRange(qreal min,qreal max) override;
+    void setRange(qreal min, qreal max) override;
 
     void updateSeries();
 
-protected:
+   protected:
     void setMin(const QVariant &min) override;
     void setMax(const QVariant &max) override;
     void setRange(const QVariant &min, const QVariant &max) override;
 
-private:
+   private:
     qreal m_min;
     qreal m_max;
     int m_tickCount;
@@ -78,4 +78,4 @@ private:
 
 QT_CHARTS_END_NAMESPACE
 
-#endif // QCOLORAXIS_P_H
+#endif  // QCOLORAXIS_P_H

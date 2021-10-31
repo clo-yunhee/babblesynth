@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_SOS_FILTER
 #define BABBLESYNTH_SOS_FILTER
 
@@ -34,25 +33,17 @@ double tf2zpk(const std::vector<double>& b, const std::vector<double>& a,
               std::vector<std::complex<double>>& p);
 
 std::vector<std::array<double, 6>> zpk2sos(
-                const std::vector<std::complex<double>>& z,
-                const std::vector<std::complex<double>>& p,
-                double k);
+    const std::vector<std::complex<double>>& z,
+    const std::vector<std::complex<double>>& p, double k);
 
 void sosfilt(const std::vector<std::array<double, 6>>& sos,
-             const std::vector<double>& x, std::vector<double>& y,
-             int start, int end,
-             std::vector<std::array<double, 2>>& zi);
+             const std::vector<double>& x, std::vector<double>& y, int start,
+             int end, std::vector<std::array<double, 2>>& zi);
 
-std::vector<std::array<double, 2>> sosfilt_zi(const std::vector<std::array<double, 6>>& sos);
+std::vector<std::array<double, 2>> sosfilt_zi(
+    const std::vector<std::array<double, 6>>& sos);
 
-void psosfilt(const std::vector<std::array<double, 6>>& sos,
-    const std::vector<double>& x, std::vector<double>& y,
-    int start, int end,
-    std::vector<std::array<double, 2>>& zi);
+}  // namespace filter
+}  // namespace babblesynth
 
-std::vector<std::array<double, 2>> psosfilt_zi(const std::vector<std::array<double, 6>>& sos);
-
-} // filter
-} // babblesynth
-
-#endif // BABBLESYNTH_SOS_FILTER
+#endif  // BABBLESYNTH_SOS_FILTER

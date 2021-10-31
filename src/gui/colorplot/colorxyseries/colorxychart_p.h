@@ -39,23 +39,24 @@
 #ifndef COLORXYCHART_H
 #define COLORXYCHART_H
 
-#include <QtCharts/QChartGlobal>
+#include <QtCharts/private/qchartglobal_p.h>
 #include <private/chartitem_p.h>
 #include <private/xyanimation_p.h>
+
+#include <QtCharts/QChartGlobal>
 #include <QtCharts/QValueAxis>
-#include "qcolorxyseries.h"
-#include <QtCharts/private/qchartglobal_p.h>
 #include <QtGui/QPen>
+
+#include "qcolorxyseries.h"
 
 QT_CHARTS_BEGIN_NAMESPACE
 
 class ChartPresenter;
 
-class ColorXYChart :  public ChartItem
-{
+class ColorXYChart : public ChartItem {
     Q_OBJECT
-public:
-    explicit ColorXYChart(QColorXYSeries *series,QGraphicsItem *item = 0);
+   public:
+    explicit ColorXYChart(QColorXYSeries *series, QGraphicsItem *item = 0);
     ~ColorXYChart() {}
 
     void setGeometryPoints(const QVector<QPointF> &points);
@@ -71,7 +72,7 @@ public:
     void getSeriesRanges(qreal &minX, qreal &maxX, qreal &minY, qreal &maxY);
     QVector<bool> offGridStatusVector();
 
-public Q_SLOTS:
+   public Q_SLOTS:
     void handlePointAdded(int index);
     void handlePointRemoved(int index);
     void handlePointsRemoved(int index, int count);
@@ -81,30 +82,31 @@ public Q_SLOTS:
 
     virtual void handleSeriesUpdated();
 
-Q_SIGNALS:
+   Q_SIGNALS:
     void clicked(const QPointF &point);
     void hovered(const QPointF &point, bool state);
     void pressed(const QPointF &point);
     void released(const QPointF &point);
     void doubleClicked(const QPointF &point);
 
-protected:
-    virtual void updateChart(const QVector<QPointF> &oldPoints, const QVector<QPointF> &newPoints,
-                             int index = -1);
+   protected:
+    virtual void updateChart(const QVector<QPointF> &oldPoints,
+                             const QVector<QPointF> &newPoints, int index = -1);
     virtual void updateGlChart();
     virtual void refreshGlChart();
 
-private:
+   private:
     inline bool isEmpty();
 
-protected:
+   protected:
     QColorXYSeries *m_series;
     QVector<QPointF> m_points;
-    //QColor m_selectedColor;
+    // QColor m_selectedColor;
     XYAnimation *m_animation;
     bool m_dirty;
 
-    QHash<int, QHash<QColorXYSeries::PointConfiguration, QVariant>> m_pointsConfiguration;
+    QHash<int, QHash<QColorXYSeries::PointConfiguration, QVariant>>
+        m_pointsConfiguration;
     bool m_pointsConfigurationDirty;
 };
 
