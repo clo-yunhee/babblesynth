@@ -39,31 +39,32 @@
 #ifndef CHARTCOLORAXISY_H
 #define CHARTCOLORAXISY_H
 
-#include "coloraxis_p.h"
-#include <private/verticalaxis_p.h>
 #include <QtCharts/private/qchartglobal_p.h>
+#include <private/verticalaxis_p.h>
+
+#include "coloraxis_p.h"
 
 QT_CHARTS_BEGIN_NAMESPACE
 
 class QColorAxis;
 
-class ChartColorAxisY : public VerticalAxis, public ColorAxis
-{
+class ChartColorAxisY : public VerticalAxis, public ColorAxis {
     Q_OBJECT
-public:
-    ChartColorAxisY(QColorAxis *axis, QGraphicsItem* item = 0);
+   public:
+    ChartColorAxisY(QColorAxis *axis, QGraphicsItem *item = 0);
     ~ChartColorAxisY();
 
-    QSizeF sizeHint(Qt::SizeHint which, const QSizeF &constraint) const override;
+    QSizeF sizeHint(Qt::SizeHint which,
+                    const QSizeF &constraint) const override;
 
-protected:
+   protected:
     QVector<qreal> calculateLayout() const override;
     void updateGeometry() override;
 
-private:
+   private:
     QColorAxis *m_axis;
 };
 
 QT_CHARTS_END_NAMESPACE
 
-#endif // CHARTCOLORAXISY_H
+#endif  // CHARTCOLORAXISY_H

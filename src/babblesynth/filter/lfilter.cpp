@@ -16,27 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "tf_filter.h"
 
 using namespace babblesynth;
 
-void filter::lfilter(const std::vector<double>& b,
-                     const std::vector<double>& a,
-                     const std::vector<double>& x,
-                     std::vector<double>& y,
-                     int start, int end,
-                     std::vector<double>& z)
-{
+void filter::lfilter(const std::vector<double>& b, const std::vector<double>& a,
+                     const std::vector<double>& x, std::vector<double>& y,
+                     int start, int end, std::vector<double>& z) {
     const int len_b = b.size();
     // const int len_a = a.size();
 
     // const double a0 = a[0];
 
-    int k; // Index along x and y
-    int j; // Index along b and a
-    int m; // Index along z
-    int n; // Index for iterating middle delays
+    int k;  // Index along x and y
+    int j;  // Index along b and a
+    int m;  // Index along z
+    int n;  // Index for iterating middle delays
 
     // Assume the filter is already normalized.
 
@@ -56,17 +51,16 @@ void filter::lfilter(const std::vector<double>& b,
             }
             // Last delay
             z[m] = x[k] * b[j] - y[k] * a[j];
-        }
-        else {
+        } else {
             y[k] = x[k] * b[j];
         }
     }
 }
 
-std::vector<double> filter::lfiltic(
-    const std::vector<double>& b, const std::vector<double>& a,
-    const std::vector<double>& x, const std::vector<double>& y, int end)
-{
+std::vector<double> filter::lfiltic(const std::vector<double>& b,
+                                    const std::vector<double>& a,
+                                    const std::vector<double>& x,
+                                    const std::vector<double>& y, int end) {
     const int N = a.size() - 1;
     const int M = b.size() - 1;
     const int K = std::max(M, N);

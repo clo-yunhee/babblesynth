@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "abstract_source.h"
 
 using namespace babblesynth::source;
@@ -24,6 +23,4 @@ using namespace babblesynth::source;
 babblesynth::enumeration babblesynth::source::sources =
     babblesynth::enumeration("LF");
 
-abstract_source::abstract_source()
-    : parameter_holder()
-{}
+abstract_source::abstract_source() : parameter_holder() {}

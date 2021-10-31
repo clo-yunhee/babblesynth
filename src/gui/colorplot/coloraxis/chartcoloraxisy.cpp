@@ -27,26 +27,22 @@
 **
 ****************************************************************************/
 
+#include <private/abstractchartlayout_p.h>
+#include <private/chartpresenter_p.h>
+
+#include <QtWidgets/QGraphicsLayout>
+
 #include "chartcoloraxisy_p.h"
 #include "qcoloraxis.h"
-#include <private/chartpresenter_p.h>
-#include <private/abstractchartlayout_p.h>
-#include <QtWidgets/QGraphicsLayout>
 
 QT_CHARTS_BEGIN_NAMESPACE
 
 ChartColorAxisY::ChartColorAxisY(QColorAxis *axis, QGraphicsItem *item)
-    : VerticalAxis(axis, item, true)
-    , m_axis(axis)
-{
-}
+    : VerticalAxis(axis, item, true), m_axis(axis) {}
 
-ChartColorAxisY::~ChartColorAxisY()
-{
-}
+ChartColorAxisY::~ChartColorAxisY() {}
 
-QVector<qreal> ChartColorAxisY::calculateLayout() const
-{
+QVector<qreal> ChartColorAxisY::calculateLayout() const {
     int tickCount = m_axis->tickCount();
 
     Q_ASSERT(tickCount >= 2);
@@ -63,55 +59,56 @@ QVector<qreal> ChartColorAxisY::calculateLayout() const
     return points;
 }
 
-void ChartColorAxisY::updateGeometry()
-{
-    setLabels(createColorLabels(min(), max(), m_axis->tickCount(), presenter()) << QString());
+void ChartColorAxisY::updateGeometry() {
+    setLabels(createColorLabels(min(), max(), m_axis->tickCount(), presenter())
+              << QString());
 
     VerticalAxis::updateGeometry();
 }
 
-QSizeF ChartColorAxisY::sizeHint(Qt::SizeHint which, const QSizeF &constraint) const
-{
+QSizeF ChartColorAxisY::sizeHint(Qt::SizeHint which,
+                                 const QSizeF &constraint) const {
     Q_UNUSED(constraint);
 
     QSizeF sh;
     QSizeF base = VerticalAxis::sizeHint(which, constraint);
-    const QStringList &ticksList = createColorLabels(min(), max(), m_axis->tickCount(), presenter());
+    const QStringList &ticksList =
+        createColorLabels(min(), max(), m_axis->tickCount(), presenter());
     qreal width = 0;
-    // Height of vertical axis sizeHint indicates the maximum distance labels can extend past
-    // first and last ticks. Base height is irrelevant.
+    // Height of vertical axis sizeHint indicates the maximum distance labels
+    // can extend past first and last ticks. Base height is irrelevant.
     qreal height = 0;
 
     switch (which) {
-    case Qt::MinimumSize: {
-        QRectF boundingRect = ChartPresenter::textBoundingRect(axis()->labelsFont(),
-                                                               QStringLiteral("..."),
-                                                               axis()->labelsAngle());
-        width = boundingRect.width() + labelPadding() + base.width() + m_axis->size()
-                + colorScalePadding() + 1.0;
-        height = boundingRect.height() / 2.0;
-        sh = QSizeF(width, height);
-        break;
-    }
-    case Qt::PreferredSize: {
-        qreal labelWidth = 0.0;
-        qreal firstHeight = -1.0;
-        for (const QString &s : ticksList) {
-            QRectF rect = ChartPresenter::textBoundingRect(axis()->labelsFont(), s,
-                                                           axis()->labelsAngle());
-            labelWidth = qMax(rect.width(), labelWidth);
-            height = rect.height();
-            if (firstHeight < 0.0)
-                firstHeight = height;
+        case Qt::MinimumSize: {
+            QRectF boundingRect = ChartPresenter::textBoundingRect(
+                axis()->labelsFont(), QStringLiteral("..."),
+                axis()->labelsAngle());
+            width = boundingRect.width() + labelPadding() + base.width() +
+                    m_axis->size() + colorScalePadding() + 1.0;
+            height = boundingRect.height() / 2.0;
+            sh = QSizeF(width, height);
+            break;
         }
-        width = labelWidth + labelPadding() + base.width() + m_axis->size() + colorScalePadding()
-                + 2.0; // two pixels of tolerance
-        height = qMax(height, firstHeight) / 2.0;
-        sh = QSizeF(width, height);
-        break;
-    }
-    default:
-        break;
+        case Qt::PreferredSize: {
+            qreal labelWidth = 0.0;
+            qreal firstHeight = -1.0;
+            for (const QString &s : ticksList) {
+                QRectF rect = ChartPresenter::textBoundingRect(
+                    axis()->labelsFont(), s, axis()->labelsAngle());
+                labelWidth = qMax(rect.width(), labelWidth);
+                height = rect.height();
+                if (firstHeight < 0.0) firstHeight = height;
+            }
+            width = labelWidth + labelPadding() + base.width() +
+                    m_axis->size() + colorScalePadding() +
+                    2.0;  // two pixels of tolerance
+            height = qMax(height, firstHeight) / 2.0;
+            sh = QSizeF(width, height);
+            break;
+        }
+        default:
+            break;
     }
 
     return sh;

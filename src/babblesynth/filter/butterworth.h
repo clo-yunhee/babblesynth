@@ -1,4 +1,4 @@
-﻿/*
+/*
  * BabbleSynth
  * Copyright (C) 2021  Clo Yun-Hee Dufour
  *
@@ -16,31 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BABBLESYNTH_ABSTRACT_SOURCE_H
-#define BABBLESYNTH_ABSTRACT_SOURCE_H
+#ifndef BABBLESYNTH_BUTTERWORTH_H
+#define BABBLESYNTH_BUTTERWORTH_H
 
-#include <cmath>
-
-#include "../enumeration.h"
-#include "../parameter_holder.h"
-#include "../variable.h"
+#include <array>
+#include <vector>
 
 namespace babblesynth {
-namespace source {
+namespace filter {
+namespace butterworth {
 
-class abstract_source : public parameter_holder {
-   public:
-    virtual ~abstract_source() = default;
+std::vector<std::array<double, 6>> lowPass(int N, double fc, double fs);
+std::vector<std::array<double, 6>> highPass(int N, double fc, double fs);
 
-    virtual double evaluateAtPhase(double theta) = 0;
-
-   protected:
-    abstract_source();
-};
-
-extern enumeration sources;
-
-}  // namespace source
+}  // namespace butterworth
+}  // namespace filter
 }  // namespace babblesynth
 
-#endif  // BABBLESYNTH_ABSTRACT_SOURCE_H
+#endif  // BABBLESYNTH_BUTTERWORTH_H

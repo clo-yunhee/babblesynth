@@ -16,28 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_SOURCE_PLAN_ITEM_H
 #define BABBLESYNTH_SOURCE_PLAN_ITEM_H
 
-#include <QtWidgets>
 #include <babblesynth.h>
+
+#include <QtWidgets>
 
 namespace babblesynth {
 namespace gui {
 
 class SourcePlanItem : public QFrame {
     Q_OBJECT
-    
-public:
-    SourcePlanItem(int duration,
-                   variable_plan::transition pitchTransition,
+
+   public:
+    SourcePlanItem(int duration, variable_plan::transition pitchTransition,
                    double targetPitch,
                    variable_plan::transition amplitudeTransiiton,
-                   double targetAmplitude,
-                   QWidget *parent = nullptr);
+                   double targetAmplitude, QWidget *parent = nullptr);
 
-    SourcePlanItem(double initialPitch, double initialAmplitude, QWidget *parent = nullptr);
+    SourcePlanItem(double initialPitch, double initialAmplitude,
+                   QWidget *parent = nullptr);
 
     void updatePlans();
 
@@ -45,11 +44,11 @@ public:
     double pitch() const;
     double amplitude() const;
 
-signals:
+   signals:
     void updated();
     void requestRemove(SourcePlanItem *item);
 
-private:
+   private:
     double m_duration;
 
     variable_plan::transition m_pitchTransition;
@@ -59,7 +58,7 @@ private:
     double m_targetAmplitude;
 };
 
-}
-}
+}  // namespace gui
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_SOURCE_PLAN_ITEM_H
+#endif  // BABBLESYNTH_SOURCE_PLAN_ITEM_H

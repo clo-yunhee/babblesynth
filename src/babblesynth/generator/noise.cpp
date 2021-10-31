@@ -16,27 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "noise.h"
 
 #include <array>
 
-#include "noise.h"
-
 using namespace babblesynth::generator;
 
-std::random_device               noise::rd;
-std::mt19937                     noise::gen(rd());
+std::random_device noise::rd;
+std::mt19937 noise::gen(rd());
 std::uniform_real_distribution<> noise::dis(-1.0, 1.0);
 
-std::vector<double> noise::white(int length)
-{
+std::vector<double> noise::white(int length) {
     std::vector<double> out(length);
-    for (int i = 0; i < length; ++i)
-        out[i] = dis(gen);
+    for (int i = 0; i < length; ++i) out[i] = dis(gen);
     return out;
 }
 
-std::vector<double> noise::colored(int length, double alpha)
-{
+std::vector<double> noise::colored(int length, double alpha) {
     std::array<double, 64> filter;
     filter[0] = 1.0;
     for (int k = 1; k < 64; ++k) {
@@ -48,8 +44,7 @@ std::vector<double> noise::colored(int length, double alpha)
     for (int i = 0; i < length + filter.size(); ++i) {
         filtered[i] = 0.0;
         for (int j = 0; j < filter.size(); ++j)
-            if (i - j >= 0)
-                filtered[i] += filter[j] * noise[i - j];
+            if (i - j >= 0) filtered[i] += filter[j] * noise[i - j];
     }
 
     std::vector<double> out(length);

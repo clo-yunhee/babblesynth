@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_LF_H
 #define BABBLESYNTH_LF_H
 
@@ -26,33 +25,33 @@ namespace babblesynth {
 namespace source {
 
 class lf : public abstract_source {
-public:
+   public:
     lf();
 
     double evaluateAtPhase(double theta) override;
 
-private:
-    void calculateModelParameters();
+   private:
+    bool calculateModelParameters();
 
-    void onParameterChange(const parameter& param) override;
+    bool onParameterChange(const parameter& param) override;
 
     static constexpr double T0 = 1;
     static constexpr double E = 1;
-    
+
     double Oq;
     double am;
     double Qa;
 
-    double Ee; // = E
-    double Te; // = Oq * T0
-    double Tp; // = am * Oq * T0
-    double Ta; // = Qa * (1 - Oq) * T0
+    double Ee;  // = E
+    double Te;  // = Oq * T0
+    double Tp;  // = am * Oq * T0
+    double Ta;  // = Qa * (1 - Oq) * T0
 
     double alpha;
     double epsilon;
 };
 
-} // source
-} // babblesynth
+}  // namespace source
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_LF_H
+#endif  // BABBLESYNTH_LF_H

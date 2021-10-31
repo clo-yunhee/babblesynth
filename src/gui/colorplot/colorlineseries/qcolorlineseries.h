@@ -27,31 +27,30 @@
 **
 ****************************************************************************/
 
-
 #ifndef QCOLORLINESERIES_H
 #define QCOLORLINESERIES_H
 
 #include <QtCharts/QChartGlobal>
-#include "../colorxyseries/qcolorxyseries.h"
 #include <QtGui/QPen>
+
+#include "../colorxyseries/qcolorxyseries.h"
 
 QT_CHARTS_BEGIN_NAMESPACE
 
 class QColorLineSeriesPrivate;
 
-class QColorLineSeries : public QColorXYSeries
-{
+class QColorLineSeries : public QColorXYSeries {
     Q_OBJECT
 
-public:
+   public:
     explicit QColorLineSeries(QObject *parent = nullptr);
     ~QColorLineSeries();
     QAbstractSeries::SeriesType type() const override;
 
-protected:
+   protected:
     QColorLineSeries(QColorLineSeriesPrivate &d, QObject *parent = nullptr);
 
-private:
+   private:
     Q_DECLARE_PRIVATE(QColorLineSeries)
     Q_DISABLE_COPY(QColorLineSeries)
     friend class ColorLineChartItem;
@@ -59,4 +58,4 @@ private:
 
 QT_CHARTS_END_NAMESPACE
 
-#endif // QCOLORLINESERIES_H
+#endif  // QCOLORLINESERIES_H

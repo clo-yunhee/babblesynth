@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include <algorithm>
 
 #include "sos_filter.h"
 
 using namespace babblesynth;
 
-static decltype(auto) cplxpair(const std::vector<std::complex<double>>& v_, double tol = 100.0 * std::numeric_limits<double>::epsilon())
-{
+static decltype(auto) cplxpair(
+    const std::vector<std::complex<double>>& v_,
+    double tol = 100.0 * std::numeric_limits<double>::epsilon()) {
     const int l = v_.size();
     auto v = v_;
 
@@ -37,8 +37,7 @@ static decltype(auto) cplxpair(const std::vector<std::complex<double>>& v_, doub
         if (std::abs(z.imag()) <= tol * std::abs(z)) {
             reals.push_back(z.real());
             it = v.erase(it);
-        }
-        else {
+        } else {
             ++it;
         }
     }
@@ -55,11 +54,13 @@ static decltype(auto) cplxpair(const std::vector<std::complex<double>>& v_, doub
         }
 
         // Sort v based on real part
-        std::sort(v.begin(), v.end(), [](auto x, auto y) { return x.real() < y.real(); });
-        
+        std::sort(v.begin(), v.end(),
+                  [](auto x, auto y) { return x.real() < y.real(); });
+
         // Check if real parts occur in pairs. If not: error
         for (int i = 0; i < v.size() / 2; ++i) {
-            if (std::abs(v[2 * i].real() - v[2 * i + 1].real()) > tol * std::abs(v[2 * i])) {
+            if (std::abs(v[2 * i].real() - v[2 * i + 1].real()) >
+                tol * std::abs(v[2 * i])) {
                 goto error;
             }
         }
@@ -67,11 +68,11 @@ static decltype(auto) cplxpair(const std::vector<std::complex<double>>& v_, doub
         // Check if imag part of real part pairs are conjugates
         int yix = 0;
         while (v.size() > 0) {
-
             // Find all real parts equal to real(v[0])
             std::vector<int> idx;
             for (int i = 0; i < v.size(); ++i) {
-                if (std::abs(v[i].real() - v[0].real()) <= tol * std::abs(v[i].real())) {
+                if (std::abs(v[i].real() - v[0].real()) <=
+                    tol * std::abs(v[i].real())) {
                     idx.push_back(i);
                 }
             }
@@ -81,12 +82,13 @@ static decltype(auto) cplxpair(const std::vector<std::complex<double>>& v_, doub
             }
 
             // Sort the imag parts of those values
-            std::sort(idx.begin(), idx.end(), [&v](int i, int j) { return v[i].imag() < v[j].imag(); });
+            std::sort(idx.begin(), idx.end(),
+                      [&v](int i, int j) { return v[i].imag() < v[j].imag(); });
             std::vector<double> si;
             std::vector<std::complex<double>> q;
             for (int i : idx) {
                 si.push_back(v[i].imag());
-                q.push_back(v[i]); 
+                q.push_back(v[i]);
             }
             const int lq = q.size();
 
@@ -124,8 +126,9 @@ error:
     throw std::invalid_argument("cplxpair: could not pair all complex numbers");
 }
 
-static std::pair<std::vector<std::complex<double>>, std::vector<double>> cplxreal(const std::vector<std::complex<double>>& z, double tol = 100.0 * std::numeric_limits<double>::epsilon())
-{
+static std::pair<std::vector<std::complex<double>>, std::vector<double>>
+cplxreal(const std::vector<std::complex<double>>& z,
+         double tol = 100.0 * std::numeric_limits<double>::epsilon()) {
     auto y = cplxpair(z, tol);
 
     std::vector<std::complex<double>> zc;
@@ -134,8 +137,7 @@ static std::pair<std::vector<std::complex<double>>, std::vector<double>> cplxrea
     for (const auto& z : y) {
         if (std::abs(z.imag()) <= tol * std::abs(z)) {
             zr.push_back(z.real());
-        }
-        else {
+        } else {
             // only pos imag numbers
             if (z.imag() >= 0) {
                 zc.push_back(z);
@@ -147,10 +149,8 @@ static std::pair<std::vector<std::complex<double>>, std::vector<double>> cplxrea
 }
 
 std::vector<std::array<double, 6>> filter::zpk2sos(
-    const std::vector<std::complex<double>> &z,
-    const std::vector<std::complex<double>> &p,
-    double k)
-{
+    const std::vector<std::complex<double>>& z,
+    const std::vector<std::complex<double>>& p, double k) {
     auto [zc, zr] = cplxreal(z, 1e-6);
     auto [pc, pr] = cplxreal(p, 1e-6);
 
@@ -173,7 +173,7 @@ std::vector<std::array<double, 6>> filter::zpk2sos(
         zrp.resize(nzrsec);
         for (int i = 0; i < nzr - 1; i += 2) {
             zrms[i / 2] = -zr[i] - zr[i + 1];
-            zrp[i / 2]  =  zr[i] * zr[i + 1];
+            zrp[i / 2] = zr[i] * zr[i + 1];
         }
     }
 
@@ -190,10 +190,9 @@ std::vector<std::array<double, 6>> filter::zpk2sos(
         prp.resize(nprsec);
         for (int i = 0; i < npr - 1; i += 2) {
             prms[i / 2] = -pr[i] - pr[i + 1];
-            prp[i / 2]  =  pr[i] * pr[i + 1];
+            prp[i / 2] = pr[i] * pr[i + 1];
         }
-    }
-    else {
+    } else {
         nprsec = 0;
     }
 
@@ -215,7 +214,7 @@ std::vector<std::array<double, 6>> filter::zpk2sos(
     }
 
     std::vector<std::array<double, 6>> sos(nsecs);
-    
+
     for (int i = 0; i < nsecs; ++i) {
         sos[i][0] = 1.0;
         sos[i][3] = 1.0;
@@ -225,27 +224,23 @@ std::vector<std::array<double, 6>> filter::zpk2sos(
     const int nprl = npc + nprsec;
 
     for (int i = 0; i < nsecs; ++i) {
-        if (i < nzc) {       // lay down a complex zero pair:
+        if (i < nzc) {  // lay down a complex zero pair:
             sos[i][1] = zcm2r[i];
             sos[i][2] = zca2[i];
-        }
-        else if (i < nzrl) { // lay down a pair of real zeros:
+        } else if (i < nzrl) {  // lay down a pair of real zeros:
             sos[i][1] = zrms[i - nzc];
             sos[i][2] = zrp[i - nzc];
-        }
-        else {
+        } else {
             sos[i][1] = sos[i][2] = 0.0;
         }
 
-        if (i < npc) {       // lay down a complex pole pair:
+        if (i < npc) {  // lay down a complex pole pair:
             sos[i][4] = pcm2r[i];
             sos[i][5] = pca2[i];
-        }
-        else if (i < nprl) { // lay down a pair of real poles:
+        } else if (i < nprl) {  // lay down a pair of real poles:
             sos[i][4] = prms[i - npc];
             sos[i][5] = prp[i - npc];
-        }
-        else {
+        } else {
             sos[i][4] = sos[i][5] = 0.0;
         }
     }

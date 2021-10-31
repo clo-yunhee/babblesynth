@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_CLICKABLE_LABEL_H
 #define BABBLESYNTH_CLICKABLE_LABEL_H
 
@@ -27,38 +26,39 @@ namespace gui {
 
 class ClickableLabel : public QLabel {
     Q_OBJECT
-    
-public:
-    explicit ClickableLabel(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+
+   public:
+    explicit ClickableLabel(QWidget *parent = nullptr,
+                            Qt::WindowFlags f = Qt::WindowFlags());
     ~ClickableLabel();
 
-signals:
+   signals:
     void clicked(QMouseEvent *event);
 
-protected:
+   protected:
     void mousePressEvent(QMouseEvent *event) override;
 };
 
-}
-}
+}  // namespace gui
+}  // namespace babblesynth
 
-#if defined(_MSC_VER) && _MSC_VER > 1310
+#if defined(_MSC_VER) && _MSC_VER > 1310 && !defined(__clang__)
 #include <windows.h>
-// Visual C++ 2005 and later require the source files in UTF-8, and all strings 
-// to be encoded as wchar_t otherwise the strings will be converted into the 
-// local multibyte encoding and cause errors. To use a wchar_t as UTF-8, these 
-// strings then need to be convert back to UTF-8. This function is just a rough 
+// Visual C++ 2005 and later require the source files in UTF-8, and all strings
+// to be encoded as wchar_t otherwise the strings will be converted into the
+// local multibyte encoding and cause errors. To use a wchar_t as UTF-8, these
+// strings then need to be convert back to UTF-8. This function is just a rough
 // example of how to do this.
-# define utf8(str)  ConvertToUTF8(L##str)
-inline const char * ConvertToUTF8(const wchar_t * pStr) {
+#define utf8(str) ConvertToUTF8(L##str)
+inline const char *ConvertToUTF8(const wchar_t *pStr) {
     static char szBuf[1024];
     WideCharToMultiByte(CP_UTF8, 0, pStr, -1, szBuf, sizeof(szBuf), NULL, NULL);
     return szBuf;
 }
 #else
-// Visual C++ 2003 and gcc will use the string literals as is, so the files 
+// Visual C++ 2003 and gcc will use the string literals as is, so the files
 // should be saved as UTF-8. gcc requires the files to not have a UTF-8 BOM.
-# define utf8(str)  str
+#define utf8(str) str
 #endif
 
-#endif // BABBLESYNTH_CLICKABLE_LABEL_H
+#endif  // BABBLESYNTH_CLICKABLE_LABEL_H

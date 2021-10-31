@@ -16,19 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "clickable_label.h"
 
 using namespace babblesynth::gui;
 
 ClickableLabel::ClickableLabel(QWidget *parent, Qt::WindowFlags f)
-    : QLabel(parent, f)
-{}
+    : QLabel(parent, f) {}
 
-ClickableLabel::~ClickableLabel()
-{}
+ClickableLabel::~ClickableLabel() {}
 
-void ClickableLabel::mousePressEvent(QMouseEvent *event)
-{
+void ClickableLabel::mousePressEvent(QMouseEvent *event) {
     emit clicked(event);
 }

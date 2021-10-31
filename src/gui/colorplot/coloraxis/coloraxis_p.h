@@ -39,19 +39,21 @@
 #ifndef COLORAXIS_H
 #define COLORAXIS_H
 
-#include <QStringList>
-#include <private/qchartglobal_p.h>
 #include <private/chartpresenter_p.h>
+#include <private/qchartglobal_p.h>
+
+#include <QStringList>
 
 QT_CHARTS_BEGIN_NAMESPACE
 
 class ColorAxis {
-public:
-    inline qreal colorScalePadding() const { return qreal { 8.0 }; }
-    
-    QStringList createColorLabels(qreal min, qreal max, int ticks, ChartPresenter *presenter) const;
+   public:
+    inline qreal colorScalePadding() const { return qreal{8.0}; }
+
+    QStringList createColorLabels(qreal min, qreal max, int ticks,
+                                  ChartPresenter *presenter) const;
 };
 
 QT_CHARTS_END_NAMESPACE
 
-#endif // COLORAXIS_H
+#endif  // COLORAXIS_H

@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
 
 #ifndef BABBLESYNTH_COLOR_PLOT_H
 #define BABBLESYNTH_COLOR_PLOT_H
@@ -23,4 +22,4 @@
 #include "coloraxis/qcoloraxis.h"
 #include "colorlineseries/qcolorlineseries.h"
 
-#endif // BABBLESYNTH_COLOR_PLOT_H
+#endif  // BABBLESYNTH_COLOR_PLOT_H

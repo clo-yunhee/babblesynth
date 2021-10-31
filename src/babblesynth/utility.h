@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_UTILITY_H
 #define BABBLESYNTH_UTILITY_H
 
@@ -26,30 +25,29 @@
 namespace babblesynth {
 namespace util {
 
-template<typename T, typename... Rest>
+template <typename T, typename... Rest>
 struct is_any : std::false_type {};
 
-template<typename T, typename First>
+template <typename T, typename First>
 struct is_any<T, First> : std::is_same<T, First> {};
 
-template<typename T, typename First, typename... Rest>
+template <typename T, typename First, typename... Rest>
 struct is_any<T, First, Rest...>
-    : std::integral_constant<bool, std::is_same<T, First>::value || is_any<T, Rest...>::value>
-{};
+    : std::integral_constant<bool, std::is_same<T, First>::value ||
+                                       is_any<T, Rest...>::value> {};
 
-template<typename T, typename... Rest>
+template <typename T, typename... Rest>
 inline constexpr bool is_any_v = is_any<T, Rest...>::value;
 
-template<typename T, typename... Types>
-T get_with_numeric_conversion(const std::variant<Types...>& variant)
-{
-    // Automatically convert between int and double (truncate from double to int)
+template <typename T, typename... Types>
+T get_with_numeric_conversion(const std::variant<Types...>& variant) {
+    // Automatically convert between int and double (truncate from double to
+    // int)
     if constexpr (std::is_same_v<T, int>) {
         if (std::holds_alternative<double>(variant)) {
             return std::get<double>(variant);
         }
-    }
-    else if constexpr (std::is_same_v<T, double>) {
+    } else if constexpr (std::is_same_v<T, double>) {
         if (std::holds_alternative<int>(variant)) {
             return std::get<int>(variant);
         }
@@ -57,7 +55,7 @@ T get_with_numeric_conversion(const std::variant<Types...>& variant)
     return std::get<T>(variant);
 }
 
-} // util
-} // babblesynth
+}  // namespace util
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_UTILITY_H
+#endif  // BABBLESYNTH_UTILITY_H

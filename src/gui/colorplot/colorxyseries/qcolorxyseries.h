@@ -27,11 +27,11 @@
 **
 ****************************************************************************/
 
-
 #ifndef QCOLORXYSERIES_H
 #define QCOLORXYSERIES_H
 
 #include <qchartglobal.h>
+
 #include <QXYSeries>
 
 QT_CHARTS_BEGIN_NAMESPACE
@@ -40,12 +40,14 @@ class QColorXYSeriesPrivate;
 
 class QColorXYSeries : public QXYSeries {
     Q_OBJECT
-    
-protected:
-    explicit QColorXYSeries(QColorXYSeriesPrivate &d, QObject *parent = nullptr);
 
-public:
-    static constexpr SeriesType SeriesTypeColorLine = SeriesType(SeriesTypeCandlestick + 10);
+   protected:
+    explicit QColorXYSeries(QColorXYSeriesPrivate &d,
+                            QObject *parent = nullptr);
+
+   public:
+    static constexpr SeriesType SeriesTypeColorLine =
+        SeriesType(SeriesTypeCandlestick + 10);
 
     enum class PointConfiguration {
         Color = 0,
@@ -59,32 +61,37 @@ public:
     void clearPointConfiguration(const int index, const PointConfiguration key);
     void clearPointsConfiguration();
     void clearPointsConfiguration(const PointConfiguration key);
-    void setPointConfiguration(const int index,
-                               const QHash<PointConfiguration, QVariant> &configuration);
+    void setPointConfiguration(
+        const int index,
+        const QHash<PointConfiguration, QVariant> &configuration);
     void setPointConfiguration(const int index, const PointConfiguration key,
                                const QVariant &value);
     void setPointsConfiguration(
-            const QHash<int, QHash<PointConfiguration, QVariant>> &pointsConfiguration);
-    QHash<PointConfiguration, QVariant> pointConfiguration(const int index) const;
+        const QHash<int, QHash<PointConfiguration, QVariant>>
+            &pointsConfiguration);
+    QHash<PointConfiguration, QVariant> pointConfiguration(
+        const int index) const;
     QHash<int, QHash<PointConfiguration, QVariant>> pointsConfiguration() const;
 
-    void sizeBy(const QVector<qreal> &sourceData, const qreal minSize, const qreal maxSize);
-    void colorBy(const QVector<qreal> &sourceData, const QLinearGradient &gradient = QLinearGradient());
+    void sizeBy(const QVector<qreal> &sourceData, const qreal minSize,
+                const qreal maxSize);
+    void colorBy(const QVector<qreal> &sourceData,
+                 const QLinearGradient &gradient = QLinearGradient());
 
-Q_SIGNALS:
-    void pointsConfigurationChanged(const QHash<int, QHash<PointConfiguration, QVariant>> &configuration);
+   Q_SIGNALS:
+    void pointsConfigurationChanged(
+        const QHash<int, QHash<PointConfiguration, QVariant>> &configuration);
 
-private:
+   private:
     Q_DECLARE_PRIVATE(QColorXYSeries)
     friend class QColorAxisPrivate;
     friend class ColorXYChart;
 };
 
-inline uint qHash(QColorXYSeries::PointConfiguration key, uint seed)
-{
+inline uint qHash(QColorXYSeries::PointConfiguration key, uint seed) {
     return ::qHash(static_cast<uint>(key), seed);
 }
 
 QT_CHARTS_END_NAMESPACE
 
-#endif // QCOLORXYSERIES_H
+#endif  // QCOLORXYSERIES_H

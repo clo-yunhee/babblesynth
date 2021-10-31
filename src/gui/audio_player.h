@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_AUDIO_PLAYER_H
 #define BABBLESYNTH_AUDIO_PLAYER_H
 
-#include <QtWidgets>
 #include <QtMultimedia>
+#include <QtWidgets>
 
 #include "app_state.h"
 #include "source_parameters.h"
@@ -31,17 +30,17 @@ namespace gui {
 
 class AudioPlayer : public QObject {
     Q_OBJECT
-    
-public:
+
+   public:
     AudioPlayer(int sampleRate = 48000, QObject *parent = nullptr);
 
     void setSampleRate(int sampleRate);
-    void play(const std::vector<double>& data);
+    void play(const std::vector<double> &data);
 
-private slots:
+   private slots:
     void onStateChanged(QAudio::State state);
 
-private:
+   private:
     QAudioDeviceInfo m_deviceInfo;
 
     int m_sampleRate;
@@ -55,7 +54,7 @@ private:
     bool m_playing;
 };
 
-}
-}
+}  // namespace gui
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_AUDIO_PLAYER_H
+#endif  // BABBLESYNTH_AUDIO_PLAYER_H

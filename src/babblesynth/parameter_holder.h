@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_PARAMETER_HOLDER_H
 #define BABBLESYNTH_PARAMETER_HOLDER_H
 
@@ -28,47 +27,36 @@
 
 namespace babblesynth {
 
-class parameter_holder
-{
-public:
+class parameter_holder {
+   public:
     static constexpr int maxNumberOfParameters = 10;
 
     const std::vector<std::string> getParameterNames() const;
 
     parameter& getParameter(int index);
     parameter& getParameter(const std::string& name);
-    
+
     const parameter& getParameter(int index) const;
     const parameter& getParameter(const std::string& name) const;
 
-    void processEvents();
-    
-protected:
-    parameter_holder(bool isQueued = false);
+   protected:
+    virtual ~parameter_holder() = default;
 
     parameter& addParameter(const parameter& param);
 
-    template<typename... Ts>
-    parameter& addParameter(Ts&&... args)
-    {
+    template <typename... Ts>
+    parameter& addParameter(Ts&&... args) {
         const parameter p = parameter(std::forward<Ts>(args)...);
         return addParameter(p);
     }
 
-    virtual void onParameterChange(const parameter& param) = 0;
+    virtual bool onParameterChange(const parameter& param) = 0;
 
-private:
-    void internalObserver(const parameter& param);
-
-    bool m_isQueued;
-
+   private:
     // Use a vector to preserve ordering.
     std::vector<parameter> m_parameters;
-
-    // Unique set of parameters that changed since the last processEvents.
-    std::set<const parameter *> m_updatedParameters;
 };
 
-} // babblesynth
+}  // namespace babblesynth
 
-#endif //BABBLESYNTH_PARAMETER_HOLDER_H
+#endif  // BABBLESYNTH_PARAMETER_HOLDER_H

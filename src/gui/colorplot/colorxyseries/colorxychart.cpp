@@ -27,61 +27,62 @@
 **
 ****************************************************************************/
 
+#include <private/abstractdomain_p.h>
+#include <private/chartdataset_p.h>
+#include <private/chartpresenter_p.h>
+#include <private/glxyseriesdata_p.h>
+#include <private/qabstractaxis_p.h>
+
+#include <QtCharts/QXYModelMapper>
+#include <QtCore/QAbstractItemModel>
+#include <QtGui/QPainter>
+
 #include "colorxychart_p.h"
 #include "qcolorxyseries.h"
 #include "qcolorxyseries_p.h"
-#include <private/chartpresenter_p.h>
-#include <private/abstractdomain_p.h>
-#include <private/chartdataset_p.h>
-#include <private/glxyseriesdata_p.h>
-#include <QtCharts/QXYModelMapper>
-#include <private/qabstractaxis_p.h>
-#include <QtGui/QPainter>
-#include <QtCore/QAbstractItemModel>
-
 
 QT_CHARTS_BEGIN_NAMESPACE
 
-ColorXYChart::ColorXYChart(QColorXYSeries *series, QGraphicsItem *item):
-      ChartItem(series->d_func(),item),
+ColorXYChart::ColorXYChart(QColorXYSeries *series, QGraphicsItem *item)
+    : ChartItem(series->d_func(), item),
       m_series(series),
       m_animation(0),
-      m_dirty(true)
-{
-    connect(series->d_func(), &QXYSeriesPrivate::updated,
-            this, &ColorXYChart::handleSeriesUpdated);
-    connect(series, &QXYSeries::pointReplaced, this, &ColorXYChart::handlePointReplaced);
-    connect(series, &QXYSeries::pointsReplaced, this, &ColorXYChart::handlePointsReplaced);
-    connect(series, &QXYSeries::pointAdded, this, &ColorXYChart::handlePointAdded);
-    connect(series, &QXYSeries::pointRemoved, this, &ColorXYChart::handlePointRemoved);
-    connect(series, &QXYSeries::pointsRemoved, this, &ColorXYChart::handlePointsRemoved);
+      m_dirty(true) {
+    connect(series->d_func(), &QXYSeriesPrivate::updated, this,
+            &ColorXYChart::handleSeriesUpdated);
+    connect(series, &QXYSeries::pointReplaced, this,
+            &ColorXYChart::handlePointReplaced);
+    connect(series, &QXYSeries::pointsReplaced, this,
+            &ColorXYChart::handlePointsReplaced);
+    connect(series, &QXYSeries::pointAdded, this,
+            &ColorXYChart::handlePointAdded);
+    connect(series, &QXYSeries::pointRemoved, this,
+            &ColorXYChart::handlePointRemoved);
+    connect(series, &QXYSeries::pointsRemoved, this,
+            &ColorXYChart::handlePointsRemoved);
     connect(this, &ColorXYChart::clicked, series, &QXYSeries::clicked);
     connect(this, &ColorXYChart::hovered, series, &QXYSeries::hovered);
     connect(this, &ColorXYChart::pressed, series, &QXYSeries::pressed);
     connect(this, &ColorXYChart::released, series, &QXYSeries::released);
-    connect(this, &ColorXYChart::doubleClicked, series, &QXYSeries::doubleClicked);
-    connect(series, &QAbstractSeries::useOpenGLChanged, this, &ColorXYChart::handleDomainUpdated);
+    connect(this, &ColorXYChart::doubleClicked, series,
+            &QXYSeries::doubleClicked);
+    connect(series, &QAbstractSeries::useOpenGLChanged, this,
+            &ColorXYChart::handleDomainUpdated);
 }
 
-void ColorXYChart::setGeometryPoints(const QVector<QPointF> &points)
-{
+void ColorXYChart::setGeometryPoints(const QVector<QPointF> &points) {
     m_points = points;
 }
 
-void ColorXYChart::setAnimation(XYAnimation *animation)
-{
+void ColorXYChart::setAnimation(XYAnimation *animation) {
     m_animation = animation;
 }
 
-void ColorXYChart::setDirty(bool dirty)
-{
-    m_dirty = dirty;
-}
+void ColorXYChart::setDirty(bool dirty) { m_dirty = dirty; }
 
 // Returns a list with same size as geometryPoints list, indicating
 // the off grid status of points.
-QVector<bool> ColorXYChart::offGridStatusVector()
-{
+QVector<bool> ColorXYChart::offGridStatusVector() {
     qreal minX = domain()->minX();
     qreal maxX = domain()->maxX();
     qreal minY = domain()->minY();
@@ -90,16 +91,14 @@ QVector<bool> ColorXYChart::offGridStatusVector()
     QVector<bool> returnVector;
     returnVector.resize(m_points.size());
     // During remove animation series may have different number of points,
-    // so ensure we don't go over the index. No need to check for zero points, this
-    // will not be called in such a situation.
+    // so ensure we don't go over the index. No need to check for zero points,
+    // this will not be called in such a situation.
     const int seriesLastIndex = m_series->count() - 1;
 
     for (int i = 0; i < m_points.size(); i++) {
         const QPointF &seriesPoint = m_series->at(qMin(seriesLastIndex, i));
-        if (seriesPoint.x() < minX
-            || seriesPoint.x() > maxX
-            || seriesPoint.y() < minY
-            || seriesPoint.y() > maxY) {
+        if (seriesPoint.x() < minX || seriesPoint.x() > maxX ||
+            seriesPoint.y() < minY || seriesPoint.y() > maxY) {
             returnVector[i] = true;
         } else {
             returnVector[i] = false;
@@ -108,10 +107,8 @@ QVector<bool> ColorXYChart::offGridStatusVector()
     return returnVector;
 }
 
-void ColorXYChart::updateChart(const QVector<QPointF> &oldPoints, const QVector<QPointF> &newPoints,
-                          int index)
-{
-
+void ColorXYChart::updateChart(const QVector<QPointF> &oldPoints,
+                               const QVector<QPointF> &newPoints, int index) {
     if (m_animation) {
         m_animation->setup(oldPoints, newPoints, index);
         m_points = newPoints;
@@ -123,24 +120,20 @@ void ColorXYChart::updateChart(const QVector<QPointF> &oldPoints, const QVector<
     }
 }
 
-void ColorXYChart::updateGlChart()
-{
+void ColorXYChart::updateGlChart() {
     dataSet()->glXYSeriesDataManager()->setPoints(m_series, domain());
     presenter()->updateGLWidget();
     updateGeometry();
 }
 
 // Doesn't update gl geometry, but refreshes the chart
-void ColorXYChart::refreshGlChart()
-{
-    if (presenter())
-        presenter()->updateGLWidget();
+void ColorXYChart::refreshGlChart() {
+    if (presenter()) presenter()->updateGLWidget();
 }
 
-//handlers
+// handlers
 
-void ColorXYChart::handlePointAdded(int index)
-{
+void ColorXYChart::handlePointAdded(int index) {
     Q_ASSERT(index < m_series->count());
     Q_ASSERT(index >= 0);
 
@@ -149,11 +142,12 @@ void ColorXYChart::handlePointAdded(int index)
     } else {
         QVector<QPointF> points;
         if (m_dirty || m_points.isEmpty()) {
-            points = domain()->calculateGeometryPoints(m_series->pointsVector());
+            points =
+                domain()->calculateGeometryPoints(m_series->pointsVector());
         } else {
             points = m_points;
-            QPointF point =
-                    domain()->calculateGeometryPoint(m_series->points().at(index), m_validData);
+            QPointF point = domain()->calculateGeometryPoint(
+                m_series->points().at(index), m_validData);
             if (!m_validData)
                 m_points.clear();
             else
@@ -163,8 +157,7 @@ void ColorXYChart::handlePointAdded(int index)
     }
 }
 
-void ColorXYChart::handlePointRemoved(int index)
-{
+void ColorXYChart::handlePointRemoved(int index) {
     Q_ASSERT(index <= m_series->count());
     Q_ASSERT(index >= 0);
 
@@ -173,7 +166,8 @@ void ColorXYChart::handlePointRemoved(int index)
     } else {
         QVector<QPointF> points;
         if (m_dirty || m_points.isEmpty()) {
-            points = domain()->calculateGeometryPoints(m_series->pointsVector());
+            points =
+                domain()->calculateGeometryPoints(m_series->pointsVector());
         } else {
             points = m_points;
             points.remove(index);
@@ -182,8 +176,7 @@ void ColorXYChart::handlePointRemoved(int index)
     }
 }
 
-void ColorXYChart::handlePointsRemoved(int index, int count)
-{
+void ColorXYChart::handlePointsRemoved(int index, int count) {
     Q_ASSERT(index <= m_series->count());
     Q_ASSERT(index >= 0);
 
@@ -192,7 +185,8 @@ void ColorXYChart::handlePointsRemoved(int index, int count)
     } else {
         QVector<QPointF> points;
         if (m_dirty || m_points.isEmpty()) {
-            points = domain()->calculateGeometryPoints(m_series->pointsVector());
+            points =
+                domain()->calculateGeometryPoints(m_series->pointsVector());
         } else {
             points = m_points;
             points.remove(index, count);
@@ -201,8 +195,7 @@ void ColorXYChart::handlePointsRemoved(int index, int count)
     }
 }
 
-void ColorXYChart::handlePointReplaced(int index)
-{
+void ColorXYChart::handlePointReplaced(int index) {
     Q_ASSERT(index < m_series->count());
     Q_ASSERT(index >= 0);
 
@@ -211,48 +204,44 @@ void ColorXYChart::handlePointReplaced(int index)
     } else {
         QVector<QPointF> points;
         if (m_dirty || m_points.isEmpty()) {
-            points = domain()->calculateGeometryPoints(m_series->pointsVector());
+            points =
+                domain()->calculateGeometryPoints(m_series->pointsVector());
         } else {
-            QPointF point =
-                    domain()->calculateGeometryPoint(m_series->points().at(index), m_validData);
-            if (!m_validData)
-                m_points.clear();
+            QPointF point = domain()->calculateGeometryPoint(
+                m_series->points().at(index), m_validData);
+            if (!m_validData) m_points.clear();
             points = m_points;
-            if (m_validData)
-                points.replace(index, point);
+            if (m_validData) points.replace(index, point);
         }
         updateChart(m_points, points, index);
     }
 }
 
-void ColorXYChart::handlePointsReplaced()
-{
+void ColorXYChart::handlePointsReplaced() {
     if (m_series->useOpenGL()) {
         updateGlChart();
     } else {
         // All the points were replaced -> recalculate
-        QVector<QPointF> points = domain()->calculateGeometryPoints(m_series->pointsVector());
+        QVector<QPointF> points =
+            domain()->calculateGeometryPoints(m_series->pointsVector());
         updateChart(m_points, points, -1);
     }
 }
 
-void ColorXYChart::handleDomainUpdated()
-{
+void ColorXYChart::handleDomainUpdated() {
     if (m_series->useOpenGL()) {
         updateGlChart();
     } else {
         if (isEmpty()) return;
-        QVector<QPointF> points = domain()->calculateGeometryPoints(m_series->pointsVector());
+        QVector<QPointF> points =
+            domain()->calculateGeometryPoints(m_series->pointsVector());
         updateChart(m_points, points);
     }
 }
 
-void ColorXYChart::handleSeriesUpdated()
-{
-}
+void ColorXYChart::handleSeriesUpdated() {}
 
-bool ColorXYChart::isEmpty()
-{
+bool ColorXYChart::isEmpty() {
     return domain()->isEmpty() || m_series->points().isEmpty();
 }
 

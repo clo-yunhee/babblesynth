@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_BABBLESYNTH_H
 #define BABBLESYNTH_BABBLESYNTH_H
 
@@ -26,7 +25,8 @@
 // Defines a custom enumeration type to allow for run-time introspection.
 #include "enumeration.h"
 
-// Defines a parameter type that holds a name, a value, and an optional value range (min/max).
+// Defines a parameter type that holds a name, a value, and an optional value
+// range (min/max).
 #include "parameter.h"
 
 // Defines a variable with special behaviour for continuous variation.
@@ -47,4 +47,4 @@
 // Defines a formant filter.
 #include "filter/formant_filter.h"
 
-#endif // BABBLESYNTH_BABBLESYNTH_H
+#endif  // BABBLESYNTH_BABBLESYNTH_H

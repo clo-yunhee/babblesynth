@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "source_plan_item.h"
-#include "clickable_label.h"
+
 #include "app_state.h"
+#include "clickable_label.h"
 
 using namespace babblesynth::gui;
 
@@ -27,17 +27,17 @@ SourcePlanItem::SourcePlanItem(int duration,
                                variable_plan::transition pitchTransition,
                                double targetPitch,
                                variable_plan::transition amplitudeTransition,
-                               double targetAmplitude,
-                               QWidget *parent)
+                               double targetAmplitude, QWidget *parent)
     : QFrame(parent),
       m_duration(duration / 1000.0),
       m_pitchTransition(pitchTransition),
       m_targetPitch(targetPitch),
       m_amplitudeTransition(amplitudeTransition),
-      m_targetAmplitude(targetAmplitude)
-{
+      m_targetAmplitude(targetAmplitude) {
     setObjectName("SourcePlanItem");
-    setStyleSheet("QFrame#SourcePlanItem { border-style: solid; border-width: 2px; border-radius: 7px; }");
+    setStyleSheet(
+        "QFrame#SourcePlanItem { border-style: solid; border-width: 2px; "
+        "border-radius: 7px; }");
 
     QSpinBox *durationInput = new QSpinBox(this);
     durationInput->setRange(10, 5000);
@@ -88,44 +88,51 @@ SourcePlanItem::SourcePlanItem(int duration,
     layout->setAlignment(removeButton, Qt::AlignRight);
     setLayout(layout);
 
-    QObject::connect(durationInput, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
-        m_duration = value / 1000.0;
-        emit updated();
-    });
+    QObject::connect(durationInput, qOverload<int>(&QSpinBox::valueChanged),
+                     this, [this](int value) {
+                         m_duration = value / 1000.0;
+                         emit updated();
+                     });
 
-    QObject::connect(pitch, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
-        m_targetPitch = value;
-        emit updated();
-    });
+    QObject::connect(pitch, qOverload<int>(&QSpinBox::valueChanged), this,
+                     [this](int value) {
+                         m_targetPitch = value;
+                         emit updated();
+                     });
 
-    QObject::connect(pitchType, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int value) {
-        m_pitchTransition = variable_plan::transition(value);
-        emit updated();
-    });
+    QObject::connect(pitchType, qOverload<int>(&QComboBox::currentIndexChanged),
+                     this, [this](int value) {
+                         m_pitchTransition = variable_plan::transition(value);
+                         emit updated();
+                     });
 
-    QObject::connect(amplitude, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
-        m_targetAmplitude = value / 100.0;
-        emit updated();
-    });
+    QObject::connect(amplitude, qOverload<int>(&QSpinBox::valueChanged), this,
+                     [this](int value) {
+                         m_targetAmplitude = value / 100.0;
+                         emit updated();
+                     });
 
-    QObject::connect(amplitudeType, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int value) {
-        m_amplitudeTransition = variable_plan::transition(value);
-        emit updated();
-    });
+    QObject::connect(
+        amplitudeType, qOverload<int>(&QComboBox::currentIndexChanged), this,
+        [this](int value) {
+            m_amplitudeTransition = variable_plan::transition(value);
+            emit updated();
+        });
 
-    QObject::connect(removeButton, &QToolButton::pressed, this, [this]() {
-        emit requestRemove(this);
-    });
+    QObject::connect(removeButton, &QToolButton::pressed, this,
+                     [this]() { emit requestRemove(this); });
 }
 
-SourcePlanItem::SourcePlanItem(double initialPitch, double initialAmplitude, QWidget *parent)
+SourcePlanItem::SourcePlanItem(double initialPitch, double initialAmplitude,
+                               QWidget *parent)
     : QFrame(parent),
       m_duration(0),
       m_targetPitch(initialPitch),
-      m_targetAmplitude(initialAmplitude)
-{
+      m_targetAmplitude(initialAmplitude) {
     setObjectName("SourcePlanItem");
-    setStyleSheet("QFrame#SourcePlanItem { border-style: solid; border-width: 2px; border-radius: 7px; }");
+    setStyleSheet(
+        "QFrame#SourcePlanItem { border-style: solid; border-width: 2px; "
+        "border-radius: 7px; }");
 
     QSpinBox *pitch = new QSpinBox(this);
     pitch->setRange(20, 800);
@@ -141,58 +148,55 @@ SourcePlanItem::SourcePlanItem(double initialPitch, double initialAmplitude, QWi
     layout->addRow(utf8("f₀"), pitch);
     layout->addRow(utf8("Aᵥ"), amplitude);
     setLayout(layout);
-    
-    QObject::connect(pitch, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
-        m_targetPitch = value;
-        emit updated();
-    });
-    
-    QObject::connect(amplitude, qOverload<int>(&QSpinBox::valueChanged), this, [this](int value) {
-        m_targetAmplitude = value / 100.0;
-        emit updated();
-    });
+
+    QObject::connect(pitch, qOverload<int>(&QSpinBox::valueChanged), this,
+                     [this](int value) {
+                         m_targetPitch = value;
+                         emit updated();
+                     });
+
+    QObject::connect(amplitude, qOverload<int>(&QSpinBox::valueChanged), this,
+                     [this](int value) {
+                         m_targetAmplitude = value / 100.0;
+                         emit updated();
+                     });
 }
 
-void SourcePlanItem::updatePlans()
-{
+void SourcePlanItem::updatePlans() {
     const double targetTime = appState->pitchPlan()->duration() + m_duration;
 
     switch (m_pitchTransition) {
-    case variable_plan::TransitionStep:
-        appState->pitchPlan()->stepToValueAtTime(m_targetPitch, targetTime);
-        break;
-    case variable_plan::TransitionLinear:
-        appState->pitchPlan()->linearToValueAtTime(m_targetPitch, targetTime);
-        break;
-    case variable_plan::TransitionCubic:
-        appState->pitchPlan()->cubicToValueAtTime(m_targetPitch, targetTime);
-        break;
+        case variable_plan::TransitionStep:
+            appState->pitchPlan()->stepToValueAtTime(m_targetPitch, targetTime);
+            break;
+        case variable_plan::TransitionLinear:
+            appState->pitchPlan()->linearToValueAtTime(m_targetPitch,
+                                                       targetTime);
+            break;
+        case variable_plan::TransitionCubic:
+            appState->pitchPlan()->cubicToValueAtTime(m_targetPitch,
+                                                      targetTime);
+            break;
     }
 
     switch (m_amplitudeTransition) {
-    case variable_plan::TransitionStep:
-        appState->amplitudePlan()->stepToValueAtTime(m_targetAmplitude, targetTime);
-        break;
-    case variable_plan::TransitionLinear:
-        appState->amplitudePlan()->linearToValueAtTime(m_targetAmplitude, targetTime);
-        break;
-    case variable_plan::TransitionCubic:
-        appState->amplitudePlan()->cubicToValueAtTime(m_targetAmplitude, targetTime);
-        break;
+        case variable_plan::TransitionStep:
+            appState->amplitudePlan()->stepToValueAtTime(m_targetAmplitude,
+                                                         targetTime);
+            break;
+        case variable_plan::TransitionLinear:
+            appState->amplitudePlan()->linearToValueAtTime(m_targetAmplitude,
+                                                           targetTime);
+            break;
+        case variable_plan::TransitionCubic:
+            appState->amplitudePlan()->cubicToValueAtTime(m_targetAmplitude,
+                                                          targetTime);
+            break;
     }
 }
 
-double SourcePlanItem::duration() const
-{
-    return m_duration;
-}
+double SourcePlanItem::duration() const { return m_duration; }
 
-double SourcePlanItem::pitch() const
-{
-    return m_targetPitch;
-}
+double SourcePlanItem::pitch() const { return m_targetPitch; }
 
-double SourcePlanItem::amplitude() const
-{
-    return m_targetAmplitude; 
-}
+double SourcePlanItem::amplitude() const { return m_targetAmplitude; }

@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_CHART_VIEW_H
 #define BABBLESYNTH_CHART_VIEW_H
 
-#include <QtWidgets>
-#include <QtCharts>
-#include <optional>
 #include <babblesynth.h>
+
+#include <QtCharts>
+#include <QtWidgets>
+#include <optional>
 
 #include "colorplot/colorplot.h"
 
@@ -33,30 +33,32 @@ namespace gui {
 class ChartView : public QChartView {
     Q_OBJECT
 
-public:
-    ChartView(QChart *chart, QWidget *parent = nullptr);
+   public:
+    ChartView(QChart* chart, QWidget* parent = nullptr);
 
     QPointF pointFromPos(const QPointF& pos) const;
     QPointF posFromPoint(const QPointF& point) const;
-    
-signals:
+
+   signals:
     void mouseHovered(const QString& series, const QPointF& point, int index);
     void mouseLeft(const QString& series);
 
-    void mouseDoubleClicked(const QString& series, const QPointF& point, int index);
-    void mouseRightClicked(const QString& series, const QPointF& point, int index);
+    void mouseDoubleClicked(const QString& series, const QPointF& point,
+                            int index);
+    void mouseRightClicked(const QString& series, const QPointF& point,
+                           int index);
 
     void mousePressed(const QString& series, const QPointF& point, int index);
     void mouseReleased(const QString& series);
     void mouseDragging(const QString& series, const QPointF& point);
 
-protected:
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseDoubleClickEvent(QMouseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
+   protected:
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 
-private:
+   private:
     bool checkThrottle();
 
     QHash<QString, QVariant> findMatchingPoints(const QPointF& mousePos) const;
@@ -67,7 +69,7 @@ private:
     QElapsedTimer m_eventThrottle;
 };
 
-}
-}
+}  // namespace gui
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_CHART_VIEW_H
+#endif  // BABBLESYNTH_CHART_VIEW_H

@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef BABBLESYNTH_VARIABLE_H
 #define BABBLESYNTH_VARIABLE_H
 
@@ -25,23 +24,24 @@
 namespace babblesynth {
 
 class variable {
-public:
+   public:
     explicit variable(bool isTrulyContinuous = true);
 
     void setPlan(const variable_plan& plan);
 
-    void update(double time); // used in the ^isTrulyContinuous case to update the value
+    void update(double time);  // used in the ^isTrulyContinuous case to update
+                               // the value
 
     double evaluateAtTime(double time) const;
 
     double maxTime() const;
 
-private:
+   private:
     bool m_isTrulyContinuous;
-    double m_actualValue; // only used in the ^isTrulyContinuous case
+    double m_actualValue;  // only used in the ^isTrulyContinuous case
     variable_plan m_plan;
 };
 
-} // babblesynth
+}  // namespace babblesynth
 
-#endif // BABBLESYNTH_VARIABLE_H
+#endif  // BABBLESYNTH_VARIABLE_H

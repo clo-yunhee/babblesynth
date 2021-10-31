@@ -36,16 +36,17 @@ QT_CHARTS_BEGIN_NAMESPACE
 
 class QColorAxisPrivate;
 
-class QColorAxis : public QAbstractAxis
-{
+class QColorAxis : public QAbstractAxis {
     Q_OBJECT
-    Q_PROPERTY(int tickCount READ tickCount WRITE setTickCount NOTIFY tickCountChanged)
+    Q_PROPERTY(
+        int tickCount READ tickCount WRITE setTickCount NOTIFY tickCountChanged)
     Q_PROPERTY(qreal min READ min WRITE setMin NOTIFY minChanged)
     Q_PROPERTY(qreal max READ max WRITE setMax NOTIFY maxChanged)
     Q_PROPERTY(qreal size READ size WRITE setSize NOTIFY sizeChanged)
-    Q_PROPERTY(bool autoRange READ autoRange WRITE setAutoRange NOTIFY autoRangeChanged)
+    Q_PROPERTY(bool autoRange READ autoRange WRITE setAutoRange NOTIFY
+                   autoRangeChanged)
 
-public:
+   public:
     static constexpr AxisType AxisTypeColor = AxisType(0x20);
 
     explicit QColorAxis(QObject *parent = nullptr);
@@ -71,7 +72,7 @@ public:
     void setAutoRange(bool autoRange);
     bool autoRange() const;
 
-Q_SIGNALS:
+   Q_SIGNALS:
     void minChanged(qreal min);
     void maxChanged(qreal max);
     void rangeChanged(qreal min, qreal max);
@@ -80,14 +81,14 @@ Q_SIGNALS:
     void sizeChanged(const qreal size);
     void autoRangeChanged(bool autoRange);
 
-protected:
+   protected:
     explicit QColorAxis(QColorAxisPrivate &d, QObject *parent = nullptr);
 
-private:
+   private:
     Q_DECLARE_PRIVATE(QColorAxis)
     Q_DISABLE_COPY(QColorAxis)
 };
 
 QT_CHARTS_END_NAMESPACE
 
-#endif // QCOLORAXIS_H
+#endif  // QCOLORAXIS_H

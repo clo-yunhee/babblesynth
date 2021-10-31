@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "variable_plan.h"
 
+#include <numeric>
 #include <stdexcept>
 
-#include "variable_plan.h"
 #include "spline.h"
 
 using namespace babblesynth;
@@ -29,8 +30,7 @@ variable_plan::variable_plan(bool piecewiseMonotonic, double initialValue)
       m_times({0.0}),
       m_values({initialValue}),
       m_transitions({TransitionLinear, TransitionLinear}),
-      m_spline(nullptr)
-{
+      m_spline(nullptr) {
     updateSpline();
 }
 
@@ -39,22 +39,19 @@ variable_plan::variable_plan(const variable_plan& orig)
       m_times(orig.m_times),
       m_values(orig.m_values),
       m_transitions(orig.m_transitions),
-      m_spline(nullptr)
-{    
+      m_spline(nullptr) {
     updateSpline();
 }
 
-variable_plan::~variable_plan()
-{
+variable_plan::~variable_plan() {
     if (m_spline != nullptr) {
-        delete (tk::spline *) m_spline;
+        delete (tk::spline*)m_spline;
     }
 }
 
-variable_plan& variable_plan::operator=(const variable_plan& orig)
-{
+variable_plan& variable_plan::operator=(const variable_plan& orig) {
     if (m_spline != nullptr) {
-        delete (tk::spline *) m_spline;
+        delete (tk::spline*)m_spline;
         m_spline = nullptr;
     }
 
@@ -66,26 +63,22 @@ variable_plan& variable_plan::operator=(const variable_plan& orig)
     return *this;
 }
 
-variable_plan& variable_plan::stepToValueAtTime(double value, double time)
-{
+variable_plan& variable_plan::stepToValueAtTime(double value, double time) {
     addPoint(time, value, TransitionStep);
     return *this;
 }
 
-variable_plan& variable_plan::linearToValueAtTime(double value, double time)
-{
+variable_plan& variable_plan::linearToValueAtTime(double value, double time) {
     addPoint(time, value, TransitionLinear);
     return *this;
 }
 
-variable_plan& variable_plan::cubicToValueAtTime(double value, double time)
-{
+variable_plan& variable_plan::cubicToValueAtTime(double value, double time) {
     addPoint(time, value, TransitionCubic);
     return *this;
 }
 
-variable_plan& variable_plan::reset(double initialValue)
-{
+variable_plan& variable_plan::reset(double initialValue) {
     m_times.clear();
     m_values.clear();
     m_transitions.clear();
@@ -95,8 +88,7 @@ variable_plan& variable_plan::reset(double initialValue)
     return *this;
 }
 
-double variable_plan::evaluateAtTime(double time) const
-{
+double variable_plan::evaluateAtTime(double time) const {
     int leftIndex = 0;
     while (m_times[leftIndex] < time) {
         ++leftIndex;
@@ -105,58 +97,52 @@ double variable_plan::evaluateAtTime(double time) const
 
     if (leftIndex < 0) {
         return m_values.front();
-    }
-    else if (leftIndex >= m_values.size() - 1) {
+    } else if (leftIndex >= m_values.size() - 1) {
         return m_values.back();
     }
 
     switch (m_transitions[leftIndex]) {
-    case TransitionStep:
-        return interpolateStep(leftIndex, time);
-    case TransitionLinear:
-        return interpolateLinear(leftIndex, time);
-    case TransitionCubic:
-        return interpolateCubic(leftIndex, time);
-    default:
-        throw std::invalid_argument("unknown transition type for variable plan");
+        case TransitionStep:
+            return interpolateStep(leftIndex, time);
+        case TransitionLinear:
+            return interpolateLinear(leftIndex, time);
+        case TransitionCubic:
+            return interpolateCubic(leftIndex, time);
+        default:
+            throw std::invalid_argument(
+                "unknown transition type for variable plan");
     }
 }
 
-double variable_plan::duration() const
-{
-    return m_times.back();
-}
+double variable_plan::duration() const { return m_times.back(); }
 
-void variable_plan::addPoint(double time, double value, transition trans)
-{
+void variable_plan::addPoint(double time, double value, transition trans) {
     m_times.push_back(time);
     m_values.push_back(value);
     m_transitions.push_back(trans);
     updateSpline();
 }
 
-void variable_plan::updateSpline()
-{
+void variable_plan::updateSpline() {
     if (m_spline != nullptr) {
-        delete (tk::spline *) m_spline;
+        delete (tk::spline*)m_spline;
     }
- 
+
     if (m_times.size() >= 3) {
-        m_spline = new tk::spline(m_times, m_values, tk::spline::cspline_hermite, m_isPiecewiseMonotonic,
-                                  tk::spline::first_deriv, 0.0, tk::spline::first_deriv, 0.0);
-    }
-    else {   
+        m_spline =
+            new tk::spline(m_times, m_values, tk::spline::cspline_hermite,
+                           m_isPiecewiseMonotonic, tk::spline::first_deriv, 0.0,
+                           tk::spline::first_deriv, 0.0);
+    } else {
         m_spline = nullptr;
     }
 }
 
-double variable_plan::interpolateStep(int index, double time) const
-{
+double variable_plan::interpolateStep(int index, double time) const {
     return m_values[index + 1];
 }
 
-double variable_plan::interpolateLinear(int index, double time) const
-{
+double variable_plan::interpolateLinear(int index, double time) const {
     const double T0 = m_times[index];
     const double V0 = m_values[index];
 
@@ -166,12 +152,10 @@ double variable_plan::interpolateLinear(int index, double time) const
     return V0 + (V1 - V0) * (time - T0) / (T1 - T0);
 }
 
-double variable_plan::interpolateCubic(int index, double time) const
-{
+double variable_plan::interpolateCubic(int index, double time) const {
     if (m_spline != nullptr) {
-        return (*(tk::spline *) m_spline)(time);
-    }
-    else {
+        return (*(tk::spline*)m_spline)(time);
+    } else {
         return interpolateLinear(index, time);
     }
 }

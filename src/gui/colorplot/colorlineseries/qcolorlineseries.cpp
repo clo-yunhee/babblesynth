@@ -28,11 +28,13 @@
 ****************************************************************************/
 
 #include "qcolorlineseries.h"
-#include "qcolorlineseries_p.h"
-#include "colorlinechartitem_p.h"
+
 #include <private/chartdataset_p.h>
 #include <private/charttheme_p.h>
 #include <private/qchart_p.h>
+
+#include "colorlinechartitem_p.h"
+#include "qcolorlineseries_p.h"
 
 QT_CHARTS_BEGIN_NAMESPACE
 
@@ -88,58 +90,50 @@ QT_CHARTS_BEGIN_NAMESPACE
 /*!
     \qmlproperty Qt::PenStyle LineSeries::style
     Controls the style of the line. Set to one of \l{Qt::NoPen}{Qt.NoPen},
-    \l{Qt::SolidLine}{Qt.SolidLine}, \l{Qt::DashLine}{Qt.DashLine}, \l{Qt::DotLine}{Qt.DotLine},
-    \l{Qt::DashDotLine}{Qt.DashDotLine}, or \l{Qt::DashDotDotLine}{Qt.DashDotDotLine}.
-    Using \l{Qt::CustomDashLine}{Qt.CustomDashLine} is not supported in the QML API.
-    By default, the style is Qt.SolidLine.
+    \l{Qt::SolidLine}{Qt.SolidLine}, \l{Qt::DashLine}{Qt.DashLine},
+   \l{Qt::DotLine}{Qt.DotLine}, \l{Qt::DashDotLine}{Qt.DashDotLine}, or
+   \l{Qt::DashDotDotLine}{Qt.DashDotDotLine}. Using
+   \l{Qt::CustomDashLine}{Qt.CustomDashLine} is not supported in the QML API. By
+   default, the style is Qt.SolidLine.
 
     \sa Qt::PenStyle
 */
 
 /*!
     \qmlproperty Qt::PenCapStyle LineSeries::capStyle
-    Controls the cap style of the line. Set to one of \l{Qt::FlatCap}{Qt.FlatCap},
-    \l{Qt::SquareCap}{Qt.SquareCap} or \l{Qt::RoundCap}{Qt.RoundCap}. By
-    default the cap style is Qt.SquareCap.
+    Controls the cap style of the line. Set to one of
+   \l{Qt::FlatCap}{Qt.FlatCap}, \l{Qt::SquareCap}{Qt.SquareCap} or
+   \l{Qt::RoundCap}{Qt.RoundCap}. By default the cap style is Qt.SquareCap.
 
     \sa Qt::PenCapStyle
 */
 
 /*!
     Constructs an empty series object that is a child of \a parent.
-    When the series object is added to a QChartView or QChart instance, the ownership
-    is transferred.
+    When the series object is added to a QChartView or QChart instance, the
+   ownership is transferred.
 */
 QColorLineSeries::QColorLineSeries(QObject *parent)
-    : QColorXYSeries(*new QColorLineSeriesPrivate(this), parent)
-{
-
-}
+    : QColorXYSeries(*new QColorLineSeriesPrivate(this), parent) {}
 
 /*!
     \internal
 */
 QColorLineSeries::QColorLineSeries(QColorLineSeriesPrivate &d, QObject *parent)
-    : QColorXYSeries(d, parent)
-{
-
-}
+    : QColorXYSeries(d, parent) {}
 /*!
-    Destroys the object. Series added to QChartView or QChart instances are owned by the
-    instances and deleted when the instances are destroyed.
+    Destroys the object. Series added to QChartView or QChart instances are
+   owned by the instances and deleted when the instances are destroyed.
 */
-QColorLineSeries::~QColorLineSeries()
-{
+QColorLineSeries::~QColorLineSeries() {
     Q_D(QColorLineSeries);
-    if (d->m_chart)
-        d->m_chart->removeSeries(this);
+    if (d->m_chart) d->m_chart->removeSeries(this);
 }
 
 /*!
     \reimp
 */
-QAbstractSeries::SeriesType QColorLineSeries::type() const
-{
+QAbstractSeries::SeriesType QColorLineSeries::type() const {
     return QColorXYSeries::SeriesTypeColorLine;
 }
 
@@ -149,7 +143,8 @@ QDebug operator<< (QDebug debug, const QColorLineSeries series)
     Q_ASSERT(series.d_func()->m_x.size() == series.d_func()->m_y.size());
     int size = series.d_func()->m_x.size();
     for (int i=0; i<size; i++) {
-        debug.nospace() << "(" << series.d_func()->m_x.at(i) << ','<< series.d_func()->m_y.at(i) << ") ";
+        debug.nospace() << "(" << series.d_func()->m_x.at(i) << ','<<
+series.d_func()->m_y.at(i) << ") ";
     }
     return debug.space();
 }
@@ -158,21 +153,17 @@ QDebug operator<< (QDebug debug, const QColorLineSeries series)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 QColorLineSeriesPrivate::QColorLineSeriesPrivate(QColorLineSeries *q)
-    : QColorXYSeriesPrivate(q)
-{
+    : QColorXYSeriesPrivate(q) {}
 
-}
-
-void QColorLineSeriesPrivate::initializeGraphics(QGraphicsItem *parent)
-{
+void QColorLineSeriesPrivate::initializeGraphics(QGraphicsItem *parent) {
     Q_Q(QColorLineSeries);
-    ColorLineChartItem *line = new ColorLineChartItem(q,parent);
+    ColorLineChartItem *line = new ColorLineChartItem(q, parent);
     m_item.reset(line);
     QAbstractSeriesPrivate::initializeGraphics(parent);
 }
 
-void QColorLineSeriesPrivate::initializeTheme(int index, ChartTheme* theme, bool forced)
-{
+void QColorLineSeriesPrivate::initializeTheme(int index, ChartTheme *theme,
+                                              bool forced) {
     Q_Q(QColorLineSeries);
     const QList<QColor> colors = theme->seriesColors();
 

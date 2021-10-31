@@ -16,150 +16,86 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "source_plan.h"
-#include "clickable_label.h"
+
 #include "app_state.h"
+#include "clickable_label.h"
 
 using namespace babblesynth::gui;
 
-SourcePlan::SourcePlan(QWidget *parent)
-    : QWidget(parent)
-{
+SourcePlan::SourcePlan(QWidget* parent)
+    : QWidget(parent), m_isDragging(false), m_isDraggingSegment(false) {
     setObjectName("SourcePlan");
-    //setMinimumSize(QSize(1024, 768));
-
-    QToolButton *addButton = new QToolButton(this);
-    addButton->setIcon(QIcon(":/icons/plus.png"));
-
-    QObject::connect(addButton, &QToolButton::pressed, this, &SourcePlan::newPlanItem);
-
-    m_pitchGraph = new QColorLineSeries(this);
-    m_pitchGraph->setColor(Qt::transparent);
-    m_pitchGraph->setPointsVisible(true);
+    // setMinimumSize(QSize(1024, 768));
 
     m_timeAxis = new QValueAxis(this);
     m_timeAxis->setRange(0, 1);
 
-    QValueAxis *valueAxis = new QValueAxis(this);
-    valueAxis->setRange(0, 500);
-    valueAxis->setTickInterval(100);
-    valueAxis->setTickType(QValueAxis::TicksDynamic);
+    m_valueAxis = new QValueAxis(this);
+    m_valueAxis->setRange(0, 500);
+    m_valueAxis->setTickInterval(100);
+    m_valueAxis->setTickType(QValueAxis::TicksDynamic);
 
-    QChart *chart = new QChart;
+    QChart* chart = new QChart;
     chart->legend()->hide();
-    chart->addSeries(m_pitchGraph);
     chart->addAxis(m_timeAxis, Qt::AlignBottom);
-    chart->addAxis(valueAxis, Qt::AlignLeft);
+    chart->addAxis(m_valueAxis, Qt::AlignLeft);
     chart->setTitle(tr("Pitch and amplitude"));
     chart->setTheme(QChart::ChartThemeBlueIcy);
-    
-    m_pitchGraph->attachAxis(m_timeAxis);
-    m_pitchGraph->attachAxis(valueAxis);
 
-    m_chartView = new QChartView(chart, this);
+    m_pitchGraph = new QColorLineSeries(this);
+    m_pitchGraph->setName("graph");
+    m_pitchGraph->setPen(QPen(Qt::transparent, 12));
+    m_pitchGraph->setPointsVisible(true);
+    chart->addSeries(m_pitchGraph);
+    m_pitchGraph->attachAxis(m_timeAxis);
+    m_pitchGraph->attachAxis(m_valueAxis);
+
+    m_pointGraph = new QColorLineSeries(this);
+    m_pointGraph->setName("points");
+    m_pointGraph->setPen(QPen(Qt::transparent, 12));
+    m_pointGraph->setPointsVisible(true);
+    chart->addSeries(m_pointGraph);
+    m_pointGraph->attachAxis(m_timeAxis);
+    m_pointGraph->attachAxis(m_valueAxis);
+
+    m_chartView = new ChartView(chart, this);
     m_chartView->setRenderHint(QPainter::Antialiasing);
 
-    QScrollArea *scrollArea = new QScrollArea(this);
-    scrollArea->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    scrollArea->setWidgetResizable(true);
-    scrollArea->setSizeAdjustPolicy(QScrollArea::AdjustToContentsOnFirstShow);
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    QObject::connect(m_chartView, &ChartView::mouseHovered, this,
+                     &SourcePlan::onSeriesHovered);
+    QObject::connect(m_chartView, &ChartView::mouseLeft, this,
+                     &SourcePlan::onSeriesLeft);
+    QObject::connect(m_chartView, &ChartView::mouseDoubleClicked, this,
+                     &SourcePlan::onSeriesDoubleClicked);
+    QObject::connect(m_chartView, &ChartView::mouseRightClicked, this,
+                     &SourcePlan::onSeriesRightClicked);
+    QObject::connect(m_chartView, &ChartView::mousePressed, this,
+                     &SourcePlan::onSeriesPressed);
+    QObject::connect(m_chartView, &ChartView::mouseReleased, this,
+                     &SourcePlan::onSeriesReleased);
+    QObject::connect(m_chartView, &ChartView::mouseDragging, this,
+                     &SourcePlan::onSeriesDragging);
 
-    QWidget *segmentsWidget = new QWidget;
-    m_segments = new QVBoxLayout;
-    m_segments->addStretch();
-    segmentsWidget->setLayout(m_segments);
-    scrollArea->setWidget(segmentsWidget);
-
-    QVBoxLayout *leftLayout = new QVBoxLayout;
-    leftLayout->addWidget(addButton, 0, Qt::AlignHCenter);
-    leftLayout->addWidget(scrollArea, 1);
-    
-    QHBoxLayout *rootLayout = new QHBoxLayout;
-    rootLayout->addLayout(leftLayout);
-    rootLayout->addWidget(m_chartView, 1);
+    QVBoxLayout* rootLayout = new QVBoxLayout;
+    rootLayout->addWidget(m_chartView);
     setLayout(rootLayout);
 
-    initialPlanItem();
-    newPlanItem();
-}
+    m_pitch.append(QPointF(0.0, 210));
+    m_amplitude.append(QPointF(0.0, 1.0));
 
-void SourcePlan::initialPlanItem()
-{
-    m_initialPlanItem = new SourcePlanItem(220, 1, this);
-
-    QObject::connect(m_initialPlanItem, &SourcePlanItem::updated, this, &SourcePlan::updatePlans);
-
-    m_segments->insertWidget(0, m_initialPlanItem);
+    m_pitch.append(QPointF(2.0, 220));
+    m_amplitude.append(QPointF(2.0, 1.0));
 
     updatePlans();
 }
 
-void SourcePlan::newPlanItem()
-{
-    double duration;
-    double pitch;
-    double amplitude;
-
-    if (m_planItems.empty()) {
-        duration = 2000;
-        pitch = 220;
-        amplitude = 0.8;
-    }
-    else {
-        duration = 400;
-        pitch = m_planItems.back()->pitch();
-        amplitude = m_planItems.back()->amplitude();
-    }
-
-    SourcePlanItem *item = new SourcePlanItem(duration,
-                                              variable_plan::TransitionCubic, pitch,
-                                              variable_plan::TransitionCubic, amplitude,
-                                              this);
-
-    QObject::connect(item, &SourcePlanItem::updated, this, &SourcePlan::updatePlans);
-    QObject::connect(item, &SourcePlanItem::requestRemove, this, &SourcePlan::removePlanItem);
-
-    m_segments->insertWidget(m_segments->count() - 1, item);
-    m_planItems.append(item);
-
-    updatePlans();
-}
-
-void SourcePlan::removePlanItem(SourcePlanItem *item)
-{
-    m_segments->removeWidget(item);
-    m_planItems.removeAll(item);
-    item->deleteLater();
-
-    updatePlans();
-}
-
-void SourcePlan::updatePlans()
-{
-    appState->pitchPlan()->reset(m_initialPlanItem->pitch());
-    appState->amplitudePlan()->reset(m_initialPlanItem->amplitude());
-
-    for (SourcePlanItem *item : m_planItems) {
-        item->updatePlans();
-    }
-
-    appState->updatePlans();
-
-    redrawGraph();
-
-    emit updated();
-}
-
-void SourcePlan::redrawGraph()
-{
+void SourcePlan::redrawGraph() {
     const double duration = appState->pitchPlan()->duration();
 
     m_timeAxis->setRange(0, duration);
-    
-    constexpr int nPoints = 600;
+
+    constexpr int nPoints = 400;
 
     QVector<QPointF> pitch(nPoints);
     QVector<qreal> amplitude(nPoints + 2);
@@ -175,7 +111,7 @@ void SourcePlan::redrawGraph()
 
     amplitude[nPoints] = 0;
     amplitude[nPoints + 1] = 1;
-    
+
     m_pitchGraph->replace(pitch);
 
     QLinearGradient gradient(QPointF(50, 0), QPointF(50, 100));
@@ -186,17 +122,360 @@ void SourcePlan::redrawGraph()
     m_pitchGraph->colorBy(amplitude, gradient);
     m_pitchGraph->sizeBy(amplitude, 0, 5);
 
-    double t = 0;
+    m_pitchGraph->replace(pitch);
 
-    m_pitchGraph->setPointConfiguration(0, QColorXYSeries::PointConfiguration::Size, 8);
+    for (int i = 0; i < nPoints; ++i) {
+        setGraphPointStyle(i, Normal);
+    }
 
-    for (const auto& item : m_planItems) {
-        t += item->duration();
+    m_pointGraph->replace(m_pitch);
 
-        const int index = std::round((nPoints - 1) * t / duration);
-        
-        m_pitchGraph->setPointConfiguration(index, QColorXYSeries::PointConfiguration::Size, 8);
+    for (int i = 0; i < m_pitch.size(); ++i) {
+        setPointStyle(i, Normal);
     }
 
     m_chartView->update();
+}
+
+void SourcePlan::updatePlans() {
+    appState->pitchPlan()->reset(m_pitch[0].y());
+    appState->amplitudePlan()->reset(m_amplitude[0].y());
+
+    for (int i = 1; i < m_pitch.size(); ++i) {
+        appState->pitchPlan()->cubicToValueAtTime(m_pitch[i].y(),
+                                                  m_pitch[i].x());
+        appState->amplitudePlan()->cubicToValueAtTime(m_amplitude[i].y(),
+                                                      m_amplitude[i].x());
+    }
+
+    appState->updatePlans();
+
+    redrawGraph();
+
+    emit updated();
+}
+
+void SourcePlan::onSeriesHovered(const QString& series, const QPointF& point,
+                                 int index) {
+    const int nGraphPoints = m_pitchGraph->count();
+
+    for (int i = 0; i < nGraphPoints; ++i) {
+        setGraphPointStyle(i, Hover);
+    }
+
+    const int nPoints = m_pitch.size();
+
+    for (int i = 0; i < nPoints; ++i) {
+        setPointStyle(i, Hover);
+    }
+
+    if (!m_isDragging) {
+        int leftPointIndex = 0;
+        while (leftPointIndex < nPoints &&
+               point.x() >= m_pitch[leftPointIndex].x()) {
+            ++leftPointIndex;
+        }
+
+        int rightPointIndex = nPoints - 1;
+        while (rightPointIndex >= 0 &&
+               point.x() <= m_pitch[rightPointIndex].x()) {
+            --rightPointIndex;
+        }
+
+        if (leftPointIndex > 0) --leftPointIndex;
+        if (rightPointIndex < nPoints - 1) ++rightPointIndex;
+
+        if (leftPointIndex < nPoints && rightPointIndex >= 0) {
+            if (leftPointIndex <
+                rightPointIndex) {  // Strictly increasing interval: hovering a
+                                    // segment
+                auto leftPos =
+                    m_chartView->posFromPoint(m_pitch[leftPointIndex]);
+                leftPos -= m_chartView->posFromPoint(point);
+                if (QPointF::dotProduct(leftPos, leftPos) <= 10 * 10) {
+                    return;
+                }
+
+                auto rightPos =
+                    m_chartView->posFromPoint(m_pitch[rightPointIndex]);
+                rightPos -= m_chartView->posFromPoint(point);
+                if (QPointF::dotProduct(rightPos, rightPos) <= 10 * 10) {
+                    return;
+                }
+
+                setGraphStyleBetweenPoints(leftPointIndex, rightPointIndex,
+                                           HoverSegment);
+            } else if (leftPointIndex ==
+                       rightPointIndex) {  // Same index: hovering a point
+                // Nothing.
+            }
+        }
+    }
+
+    m_chartView->update();
+}
+
+void SourcePlan::onSeriesLeft(const QString& series) {
+    if (series != "graph") return;
+
+    const int nGraphPoints = m_pitchGraph->count();
+
+    for (int i = 0; i < nGraphPoints; ++i) {
+        setGraphPointStyle(i, Normal);
+    }
+
+    const int nPoints = m_pitch.size();
+
+    for (int i = 0; i < nPoints; ++i) {
+        setPointStyle(i, Normal);
+    }
+}
+
+void SourcePlan::onSeriesDoubleClicked(const QString& series,
+                                       const QPointF& point, int index) {
+    if (series != "graph") return;
+
+    m_pitch.append(point);
+    m_amplitude.append(QPointF(point.x(), 0.0));
+
+    std::sort(m_pitch.begin(), m_pitch.end(),
+              [](auto a, auto b) { return a.x() < b.x(); });
+    std::sort(m_amplitude.begin(), m_amplitude.end(),
+              [](auto a, auto b) { return a.x() < b.x(); });
+
+    updatePlans();
+}
+
+void SourcePlan ::onSeriesRightClicked(const QString& series,
+                                       const QPointF& point, int index) {
+    if (series != "points") return;
+
+    m_pitch.removeAt(index);
+    m_amplitude.removeAt(index);
+
+    updatePlans();
+}
+
+void SourcePlan::onSeriesPressed(const QString& series, const QPointF& point,
+                                 int index) {
+    if (!m_isDragging) {
+        if (series == "points") {
+            setPointStyle(index, Drag);
+
+            m_isDragging = true;
+            m_isDraggingSegment = false;
+            m_firstPointIndexBeingDragged = index;
+        } else if (series == "graph") {
+            const int nPoints = m_pitch.size();
+
+            int leftPointIndex = 0;
+            while (leftPointIndex < nPoints &&
+                   point.x() >= m_pitch[leftPointIndex].x()) {
+                ++leftPointIndex;
+            }
+
+            int rightPointIndex = nPoints - 1;
+            while (rightPointIndex >= 0 &&
+                   point.x() <= m_pitch[rightPointIndex].x()) {
+                --rightPointIndex;
+            }
+
+            if (leftPointIndex > 0) --leftPointIndex;
+            if (rightPointIndex < nPoints - 1) ++rightPointIndex;
+
+            if (leftPointIndex < nPoints && rightPointIndex >= 0) {
+                if (leftPointIndex <
+                    rightPointIndex) {  // Strictly increasing interval:
+                                        // hovering a segment
+
+                    // Add checks for proximity to the two ends.
+                    auto leftPos =
+                        m_chartView->posFromPoint(m_pitch[leftPointIndex]);
+                    leftPos -= m_chartView->posFromPoint(point);
+                    if (QPointF::dotProduct(leftPos, leftPos) <= 4 * 4) {
+                        return;
+                    }
+
+                    auto rightPos =
+                        m_chartView->posFromPoint(m_pitch[rightPointIndex]);
+                    rightPos -= m_chartView->posFromPoint(point);
+                    if (QPointF::dotProduct(rightPos, rightPos) <= 4 * 4) {
+                        return;
+                    }
+
+                    setPointStyle(leftPointIndex, Drag);
+                    setPointStyle(rightPointIndex, Drag);
+                    setGraphStyleBetweenPoints(leftPointIndex, rightPointIndex,
+                                               Drag);
+
+                    m_isDragging = true;
+                    m_isDraggingSegment = true;
+                    m_firstPointIndexBeingDragged = leftPointIndex;
+                    m_secondPointIndexBeingDragged = rightPointIndex;
+                    m_dragPointOriginY = point.y();
+                    m_firstPointOriginY = m_pitch[leftPointIndex].y();
+                    m_secondPointOriginY = m_pitch[rightPointIndex].y();
+                }
+            }
+        }
+    }
+}
+
+void SourcePlan::onSeriesReleased(const QString& series) {
+    if (m_isDragging) {
+        setPointStyle(m_firstPointIndexBeingDragged, Normal);
+
+        if (m_isDraggingSegment) {
+            setPointStyle(m_secondPointIndexBeingDragged, Normal);
+            setGraphStyleBetweenPoints(m_firstPointIndexBeingDragged,
+                                       m_secondPointIndexBeingDragged, Normal);
+        }
+
+        m_isDragging = false;
+    }
+}
+
+void SourcePlan::onSeriesDragging(const QString& series, QPointF point) {
+    if (m_isDragging) {
+        if (series == "points") {
+            point.setX(std::max(point.x(), 0.001));
+
+            // Don't finish this dragging event if there is already a point with
+            // that x position.
+            if (std::find_if(m_pitch.begin(), m_pitch.end(), [point](auto p) {
+                    return qFuzzyCompare(p.x(), point.x());
+                }) == m_pitch.end()) {
+                m_pitch[m_firstPointIndexBeingDragged] = point;
+                m_amplitude[m_firstPointIndexBeingDragged].setX(point.x());
+
+                if (m_firstPointIndexBeingDragged == 0) {
+                    m_pitch[0].setX(0);
+                } else {
+                    if (m_pitch[m_firstPointIndexBeingDragged].x() <= 0) {
+                        m_pitch[m_firstPointIndexBeingDragged].setX(1e-3);
+                    }
+
+                    std::vector<int> idx(m_pitch.size());
+                    std::iota(idx.begin(), idx.end(), 0);
+
+                    std::stable_sort(idx.begin(), idx.end(),
+                                     [this](int i, int j) {
+                                         return m_pitch[i].x() < m_pitch[j].x();
+                                     });
+
+                    m_firstPointIndexBeingDragged =
+                        idx[m_firstPointIndexBeingDragged];
+
+                    QList<QPointF> newPitch;
+                    QList<QPointF> newAmplitude;
+
+                    for (int i = 0; i < idx.size(); ++i) {
+                        newPitch.append(m_pitch[idx[i]]);
+                        newAmplitude.append(m_amplitude[idx[i]]);
+                    }
+
+                    m_pitch = newPitch;
+                    m_amplitude = newAmplitude;
+                }
+            }
+        } else if (series == "graph" && m_isDraggingSegment) {
+            double dy = point.y() - m_dragPointOriginY;
+
+            m_pitch[m_firstPointIndexBeingDragged].ry() =
+                m_firstPointOriginY + dy;
+            m_pitch[m_secondPointIndexBeingDragged].ry() =
+                m_secondPointOriginY + dy;
+        }
+
+        updatePlans();
+
+        const int nGraphPoints = m_pitchGraph->count();
+
+        for (int i = 0; i < nGraphPoints; ++i) {
+            setGraphPointStyle(i, Hover);
+        }
+
+        const int nPoints = m_pitch.size();
+
+        for (int i = 0; i < nPoints; ++i) {
+            setPointStyle(i, Hover);
+        }
+
+        setPointStyle(m_firstPointIndexBeingDragged, Drag);
+
+        if (m_isDraggingSegment) {
+            setPointStyle(m_secondPointIndexBeingDragged, Drag);
+            setGraphStyleBetweenPoints(m_firstPointIndexBeingDragged,
+                                       m_secondPointIndexBeingDragged, Drag);
+        }
+    }
+}
+
+void SourcePlan::setPointStyle(int index, PointStyle style) {
+    qreal size;
+    QColor color;
+
+    switch (style) {
+        case Normal:
+            size = 9;
+            color = QColor(96, 96, 96);
+            break;
+        case Hover:
+            size = 10;
+            color = QColor(72, 72, 72);
+            break;
+        case Drag:
+            size = 12;
+            color = QColor(48, 48, 48);
+            break;
+        case HoverSegment:
+            throw std::invalid_argument(
+                "HoverSegment style is not applicable to point series");
+    }
+
+    m_pointGraph->setPointConfiguration(
+        index, QColorXYSeries::PointConfiguration::Size, size);
+    m_pointGraph->setPointConfiguration(
+        index, QColorXYSeries::PointConfiguration::Color, color);
+}
+
+void SourcePlan::setGraphPointStyle(int index, PointStyle style) {
+    /*qreal size;
+
+    switch (style) {
+        case Normal:
+            size = 5;
+            break;
+        case Hover:
+            size = 6;
+            break;
+        case HoverSegment:
+            size = 7;
+            break;
+        case Drag:
+            size = 8;
+            break;
+    }
+
+    m_pitchGraph->setPointConfiguration(
+        index, QColorXYSeries::PointConfiguration::Size, size);*/
+}
+
+void SourcePlan::setGraphStyleBetweenPoints(int left, int right,
+                                            PointStyle style) {
+    QVector<QPointF> graph = m_pitchGraph->pointsVector();
+
+    int leftGraph = std::distance(
+        graph.begin(),
+        std::upper_bound(graph.begin(), graph.end(), m_pitch[left],
+                         [](auto a, auto b) { return a.x() < b.x(); }));
+
+    int rightGraph = std::distance(
+        graph.begin(),
+        std::lower_bound(graph.begin(), graph.end(), m_pitch[right],
+                         [](auto a, auto b) { return a.x() < b.x(); }));
+
+    for (int i = leftGraph; i <= rightGraph; ++i) {
+        setGraphPointStyle(i, style);
+    }
 }
