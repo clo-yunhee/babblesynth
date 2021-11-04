@@ -27,21 +27,20 @@ For more information, please refer to <http://unlicense.org>
 
 ]]
 
-if (WIN32)
-    set(QT_ROOT ${Qt5_DIR}/../../..)
-    get_filename_component(target_dir ${TARGET_EXECUTABLE} DIRECTORY)
+get_filename_component(_target_dir ${TARGET_EXECUTABLE} DIRECTORY)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     file(GET_RUNTIME_DEPENDENCIES
         EXECUTABLES ${TARGET_EXECUTABLE}
         RESOLVED_DEPENDENCIES_VAR _r_deps
         UNRESOLVED_DEPENDENCIES_VAR _u_deps
         PRE_EXCLUDE_REGEXES "api-ms-*" "ext-ms-*"
         POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" "${target_dir}/.*\\.dll"
-        DIRECTORIES ${QT_ROOT}/bin
+        DIRECTORIES ${QT_RUNTIME_DIR}
     )
 
     foreach(_file ${_r_deps})
-        file(INSTALL ${_file} DESTINATION ${target_dir})
+        file(INSTALL ${_file} DESTINATION ${_target_dir})
     endforeach()
 
     foreach(_file ${_u_deps})
@@ -49,12 +48,19 @@ if (WIN32)
     endforeach()
 
     if(CMAKE_BUILD_TYPE STREQUAL Debug)
-        set(d_ d)
+        set(_d d)
     else()
-        set(d_)
+        set(_d)
     endif()
 
-    file(INSTALL ${QT_ROOT}/plugins/platforms/qwindows${d_}.dll DESTINATION ${target_dir}/plugins/platforms)
-    file(INSTALL ${QT_ROOT}/plugins/audio/qtaudio_windows${d_}.dll
-                 ${QT_ROOT}/plugins/audio/qtaudio_wasapi${d_}.dll DESTINATION ${target_dir}/plugins/audio)
+    file(INSTALL ${QT_PLUGIN_DIR}/platforms/qwindows${_d}.dll DESTINATION ${_target_dir}/plugins/platforms)
+    file(INSTALL ${QT_PLUGIN_DIR}/audio/qtaudio_windows${_d}.dll
+                 ${QT_PLUGIN_DIR}/audio/qtaudio_wasapi${_d}.dll DESTINATION ${_target_dir}/plugins/audio)
+
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    file(INSTALL ${QT_PLUGIN_DIR}/platforms/libqxcb.so DESTINATION ${_target_dir}/plugins/platforms)
+    file(INSTALL ${QT_PLUGIN_DIR}/audio/libqtaudio_alsa.so
+                 ${QT_PLUGIN_DIR}/audio/libqtmedia_pulse.so DESTINATION ${_target_dir}/plugins/audio)
 endif()

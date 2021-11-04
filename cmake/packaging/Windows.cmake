@@ -1,8 +1,9 @@
 set(LICENSE_DESTINATION .)
 set(BIN_DESTINATION .)
 set(LIB_DESTINATION .)
+set(PLUGIN_DESTINATION .)
 set(PLATFORM_PLUGINS qwindows)
-set(AUDIO_PLUGINS wasapi windows)
+set(AUDIO_PLUGINS audio_wasapi audio_windows)
 
 set(RUNTIME_DEPS TRUE)
 set(RUNTIME_DEPS_PRE_EX "api-ms-*" "ext-ms-*")

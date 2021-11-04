@@ -21,6 +21,7 @@ add_library(babblesynth OBJECT
     parameter_holder.cpp
     parameter_holder.h
     parameter.h
+    spline.cpp
     spline.h
     utility.h
     variable_plan.cpp
@@ -32,6 +33,3 @@ add_library(babblesynth OBJECT
 target_compile_definitions(babblesynth PRIVATE _USE_MATH_DEFINES)
 
 target_include_directories(babblesynth INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-
-#add_subdirectory(fast-akima-interpolation)
-#target_link_libraries(babblesynth PRIVATE fast_akima)
