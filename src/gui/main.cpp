@@ -21,9 +21,9 @@
 #include "app_window.h"
 
 int main(int argc, char *argv[]) {
-    QApplication::setWindowIcon(QIcon(":/icons/appicon.ico"));
-
     QApplication app(argc, argv);
+
+    QApplication::setWindowIcon(QIcon(":/icons/appicon.png"));
 
     int id = QFontDatabase::addApplicationFont(":/fonts/Roboto-Regular.ttf");
     QString family = QFontDatabase::applicationFontFamilies(id).at(0);
