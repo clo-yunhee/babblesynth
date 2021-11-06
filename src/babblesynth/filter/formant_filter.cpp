@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "formant_filter.h"
+
 #include <cmath>
 #include <complex>
-// #include <iostream>
 #include <numeric>
 
 #include "../generator/noise.h"
-#include "formant_filter.h"
 #include "sos_filter.h"
 #include "tf_filter.h"
 
@@ -66,14 +66,13 @@ std::vector<double> formant_filter::generateFrom(
 
         designFilter({F1o, F2o, F3o, F4o, F5o});
 
-        // lfilter(m_B, m_A, input,output, startIndex, gci - 1, m_Z);
         sosfilt(m_filter, input, output, startIndex, gci - 1, m_filterState);
 
-        const double F1c = m_F1.evaluateAtTime(closedTime) + 200;
-        const double F2c = m_F2.evaluateAtTime(closedTime) + 300;
-        const double F3c = m_F3.evaluateAtTime(closedTime) + 400;
-        const double F4c = m_F4.evaluateAtTime(closedTime) + 500;
-        const double F5c = m_F5.evaluateAtTime(closedTime) + 600;
+        const double F1c = m_F1.evaluateAtTime(closedTime) + 100;
+        const double F2c = m_F2.evaluateAtTime(closedTime) + 150;
+        const double F3c = m_F3.evaluateAtTime(closedTime) + 200;
+        const double F4c = m_F4.evaluateAtTime(closedTime) + 250;
+        const double F5c = m_F5.evaluateAtTime(closedTime) + 300;
 
         designFilter({F1c, F2c, F3c, F4c, F5c});
 
@@ -83,12 +82,12 @@ std::vector<double> formant_filter::generateFrom(
     std::vector<double> outputFilt(output);
     std::vector<double> intZ(1, 0);
 
-    lfilter({1, 0, 0.5}, {1}, output, outputFilt, 0, samples - 1, intZ);
+    lfilter({1, 0}, {1, 0.99}, output, outputFilt, 0, samples - 1, intZ);
 
     double maxAmplitude = 1e-10;
 
     for (int i = 0; i < samples; ++i) {
-        const double xa = std::abs(output[i]);
+        const double xa = std::abs(outputFilt[i]);
         if (xa > maxAmplitude) {
             maxAmplitude = xa;
         }
@@ -100,36 +99,6 @@ std::vector<double> formant_filter::generateFrom(
 
     return outputFilt;
 }
-
-/*
-static std::vector<double> conv(const std::vector<double>& a,
-                                const std::vector<double>& b) {
-    const int na = a.size();
-    const int nb = b.size();
-    const int ny = na + nb - 1;
-
-    std::vector<double> y(ny);
-
-    for (int i = 0; i < ny; ++i) {
-        double sum = 0;
-        double c = 0;
-
-        for (int j = 0; j <= i; ++j) {
-            if (j < na && i - j < nb) {
-                double x = (a[j] * b[i - j]) - c;
-                double t = sum + x;
-
-                c = (t - sum) - x;
-                sum = t;
-            }
-        }
-
-        y[i] = sum;
-    }
-
-    return y;
-}
-*/
 
 void formant_filter::designFilter(const std::vector<double>& freqs) {
     constexpr std::array bandwidths{90, 130, 160, 140, 180};

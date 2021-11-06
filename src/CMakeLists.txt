@@ -21,7 +21,7 @@ else()
     message(AUTHOR_WARNING "This compiler (${CMAKE_CXX_COMPILER_ID}) will use CMake's own default compile flags")
 endif()
 
-if(NOT DEFINED CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
     message(STATUS "CMAKE_BUILD_TYPE was not set: defaults to RelWithDebInfo")
     set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif()

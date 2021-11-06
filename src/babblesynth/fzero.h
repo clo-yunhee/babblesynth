@@ -19,7 +19,9 @@
 #ifndef BABBLESYNTH_FZERO_H
 #define BABBLESYNTH_FZERO_H
 
+#include <array>
 #include <cmath>
+#include <limits>
 
 #ifdef __has_cpp_attribute
 #if __has_cpp_attribute(const)
