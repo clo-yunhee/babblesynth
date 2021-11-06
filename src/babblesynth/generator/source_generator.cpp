@@ -34,8 +34,8 @@ source_generator::source_generator(int sampleRate)
       m_pitch(true),
       m_amplitude(false),
       m_sampleRate(sampleRate),
-      m_antialiasFilter(
-          filter::butterworth::lowPass(8, sampleRate / 2 - 2000, sampleRate)) {
+      m_antialiasFilter(filter::butterworth::lowPass(
+          8, double(sampleRate) / 2 - 2000, sampleRate)) {
     addParameter("Source type", source::sources.valueOf("LF"));
     addParameter("Pitch plan", variable_plan(220).stepToValueAtTime(220, 1.0));
     addParameter("Amplitude plan", variable_plan(1).stepToValueAtTime(1, 1.0));

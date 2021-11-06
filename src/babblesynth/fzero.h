@@ -53,7 +53,7 @@ double fzero(double a, double b, ATTR_CONST Func f,
         return NAN;
     }
 
-    if (abs(fa) < abs(fb)) {
+    if (std::abs(fa) < std::abs(fb)) {
         std::swap(a, b);
         std::swap(fa, fb);
     }
@@ -61,10 +61,12 @@ double fzero(double a, double b, ATTR_CONST Func f,
     c = a;
     fc = fa;
     mflag = true;
-    // while (fb != 0 && fs != 0 && abs(b - a) >= tol) {
+    // while (fb != 0 && fs != 0 && std::abs(b - a) >= tol) {
     //     if (fa != fc && fb != fc) {
-    while (abs(fb) >= tol && abs(fs) >= tol && abs(b - a) >= tol) {
-        if (abs(fa - fc) < tol * abs(fc) && abs(fb - fc) < tol * abs(fc)) {
+    while (std::abs(fb) >= tol && std::abs(fs) >= tol &&
+           std::abs(b - a) >= tol) {
+        if (std::abs(fa - fc) < tol * std::abs(fc) &&
+            std::abs(fb - fc) < tol * std::abs(fc)) {
             // Inverse quadratic interpolation
             s = (a * fb * fc) / ((fa - fb) * (fa - fc)) +
                 (b * fa * fc) / ((fb - fa) * (fb - fc)) +
@@ -75,9 +77,10 @@ double fzero(double a, double b, ATTR_CONST Func f,
         }
 
         if (!((3 * a + b) / 4 <= s && s <= b) ||
-            (mflag && abs(s - b) >= abs(b - c) / 2) ||
-            (!mflag && abs(s - b) >= abs(c - d) / 2) ||
-            (mflag && abs(b - c) < tol) || (!mflag && abs(c - d) < tol)) {
+            (mflag && std::abs(s - b) >= std::abs(b - c) / 2) ||
+            (!mflag && std::abs(s - b) >= std::abs(c - d) / 2) ||
+            (mflag && std::abs(b - c) < tol) ||
+            (!mflag && std::abs(c - d) < tol)) {
             // Bisection method
             s = (a + b) / 2;
             mflag = true;
@@ -97,13 +100,13 @@ double fzero(double a, double b, ATTR_CONST Func f,
             a = s;
             fa = fs;
         }
-        if (abs(fa) < abs(fb)) {
+        if (std::abs(fa) < std::abs(fb)) {
             std::swap(a, b);
             std::swap(fa, fb);
         }
     }
 
-    return (abs(fb) < abs(fs)) ? b : s;
+    return (std::abs(fb) < std::abs(fs)) ? b : s;
 }
 
 template <typename Func>
@@ -112,8 +115,10 @@ double fzero(double a, ATTR_CONST Func f,
     // Try to find a value for b which brackets a zero-crossing.
     const double fa = f(a);
 
-    // For very small values, switch to absolute rather than relative search
-    const double aa = (abs(a) < 0.001) ? ((a == 0) ? 0.1 : sgn(a) * 0.1) : a;
+    // For very small values, switch to std::absolute rather than relative
+    // search
+    const double aa =
+        (std::abs(a) < 0.001) ? ((a == 0) ? 0.1 : sgn(a) * 0.1) : a;
 
     // Search in an ever-widening range around the initial point.
     std::array deltas{-.01, +.025, -.05, +.10, -.25,  +.50,  -1.,

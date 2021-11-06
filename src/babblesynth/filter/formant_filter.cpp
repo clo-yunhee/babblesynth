@@ -43,65 +43,12 @@ formant_filter::formant_filter(int sampleRate)
     addParameter("F5 plan", variable_plan(3800));
 }
 
-/*std::vector<double> formant_filter::generateFrom(
-    const std::vector<double>& input,
-    const std::vector<std::pair<int, int>>& periods) {
-    const int samples = input.size();
-
-    std::vector<double> lfilt_output = input;
-    std::vector<double> sosfilt_output = input;
-
-    m_filterState.clear();
-
-    for (const auto& [startIndex, endIndex] : periods) {
-        const double startTime = startIndex / double(m_sampleRate);
-        const double endTime = endIndex / double(m_sampleRate);
-
-        const double midTime = (startTime + endTime) / 2;
-
-        const double F1 = m_F1.evaluateAtTime(midTime);
-        const double F2 = m_F2.evaluateAtTime(midTime);
-        const double F3 = m_F3.evaluateAtTime(midTime);
-        const double F4 = m_F4.evaluateAtTime(midTime);
-        const double F5 = m_F5.evaluateAtTime(midTime);
-
-        designFilter({F1, F2, F3, F4, F5});
-
-        lfilter(m_B, m_A, input, lfilt_output, startIndex, endIndex, m_Z);
-        sosfilt(m_filter, input, sosfilt_output, startIndex, endIndex,
-                m_filterState);
-    }
-
-    for (int i = 0; i < samples; ++i) {
-        if (std::isnan(lfilt_output[i]) || std::isinf(lfilt_output[i])) {
-            // std::cout << "lfilter overflowed, substituting with sosfilt
-            // result" << std::endl;
-            lfilt_output[i] = sosfilt_output[i];
-        }
-    }
-
-    double maxAmplitude = 1e-10;
-
-    for (int i = 0; i < samples; ++i) {
-        const double xa = std::abs(lfilt_output[i]);
-        if (xa > maxAmplitude) {
-            maxAmplitude = xa;
-        }
-    }
-
-    for (int i = 0; i < samples; ++i) {
-        lfilt_output[i] /= maxAmplitude;
-    }
-
-    return lfilt_output;
-}*/
-
 std::vector<double> formant_filter::generateFrom(
     const std::vector<double>& input,
     const std::vector<std::pair<int, int>>& periods, double Oq) {
     const int samples = input.size();
 
-    std::vector<double> output = input;
+    std::vector<double> output(samples, 0);
 
     m_filterState.clear();
 
@@ -119,20 +66,24 @@ std::vector<double> formant_filter::generateFrom(
 
         designFilter({F1o, F2o, F3o, F4o, F5o});
 
-        lfilter(m_B, m_A, input, output, startIndex, gci - 1, m_Z);
-        // sosfilt(m_filter, input, output, startIndex, gci - 1, m_filterState);
+        // lfilter(m_B, m_A, input,output, startIndex, gci - 1, m_Z);
+        sosfilt(m_filter, input, output, startIndex, gci - 1, m_filterState);
 
-        const double F1c = m_F1.evaluateAtTime(closedTime);
-        const double F2c = m_F2.evaluateAtTime(closedTime);
-        const double F3c = m_F3.evaluateAtTime(closedTime);
-        const double F4c = m_F4.evaluateAtTime(closedTime);
-        const double F5c = m_F5.evaluateAtTime(closedTime);  // + 50;
+        const double F1c = m_F1.evaluateAtTime(closedTime) + 200;
+        const double F2c = m_F2.evaluateAtTime(closedTime) + 300;
+        const double F3c = m_F3.evaluateAtTime(closedTime) + 400;
+        const double F4c = m_F4.evaluateAtTime(closedTime) + 500;
+        const double F5c = m_F5.evaluateAtTime(closedTime) + 600;
 
         designFilter({F1c, F2c, F3c, F4c, F5c});
 
-        lfilter(m_B, m_A, input, output, gci, endIndex, m_Z);
-        // sosfilt(m_filter, input, output, gci, endIndex, m_filterState);
+        sosfilt(m_filter, input, output, gci, endIndex, m_filterState);
     }
+
+    std::vector<double> outputFilt(output);
+    std::vector<double> intZ(1, 0);
+
+    lfilter({1, 0, 0.5}, {1}, output, outputFilt, 0, samples - 1, intZ);
 
     double maxAmplitude = 1e-10;
 
@@ -144,12 +95,13 @@ std::vector<double> formant_filter::generateFrom(
     }
 
     for (int i = 0; i < samples; ++i) {
-        output[i] /= maxAmplitude;
+        outputFilt[i] /= maxAmplitude;
     }
 
-    return output;
+    return outputFilt;
 }
 
+/*
 static std::vector<double> conv(const std::vector<double>& a,
                                 const std::vector<double>& b) {
     const int na = a.size();
@@ -177,23 +129,17 @@ static std::vector<double> conv(const std::vector<double>& a,
 
     return y;
 }
+*/
 
 void formant_filter::designFilter(const std::vector<double>& freqs) {
     constexpr std::array bandwidths{90, 130, 160, 140, 180};
 
-    std::vector<std::vector<double>> Bs;
-    std::vector<std::vector<double>> As;
-    std::vector<double> Rs;
-
+    std::vector<std::array<double, 6>> sos;
     std::vector<double> b, a;
-    double r;
 
     for (int i = 0; i < freqs.size(); ++i) {
-        r = designFilterSection(freqs[i], bandwidths[i], b, a);
-
-        Bs.push_back(b);
-        As.push_back(a);
-        Rs.push_back(r);
+        designFilterSection(freqs[i], bandwidths[i], b, a);
+        sos.push_back({b[0], b[1], b[2], a[0], a[1], a[2]});
     }
 
     // Take the normalized average of 3rd formant and above.
@@ -209,56 +155,22 @@ void formant_filter::designFilter(const std::vector<double>& freqs) {
     }
     avg += 300;
 
-    // Auto-fill up to eight total formants.
+    // Auto-fill up to ten total formants.
     double freq = freqs.back() + avg;
 
-    while (Bs.size() < 10) {
+    while (sos.size() < 10) {
         const double bandwidth = 0.3 * freq;
 
-        r = designFilterSection(freq, bandwidth, b, a);
-
-        Bs.push_back(b);
-        As.push_back(a);
-        Rs.push_back(r);
+        designFilterSection(freq, bandwidth, b, a);
+        sos.push_back({b[0], b[1], b[2], a[0], a[1], a[2]});
 
         freq += avg;
     }
 
-    // Sort the sections in increasing R.
-    std::vector<int> idx(Rs.size());
-    std::iota(idx.begin(), idx.end(), 0);
-    std::sort(idx.begin(), idx.end(),
-              [&Rs](int i, int j) { return Rs[i] < Rs[j]; });
+    std::reverse(sos.begin(), sos.end());
 
-    std::vector<double> B = Bs[idx[0]];
-    std::vector<double> A = As[idx[0]];
-
-    for (int i = 0; i < Bs.size(); ++i) {
-        B = conv(B, Bs[idx[i]]);
-        A = conv(A, As[idx[i]]);
-    }
-
-    if (A[0] != 1) {
-        const double a0 = A[0];
-        for (auto& x : B) x /= a0;
-        for (auto& x : A) x /= a0;
-    }
-
-    m_B = B;
-    m_A = A;
-    m_Z.resize(B.size() - 1, 0);
-
-    m_filter.resize(Bs.size());
-    for (int i = 0; i < Bs.size(); ++i) {
-        m_filter[i][0] = Bs[i][0];
-        m_filter[i][1] = Bs[i][1];
-        m_filter[i][2] = Bs[i][2];
-        m_filter[i][3] = As[i][0];
-        m_filter[i][4] = As[i][1];
-        m_filter[i][5] = As[i][2];
-    }
-
-    m_filterState.resize(Bs.size(), {0.0, 0.0});
+    m_filter = sos;
+    m_filterState.resize(sos.size(), {0.0, 0.0});
 }
 
 double formant_filter::designFilterSection(double f, double bw,
@@ -269,7 +181,7 @@ double formant_filter::designFilterSection(double f, double bw,
 
     const double b0 = (1 - R) * sqrt(1 - 2 * R * cos(2 * theta) + (R * R));
 
-    b = {b0, 0, 0};
+    b = {b0, b0, 0};
     a = {1, -2 * R * cos(theta), R * R};
 
     return R;

@@ -48,10 +48,6 @@ class formant_filter : public parameter_holder {
     variable m_F4;
     variable m_F5;
 
-    std::vector<double> m_B;
-    std::vector<double> m_A;
-    std::vector<double> m_Z;
-
     std::vector<std::array<double, 6>> m_filter;
     std::vector<std::array<double, 2>> m_filterState;
 

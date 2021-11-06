@@ -26,12 +26,11 @@ AppWindow::AppWindow() : QMainWindow() {
     setObjectName("SourceParameters");
     setWindowTitle("BabbleSynth");
 
-    m_sampleRate = 48000;
+    m_audioPlayer = new AudioPlayer(this);
+    m_sampleRate = m_audioPlayer->preferredSampleRate();
 
     appState = std::make_shared<AppState>(m_sampleRate);
     appState->updatePlans();
-
-    m_audioPlayer = new AudioPlayer(m_sampleRate, this);
 
     m_sourceParameters = new SourceParameters;
     m_sourcePlan = new SourcePlan(this);

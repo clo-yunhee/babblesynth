@@ -18,18 +18,21 @@
 
 #include "audio_player.h"
 
+#include <qaudiodeviceinfo.h>
+
 #include <stdexcept>
 
 using namespace babblesynth::gui;
 
 static void f64_to_s16(QByteArray& dst, const std::vector<double>& src) {
+    constexpr int channels = 2;
     const int sampleCount = src.size();
-    dst.resize(sizeof(int16_t) * sampleCount);
+    dst.resize(sizeof(int16_t) * channels * sampleCount);
 
     int16_t* pDst = reinterpret_cast<int16_t*>(dst.data());
 
     int r;
-    size_t i;
+    size_t i, ch;
     for (i = 0; i < sampleCount; ++i) {
         double x = src[i];
         double c;
@@ -37,39 +40,18 @@ static void f64_to_s16(QByteArray& dst, const std::vector<double>& src) {
         c = c + 1;
         r = (int)(c * 32767.5);
         r = r - 32768;
-        pDst[i] = (int16_t)r;
+        for (ch = 0; ch < channels; ++ch) {
+            pDst[i * channels + ch] = (int16_t)r;
+        }
     }
 }
 
-AudioPlayer::AudioPlayer(int sampleRate, QObject* parent)
-    : QObject(parent), m_audio(nullptr) {
-    m_deviceInfo = QAudioDeviceInfo::defaultOutputDevice();
-    setSampleRate(sampleRate);
+AudioPlayer::AudioPlayer(QObject* parent)
+    : QObject(parent),
+      m_deviceInfo(QAudioDeviceInfo::defaultOutputDevice()),
+      m_audio(nullptr) {
+    initAudio();
     m_buffer.setBuffer(&m_data);
-}
-
-void AudioPlayer::setSampleRate(int sampleRate) {
-    m_sampleRate = sampleRate;
-
-    m_audioFormat.setSampleRate(sampleRate);
-    m_audioFormat.setChannelCount(1);
-    m_audioFormat.setSampleSize(16);
-    m_audioFormat.setSampleType(QAudioFormat::SignedInt);
-    m_audioFormat.setCodec("audio/pcm");
-
-    if (!m_deviceInfo.isFormatSupported(m_audioFormat)) {
-        throw std::invalid_argument("audio format not supported");
-    }
-
-    if (m_audio != nullptr) {
-        m_audio->stop();
-        m_audio->deleteLater();
-    }
-
-    m_audio = new QAudioOutput(m_deviceInfo, m_audioFormat, this);
-    m_audio->setVolume(0.6);
-    QObject::connect(m_audio, &QAudioOutput::stateChanged, this,
-                     &AudioPlayer::onStateChanged);
 }
 
 void AudioPlayer::play(const std::vector<double>& data) {
@@ -80,6 +62,8 @@ void AudioPlayer::play(const std::vector<double>& data) {
     m_buffer.open(QIODevice::ReadOnly);
     m_audio->start(&m_buffer);
 }
+
+int AudioPlayer::preferredSampleRate() const { return m_sampleRate; }
 
 void AudioPlayer::onStateChanged(QAudio::State state) {
     switch (state) {
@@ -99,4 +83,28 @@ void AudioPlayer::onStateChanged(QAudio::State state) {
         default:
             break;
     }
+}
+
+void AudioPlayer::initAudio() {
+    m_sampleRate = m_deviceInfo.preferredFormat().sampleRate();
+
+    m_audioFormat.setSampleRate(m_sampleRate);
+    m_audioFormat.setChannelCount(2);
+    m_audioFormat.setSampleSize(16);
+    m_audioFormat.setSampleType(QAudioFormat::SignedInt);
+    m_audioFormat.setCodec("audio/pcm");
+
+    if (!m_deviceInfo.isFormatSupported(m_audioFormat)) {
+        throw std::invalid_argument("audio format not supported");
+    }
+
+    if (m_audio != nullptr) {
+        m_audio->stop();
+        m_audio->deleteLater();
+    }
+
+    m_audio = new QAudioOutput(m_deviceInfo, m_audioFormat, this);
+    m_audio->setVolume(0.6);
+    QObject::connect(m_audio, &QAudioOutput::stateChanged, this,
+                     &AudioPlayer::onStateChanged);
 }
