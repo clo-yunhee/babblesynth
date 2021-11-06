@@ -32,15 +32,18 @@ class AudioPlayer : public QObject {
     Q_OBJECT
 
    public:
-    AudioPlayer(int sampleRate = 48000, QObject *parent = nullptr);
+    AudioPlayer(QObject *parent = nullptr);
 
-    void setSampleRate(int sampleRate);
     void play(const std::vector<double> &data);
+
+    int preferredSampleRate() const;
 
    private slots:
     void onStateChanged(QAudio::State state);
 
    private:
+    void initAudio();
+
     QAudioDeviceInfo m_deviceInfo;
 
     int m_sampleRate;

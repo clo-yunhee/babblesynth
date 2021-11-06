@@ -4,12 +4,12 @@
 <context>
     <name>babblesynth::gui::AppWindow</name>
     <message>
-        <location filename="../app_window.cpp" line="46"/>
+        <location filename="../app_window.cpp" line="45"/>
         <source>Source parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="60"/>
+        <location filename="../app_window.cpp" line="59"/>
         <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
