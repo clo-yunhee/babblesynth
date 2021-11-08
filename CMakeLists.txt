@@ -43,7 +43,7 @@ foreach(_platform ${PLATFORM_PLUGINS})
 endforeach()
 
 foreach(_audio ${AUDIO_PLUGINS})
-    install(FILES ${QT_PLUGIN_DIR}/audio/${CMAKE_SHARED_LIBRARY_PREFIX}qt${audio}${CMAKE_SHARED_LIBRARY_SUFFIX}
+    install(FILES ${QT_PLUGIN_DIR}/audio/${CMAKE_SHARED_LIBRARY_PREFIX}${_audio}${CMAKE_SHARED_LIBRARY_SUFFIX}
             DESTINATION ${PLUGIN_DESTINATION}/audio)
 endforeach()
 
