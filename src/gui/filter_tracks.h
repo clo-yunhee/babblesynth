@@ -73,7 +73,7 @@ class FilterTracks : public QWidget {
     QVector<QColorLineSeries*> m_formantPoints;
     QColorLineSeries* m_pitchGraph;
     QValueAxis* m_timeAxis;
-    QValueAxis* m_valueAxis;
+    QLogValueAxis* m_valueAxis;
 
     ChartView* m_chartView;
 

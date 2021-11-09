@@ -30,11 +30,14 @@ SourcePlan::SourcePlan(QWidget* parent)
 
     m_timeAxis = new QValueAxis(this);
     m_timeAxis->setRange(0, 1);
+    m_timeAxis->setLabelFormat("%.2f s");
 
-    m_valueAxis = new QValueAxis(this);
-    m_valueAxis->setRange(0, 500);
-    m_valueAxis->setTickInterval(100);
-    m_valueAxis->setTickType(QValueAxis::TicksDynamic);
+    m_valueAxis = new QLogValueAxis(this);
+    m_valueAxis->setRange(64, 512);
+    m_valueAxis->setBase(2);
+    m_valueAxis->setLabelFormat("%.0f Hz");
+    // m_valueAxis->setTickInterval(100);
+    // m_valueAxis->setTickType(QValueAxis::TicksDynamic);
 
     QChart* chart = new QChart;
     chart->legend()->hide();

@@ -75,7 +75,7 @@ class SourcePlan : public QWidget {
     QColorLineSeries* m_pitchGraph;
     QColorLineSeries* m_pointGraph;
     QValueAxis* m_timeAxis;
-    QValueAxis* m_valueAxis;
+    QLogValueAxis* m_valueAxis;
 
     ChartView* m_chartView;
 

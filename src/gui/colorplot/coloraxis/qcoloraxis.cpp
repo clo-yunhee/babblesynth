@@ -42,9 +42,9 @@
 #include <private/qabstractseries_p.h>
 #include <private/qxyseries_p.h>
 
+#include "../access_private.hpp"
 #include "../colorxyseries/qcolorxyseries.h"
 #include "../colorxyseries/qcolorxyseries_p.h"
-#include "access_private.hpp"
 #include "chartcoloraxisx_p.h"
 #include "chartcoloraxisy_p.h"
 #include "qcoloraxis_p.h"
@@ -340,7 +340,8 @@ void QColorAxisPrivate::setRange(qreal min, qreal max) {
 
 void QColorAxisPrivate::updateSeries() {
     // in Qt 6.2, QColorAxisPrivate is a friend class of QAbstractAxis.
-    // since this is not the case in Qt 5, we'll use pointer hacks.
+    // since this is not the case in this backport, we'll use the access_private
+    // trick.
 
     const QList<QAbstractSeries *> series = access_private::m_series(*this);
 

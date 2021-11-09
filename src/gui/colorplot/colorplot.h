@@ -21,5 +21,6 @@
 
 #include "coloraxis/qcoloraxis.h"
 #include "colorlineseries/qcolorlineseries.h"
+#include "melvalueaxis/melvalueaxis.h"
 
 #endif  // BABBLESYNTH_COLOR_PLOT_H
