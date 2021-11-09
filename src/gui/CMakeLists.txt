@@ -33,6 +33,9 @@ add_executable(babblesynth-gui WIN32
     colorplot/colorlineseries/qcolorlineseries.cpp
     colorplot/colorxyseries/colorxychart.cpp
     colorplot/colorxyseries/qcolorxyseries.cpp
+    colorplot/melvalueaxis/chartmelvalueaxisx.cpp
+    colorplot/melvalueaxis/chartmelvalueaxisy.cpp
+    colorplot/melvalueaxis/melvalueaxis.cpp
     main.cpp
     qt_conf.qrc
     fonts/fonts.qrc
