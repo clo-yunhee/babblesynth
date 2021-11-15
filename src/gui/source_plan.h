@@ -61,6 +61,9 @@ class SourcePlan : public QWidget {
 
     void onSeriesDragging(const QString& series, QPointF point);
 
+    void onSeriesScrolled(const QString& series, const QPointF& point,
+                          int index, double dy);
+
    private:
     enum PointStyle { Normal, Hover, Drag, HoverSegment };
 

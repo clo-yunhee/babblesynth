@@ -26,6 +26,7 @@ using namespace babblesynth::gui;
 SourcePlan::SourcePlan(QWidget* parent)
     : QWidget(parent), m_isDragging(false), m_isDraggingSegment(false) {
     setObjectName("SourcePlan");
+    setMinimumSize(QSize(400, 200));
     // setMinimumSize(QSize(1024, 768));
 
     m_timeAxis = new QValueAxis(this);
@@ -341,6 +342,11 @@ void SourcePlan::onSeriesReleased(const QString& series) {
 void SourcePlan::onSeriesDragging(const QString& series, QPointF point) {
     if (m_isDragging) {
         if (series == "points") {
+            // Cancel if the point is lower than zero.
+            if (point.y() <= 1e-3) {
+                return;
+            }
+
             point.setX(std::max(point.x(), 0.001));
 
             // Don't finish this dragging event if there is already a point with
@@ -356,6 +362,7 @@ void SourcePlan::onSeriesDragging(const QString& series, QPointF point) {
                 } else {
                     if (m_pitch[m_firstPointIndexBeingDragged].x() <= 0) {
                         m_pitch[m_firstPointIndexBeingDragged].setX(1e-3);
+                        m_amplitude[m_firstPointIndexBeingDragged].setX(1e-3);
                     }
 
                     std::vector<int> idx(m_pitch.size());
@@ -382,12 +389,18 @@ void SourcePlan::onSeriesDragging(const QString& series, QPointF point) {
                 }
             }
         } else if (series == "graph" && m_isDraggingSegment) {
-            double dy = point.y() - m_dragPointOriginY;
+            const double dy = point.y() - m_dragPointOriginY;
 
-            m_pitch[m_firstPointIndexBeingDragged].ry() =
-                m_firstPointOriginY + dy;
-            m_pitch[m_secondPointIndexBeingDragged].ry() =
-                m_secondPointOriginY + dy;
+            const double ny1 = m_firstPointOriginY + dy;
+            const double ny2 = m_secondPointOriginY + dy;
+
+            // Cancel if one of the points is lower than zero.
+            if (ny1 <= 1e-3 || ny2 <= 1e-3) {
+                return;
+            }
+
+            m_pitch[m_firstPointIndexBeingDragged].ry() = ny1;
+            m_pitch[m_secondPointIndexBeingDragged].ry() = ny2;
         }
 
         updatePlans();
@@ -410,6 +423,22 @@ void SourcePlan::onSeriesDragging(const QString& series, QPointF point) {
             setPointStyle(m_secondPointIndexBeingDragged, Drag);
             setGraphStyleBetweenPoints(m_firstPointIndexBeingDragged,
                                        m_secondPointIndexBeingDragged, Drag);
+        }
+    }
+}
+
+void SourcePlan::onSeriesScrolled(const QString& series, const QPointF& point,
+                                  int index, double dy) {
+    if (series == "points") {
+    } else if (series == "graph") {
+        const int nGraphPoints = m_pitchGraph->count();
+
+        const int nPoints = m_pitch.size();
+
+        int leftPointIndex = 0;
+        while (leftPointIndex < nPoints &&
+               point.x() >= m_pitch[leftPointIndex].x()) {
+            ++leftPointIndex;
         }
     }
 }

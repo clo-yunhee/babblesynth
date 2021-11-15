@@ -17,7 +17,7 @@
 <context>
     <name>babblesynth::gui::FilterTracks</name>
     <message>
-        <location filename="../filter_tracks.cpp" line="52"/>
+        <location filename="../filter_tracks.cpp" line="56"/>
         <source>Pitch and formants</source>
         <translation type="unfinished"></translation>
     </message>
@@ -58,7 +58,7 @@
 <context>
     <name>babblesynth::gui::SourcePlan</name>
     <message>
-        <location filename="../source_plan.cpp" line="43"/>
+        <location filename="../source_plan.cpp" line="47"/>
         <source>Pitch and amplitude</source>
         <translation type="unfinished"></translation>
     </message>
