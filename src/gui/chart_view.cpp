@@ -111,6 +111,24 @@ void ChartView::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
+void ChartView::wheelEvent(QWheelEvent* event) {
+    auto pointsPerSeries = findMatchingPoints(event->position());
+
+    double dy = event->angleDelta().y() / 8.0;
+
+    for (auto it = pointsPerSeries.begin(); it != pointsPerSeries.end(); ++it) {
+        auto series = it.key();
+        const auto& variant = it.value();
+
+        if (variant.isValid()) {
+            const auto& [point, index] =
+                variant.value<MatchingPointsValueType>();
+
+            emit wheelScrolled(series, point, index, dy);
+        }
+    }
+}
+
 QPointF ChartView::pointFromPos(const QPointF& pos) const {
     const auto scenePos = mapToScene(pos.toPoint());
     const auto chartPos = chart()->mapFromScene(scenePos);
@@ -161,6 +179,9 @@ QHash<QString, QVariant> ChartView::findMatchingPoints(
                         pointsConfiguration
                             [index][QColorXYSeries::PointConfiguration::Size]
                                 .toReal();
+
+                    // Give the points a minimum size in this context
+                    pointSize = std::max(pointSize, 4.0);
 
                     // Check if the mouse point is in the point's circle.
                     if (distanceSq < 4 * pointSize * pointSize) {
