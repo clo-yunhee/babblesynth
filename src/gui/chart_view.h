@@ -52,11 +52,15 @@ class ChartView : public QChartView {
     void mouseReleased(const QString& series);
     void mouseDragging(const QString& series, const QPointF& point);
 
+    void wheelScrolled(const QString& series, const QPointF& point, int index,
+                       double dy);
+
    protected:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
 
    private:
     bool checkThrottle();
