@@ -95,23 +95,34 @@ double variable_plan::evaluateAtTime(double time) const {
     }
     leftIndex -= 1;
 
+    double value = 0;
+
     if (leftIndex < 0) {
-        return m_values.front();
+        value = m_values.front();
     } else if (leftIndex >= m_values.size() - 1) {
-        return m_values.back();
+        value = m_values.back();
+    } else {
+        switch (m_transitions[leftIndex]) {
+            case TransitionStep:
+                value = interpolateStep(leftIndex, time);
+                break;
+            case TransitionLinear:
+                value = interpolateLinear(leftIndex, time);
+                break;
+            case TransitionCubic:
+                value = interpolateCubic(leftIndex, time);
+                break;
+            default:
+                throw std::invalid_argument(
+                    "unknown transition type for variable plan");
+        }
     }
 
-    switch (m_transitions[leftIndex]) {
-        case TransitionStep:
-            return interpolateStep(leftIndex, time);
-        case TransitionLinear:
-            return interpolateLinear(leftIndex, time);
-        case TransitionCubic:
-            return interpolateCubic(leftIndex, time);
-        default:
-            throw std::invalid_argument(
-                "unknown transition type for variable plan");
+    if (value <= 0) {
+        value = 1e-6;
     }
+
+    return value;
 }
 
 double variable_plan::duration() const { return m_times.back(); }
