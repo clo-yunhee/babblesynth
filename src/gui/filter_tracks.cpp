@@ -34,8 +34,9 @@ FilterTracks::FilterTracks(int nFormants, QWidget* parent)
       m_formantGraph(nFormants),
       m_formantPoints(nFormants),
       m_isDragging(false),
-      m_isDraggingPoint(false) {
+      m_isDraggingSegment(false) {
     setObjectName("FilterTracks");
+    setMinimumSize(QSize(400, 300));
 
     m_timeAxis = new QValueAxis(this);
     m_timeAxis->setRange(0, 1);
@@ -103,6 +104,8 @@ FilterTracks::FilterTracks(int nFormants, QWidget* parent)
                      &FilterTracks::onSeriesReleased);
     QObject::connect(m_chartView, &ChartView::mouseDragging, this,
                      &FilterTracks::onSeriesDragging);
+    QObject::connect(m_chartView, &ChartView::wheelScrolled, this,
+                     &FilterTracks::onSeriesScrolled);
 
     QVBoxLayout* rootLayout = new QVBoxLayout;
     rootLayout->addWidget(m_chartView);
@@ -325,9 +328,9 @@ void FilterTracks::onSeriesPressed(const QString& series, const QPointF& point,
             setPointStyle(n, index, Drag);
 
             m_isDragging = true;
-            m_isDraggingPoint = true;
+            m_isDraggingSegment = false;
             m_formantBeingDragged = n;
-            m_pointIndexBeingDragged = index;
+            m_firstPointIndexBeingDragged = index;
         } else if (series.startsWith("graph")) {
             const int nPoints = m_points[n].size();
 
@@ -372,9 +375,9 @@ void FilterTracks::onSeriesPressed(const QString& series, const QPointF& point,
                                                rightPointIndex, Drag);
 
                     m_isDragging = true;
-                    m_isDraggingPoint = false;
+                    m_isDraggingSegment = true;
                     m_formantBeingDragged = n;
-                    m_pointIndexBeingDragged = leftPointIndex;
+                    m_firstPointIndexBeingDragged = leftPointIndex;
                     m_secondPointIndexBeingDragged = rightPointIndex;
                     m_dragPointOriginY = point.y();
                     m_firstPointOriginY = m_points[n][leftPointIndex].y();
@@ -387,13 +390,14 @@ void FilterTracks::onSeriesPressed(const QString& series, const QPointF& point,
 
 void FilterTracks::onSeriesReleased(const QString& series) {
     if (m_isDragging) {
-        setPointStyle(m_formantBeingDragged, m_pointIndexBeingDragged, Normal);
+        setPointStyle(m_formantBeingDragged, m_firstPointIndexBeingDragged,
+                      Normal);
 
-        if (!m_isDraggingPoint) {
+        if (m_isDraggingSegment) {
             setPointStyle(m_formantBeingDragged, m_secondPointIndexBeingDragged,
                           Normal);
             setGraphStyleBetweenPoints(m_formantBeingDragged,
-                                       m_pointIndexBeingDragged,
+                                       m_firstPointIndexBeingDragged,
                                        m_secondPointIndexBeingDragged, Normal);
         }
 
@@ -410,6 +414,11 @@ void FilterTracks::onSeriesDragging(const QString& series, QPointF point) {
 
     if (m_isDragging) {
         if (series.startsWith("points")) {
+            // Cancel if the point is lower than zero.
+            if (point.y() <= 1e-3) {
+                return;
+            }
+
             point.setX(std::max(point.x(), 0.001));
 
             // Don't finish this dragging event if there is already a point with
@@ -418,11 +427,15 @@ void FilterTracks::onSeriesDragging(const QString& series, QPointF point) {
                              [point](auto p) {
                                  return qFuzzyCompare(p.x(), point.x());
                              }) == m_points[n].end()) {
-                m_points[n][m_pointIndexBeingDragged] = point;
+                m_points[n][m_firstPointIndexBeingDragged] = point;
 
-                if (m_pointIndexBeingDragged == 0) {
+                if (m_firstPointIndexBeingDragged == 0) {
                     m_points[n][0].setX(0);
                 } else {
+                    if (m_points[n][m_firstPointIndexBeingDragged].x() <= 0) {
+                        m_points[n][m_firstPointIndexBeingDragged].setX(1e-3);
+                    }
+
                     std::vector<int> idx(m_points[n].size());
                     std::iota(idx.begin(), idx.end(), 0);
 
@@ -431,7 +444,8 @@ void FilterTracks::onSeriesDragging(const QString& series, QPointF point) {
                             return m_points[n][i].x() < m_points[n][j].x();
                         });
 
-                    m_pointIndexBeingDragged = idx[m_pointIndexBeingDragged];
+                    m_firstPointIndexBeingDragged =
+                        idx[m_firstPointIndexBeingDragged];
 
                     QList<QPointF> newPoints;
 
@@ -441,40 +455,48 @@ void FilterTracks::onSeriesDragging(const QString& series, QPointF point) {
 
                     m_points[n] = newPoints;
                 }
-            } else if (series.startsWith("graph") && !m_isDraggingPoint) {
-                double dy = point.y() - m_dragPointOriginY;
+            }
+        } else if (series.startsWith("graph") && m_isDraggingSegment) {
+            double dy = point.y() - m_dragPointOriginY;
 
-                m_points[n][m_pointIndexBeingDragged].ry() =
-                    m_firstPointOriginY + dy;
-                m_points[n][m_secondPointIndexBeingDragged].ry() =
-                    m_secondPointOriginY + dy;
+            const double ny1 = m_firstPointOriginY + dy;
+            const double ny2 = m_secondPointOriginY + dy;
+
+            // Cancel if one of the points is lower than zero.
+            if (ny1 <= 1e-3 || ny2 <= 1e-3) {
+                return;
             }
 
-            updatePlans();
+            m_points[n][m_firstPointIndexBeingDragged].ry() = ny1;
+            m_points[n][m_secondPointIndexBeingDragged].ry() = ny2;
+        }
 
-            const int nGraphPoints = m_formantGraph[n]->count();
+        updatePlans();
 
-            for (int i = 0; i < nGraphPoints; ++i) {
-                setGraphPointStyle(n, i, Hover);
-            }
+        const int nGraphPoints = m_formantGraph[n]->count();
 
-            const int nPoints = m_points[n].size();
+        for (int i = 0; i < nGraphPoints; ++i) {
+            setGraphPointStyle(n, i, Hover);
+        }
 
-            for (int i = 0; i < nPoints; ++i) {
-                setPointStyle(n, i, Hover);
-            }
+        const int nPoints = m_points[n].size();
 
-            setPointStyle(n, m_pointIndexBeingDragged, Drag);
+        for (int i = 0; i < nPoints; ++i) {
+            setPointStyle(n, i, Hover);
+        }
 
-            if (!m_isDraggingPoint) {
-                setPointStyle(n, m_secondPointIndexBeingDragged, Drag);
-                setGraphStyleBetweenPoints(n, m_pointIndexBeingDragged,
-                                           m_secondPointIndexBeingDragged,
-                                           Drag);
-            }
+        setPointStyle(n, m_firstPointIndexBeingDragged, Drag);
+
+        if (m_isDraggingSegment) {
+            setPointStyle(n, m_secondPointIndexBeingDragged, Drag);
+            setGraphStyleBetweenPoints(n, m_firstPointIndexBeingDragged,
+                                       m_secondPointIndexBeingDragged, Drag);
         }
     }
 }
+
+void FilterTracks::onSeriesScrolled(const QString& series, const QPointF& point,
+                                    int index, double dy) {}
 
 void FilterTracks::setPointStyle(int formant, int index, PointStyle style) {
     qreal size;

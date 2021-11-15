@@ -57,6 +57,9 @@ class FilterTracks : public QWidget {
 
     void onSeriesDragging(const QString& series, QPointF point);
 
+    void onSeriesScrolled(const QString& series, const QPointF& point,
+                          int index, double dy);
+
    private:
     enum PointStyle { Normal, Hover, Drag, HoverSegment };
 
@@ -79,9 +82,8 @@ class FilterTracks : public QWidget {
 
     bool m_isDragging;
     int m_formantBeingDragged;
-
-    bool m_isDraggingPoint;
-    int m_pointIndexBeingDragged;
+    bool m_isDraggingSegment;
+    int m_firstPointIndexBeingDragged;
     int m_secondPointIndexBeingDragged;
     double m_dragPointOriginY;
     double m_firstPointOriginY;
