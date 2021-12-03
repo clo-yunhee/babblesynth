@@ -25,17 +25,17 @@
 <context>
     <name>babblesynth::gui::SourceParameters</name>
     <message>
-        <location filename="../source_parameters.cpp" line="36"/>
+        <location filename="../source_parameters.cpp" line="38"/>
         <source>Source parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source_parameters.cpp" line="59"/>
+        <location filename="../source_parameters.cpp" line="61"/>
         <source>Glottal source waveform</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source_parameters.cpp" line="81"/>
+        <location filename="../source_parameters.cpp" line="85"/>
         <source>Glottal source spectrum</source>
         <translation type="unfinished"></translation>
     </message>

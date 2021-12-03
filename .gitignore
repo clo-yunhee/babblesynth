@@ -77,3 +77,4 @@ Thumbs.db
 /.vscode/settings.json
 /build
 /CMakeLists.txt.user
+!appicon.rc
