@@ -54,7 +54,7 @@ target_compile_definitions(babblesynth-gui PRIVATE
 
 target_link_libraries(babblesynth-gui PRIVATE
     Qt5::Core Qt5::Widgets Qt5::Multimedia Qt5::Charts Qt5::ChartsPrivate
-    babblesynth
+    babblesynth fftw3
 )
 
 set_target_properties(babblesynth-gui PROPERTIES

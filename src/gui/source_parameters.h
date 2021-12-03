@@ -41,8 +41,12 @@ class SourceParameters : public QWidget {
     void addField(parameter &param);
     void redrawGraph();
 
+    QVector<QPointF> calculateSpectrum(int fs, int f0, int nfft);
+
     QFormLayout *m_sourceParams;
-    QLineSeries *m_sourceGraph;
+    QSplineSeries *m_sourceGraph;
+
+    QLineSeries *m_spectrum;
 };
 
 }  // namespace gui
