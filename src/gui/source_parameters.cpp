@@ -19,7 +19,13 @@
 #include "source_parameters.h"
 
 #include <babblesynth.h>
+#include <fftw3.h>
+#include <private/qlogvalueaxis_p.h>
+#include <qareaseries.h>
+#include <qlogvalueaxis.h>
 
+#include <cmath>
+#include <new>
 #include <stdexcept>
 
 #include "app_state.h"
@@ -39,7 +45,7 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
 
     m_sourceParams = new QFormLayout;
 
-    m_sourceGraph = new QLineSeries(this);
+    m_sourceGraph = new QSplineSeries(this);
 
     QValueAxis *timeAxis = new QValueAxis(this);
     timeAxis->setRange(0, 1);
@@ -61,9 +67,34 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
     QChartView *chartView = new QChartView(chart, this);
     chartView->setRenderHint(QPainter::Antialiasing);
 
+    m_spectrum = new QLineSeries(this);
+
+    QAreaSeries *spectrumArea = new QAreaSeries(m_spectrum);
+
+    QValueAxis *freqAxis = new QValueAxis(this);
+    freqAxis->setRange(0, 10'000);
+
+    QValueAxis *magAxis = new QValueAxis(this);
+    magAxis->setRange(-90, 110);
+
+    QChart *spectrum = new QChart;
+    spectrum->legend()->hide();
+    spectrum->addSeries(spectrumArea);
+    spectrum->addAxis(freqAxis, Qt::AlignBottom);
+    spectrum->addAxis(magAxis, Qt::AlignLeft);
+    spectrum->setTitle(tr("Glottal source spectrum"));
+    spectrum->setTheme(QChart::ChartThemeBlueIcy);
+
+    spectrumArea->attachAxis(freqAxis);
+    spectrumArea->attachAxis(magAxis);
+
+    QChartView *spectrumView = new QChartView(spectrum, this);
+    spectrumView->setRenderHint(QPainter::Antialiasing);
+
     QHBoxLayout *bottomLayout = new QHBoxLayout;
     bottomLayout->addLayout(m_sourceParams);
     bottomLayout->addWidget(chartView);
+    bottomLayout->addWidget(spectrumView);
 
     QVBoxLayout *rootLayout = new QVBoxLayout;
     rootLayout->addWidget(sourceType);
@@ -237,5 +268,97 @@ void SourceParameters::redrawGraph() {
 
     m_sourceGraph->replace(points);
 
+    const int fs = 20050;
+    const int f0 = 150;
+    const int nfft = 1024;
+
+    m_spectrum->replace(calculateSpectrum(fs, f0, nfft));
+
     layout()->update();
+}
+
+QVector<QPointF> SourceParameters::calculateSpectrum(int fs, int f0, int nfft) {
+    // Prepare FFT memory and plan.
+    auto x = fftw_alloc_real(nfft);
+    auto plan = fftw_plan_r2r_1d(nfft, x, x, FFTW_R2HC, FFTW_MEASURE);
+
+    // Period duration in samples
+    const int periodSamps = std::round(double(fs) / double(f0));
+
+    // Factor to scale the spectrum to the same amplitude
+    const int nPeriods = nfft / periodSamps;
+
+    // Length of generated source.
+    const int genSamps = nPeriods * periodSamps;
+
+    // Offset in the array (to center it).
+    const int tOffset = nfft / 2 - genSamps / 2;
+
+    // Generate samples for one period.
+    std::vector<double> onePeriod(periodSamps);
+
+    double avg = 0;
+
+    for (int i = 0; i < periodSamps; ++i) {
+        const double t = i / (periodSamps - 1.0);
+        const double theta = 2 * M_PI * t;
+
+        avg += onePeriod[i] =
+            appState->source()->getSource()->evaluateAtPhase(theta);
+    }
+
+    avg /= periodSamps;
+
+    // Calculate the average in order to remove DC.
+    for (int i = 0; i < periodSamps; ++i) {
+        onePeriod[i] -= avg;
+    }
+
+    // Then replicate it nPeriods times.
+    for (int i = 0; i < tOffset; ++i) {
+        x[i] = 0.0;
+    }
+    for (int i = tOffset + genSamps; i < nfft; ++i) {
+        x[i] = 0.0;
+    }
+
+    for (int k = 0, i = tOffset; k < nPeriods; ++k, i += periodSamps) {
+        std::copy(onePeriod.cbegin(), onePeriod.cend(), &x[i]);
+    }
+
+    // Apply Blackman-Nutall window.
+    constexpr double wa0 = 0.3635819;
+    constexpr double wa1 = 0.4891775;
+    constexpr double wa2 = 0.1365995;
+    constexpr double wa3 = 0.0106411;
+
+    for (int i = 0; i < genSamps; ++i) {
+        x[tOffset + i] *= wa0 -
+                          wa1 * std::cos((2 * M_PI * i) / (genSamps - 1)) +
+                          wa2 * std::cos((4 * M_PI * i) / (genSamps - 1)) -
+                          wa3 * std::cos((6 * M_PI * i) / (genSamps - 1));
+    }
+
+    // Execute FFT.
+    fftw_execute(plan);
+
+    // Create the series data.
+    QVector<QPointF> data(nfft / 2);
+
+    for (int i = 0; i < nfft / 2; ++i) {
+        const double zr = x[i];
+        const double zi = i > 0 ? x[nfft - 1 - i] : 0.0;
+
+        const double f = i / (nfft / 2.0 + 1) * (fs / 2.0);
+        const double a = zr * zr + zi * zi;
+        const double w = 20.0 * std::log10(a > 0 ? a : 1e-100);
+
+        data[i].setX(f);
+        data[i].setY(w);
+    }
+
+    fftw_free(x);
+    fftw_destroy_plan(plan);
+
+    return data;
 }

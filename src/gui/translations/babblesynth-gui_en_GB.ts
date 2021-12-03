@@ -25,33 +25,18 @@
 <context>
     <name>babblesynth::gui::SourceParameters</name>
     <message>
-        <location filename="../source_parameters.cpp" line="32"/>
+        <location filename="../source_parameters.cpp" line="36"/>
         <source>Source parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source_parameters.cpp" line="55"/>
+        <location filename="../source_parameters.cpp" line="59"/>
         <source>Glottal source waveform</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source_parameters.cpp" line="171"/>
-        <source>the open quotient, defined by the ratio between the open phase duration and the fundamental period. It translates spectrally to a lower or higher frequency peak in the glottal spectrum, also known as the glottal &quot;formant&quot;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../source_parameters.cpp" line="177"/>
-        <source>the asymmetry coefficient, defined by the ratio between the opening phase and the open phase durations. It translates spectrally to a wider or narrower bandwidth of the peak in the glottal spectrum. It can also be defined in terms of %2, the speed quotient, sometimes used in scientific literature: %1 = %2 / (1 + %2)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../source_parameters.cpp" line="187"/>
-        <source>the return phase quotient, defined by the ratio between the return phase time constant and the duration between the glottal closing instant and the end of the period: %1 = %2 / [(1 - %3) %4]. It translates to a flatter or steeper spectrum, also called spectral tilt or rolloff.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../source_parameters.cpp" line="208"/>
-        <source>Parameter info for %1</source>
+        <location filename="../source_parameters.cpp" line="81"/>
+        <source>Glottal source spectrum</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
