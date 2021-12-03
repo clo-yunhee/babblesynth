@@ -50,21 +50,20 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set(QT_RUNTIME_DIR ${Qt_DIR}/../..)
 
         find_path(_qt_prefix
-            NAMES qt5
-            HINTS
-                /usr/lib
+            NAMES qt5/plugins
+            PATHS
                 /usr/lib64
+                /usr/lib
                 /usr/libexec
-                /usr/local/lib
                 /usr/local/lib64
+                /usr/local/lib
                 /usr/local/libexec
-                /opt/lib
                 /opt/lib64
+                /opt/lib
                 /opt/libexec
             PATH_SUFFIXES
-                mkspecs
-                plugins
-                qml
+                platforms
+                audio
         )
 
         set(QT_PLUGIN_DIR ${_qt_prefix}/qt5/plugins)
