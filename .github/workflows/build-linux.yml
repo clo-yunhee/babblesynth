@@ -44,11 +44,33 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
+<<<<<<< HEAD
   appimage:
     needs: build
     runs-on: ubuntu-latest
     
     steps:
+=======
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: linux-babblesynth-exe
+        path: ${{github.workspace}}/build/src/gui/babblesynth-gui
+
+  appimage:
+    needs: build
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Download build artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: linux-babblesynth-exe
+        path: /tmp
+    
+>>>>>>> 09920c9 (Install fftw3.dll with copy_runtime_deps)
     - name: Download linuxdeployqt
       run: |
         wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -O /usr/local/bin/linuxdeployqt
@@ -60,7 +82,11 @@ jobs:
         mkdir -p /tmp/AppDir/usr/lib
         mkdir -p /tmp/AppDir/usr/share/applications
         mkdir -p /tmp/AppDir/usr/share/icons/hicolor/512x512/apps
+<<<<<<< HEAD
         cp ${{github.workspace}}/build/src/gui/babblesynth-gui /tmp/AppDir/usr/bin/babblesynth
+=======
+        cp /tmp/babblesynth /tmp/AppDir/usr/bin/babblesynth
+>>>>>>> 09920c9 (Install fftw3.dll with copy_runtime_deps)
         cp ${{github.workspace}}/babblesynth.dektop /tmp/AppDir/usr/share/applications/babblesynth.desktop
         cp ${{github.workspace}}/branding/icon_512x512.png /tmp/AppDir/usr/share/icons/hicolor/512x512/apps/babblesynth.png
 
