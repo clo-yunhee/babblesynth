@@ -46,7 +46,7 @@ QT_CHARTS_BEGIN_NAMESPACE
 
 class MelValueAxis;
 
-class Q_CHARTS_PRIVATE_EXPORT ChartMelValueAxisX : public ChartLogValueAxisX {
+class ChartMelValueAxisX : public ChartLogValueAxisX {
     Q_OBJECT
 
    public:

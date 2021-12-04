@@ -30,6 +30,12 @@ For more information, please refer to <http://unlicense.org>
 get_filename_component(_target_dir ${TARGET_EXECUTABLE} DIRECTORY)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    if(CMAKE_CROSSCOMPILING)
+        set(CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM "windows+pe")
+        set(CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL "objdump")
+        set(CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND "x86_64-w64-mingw32-objdump")
+    endif()
+
     file(GET_RUNTIME_DEPENDENCIES
         EXECUTABLES ${TARGET_EXECUTABLE}
         RESOLVED_DEPENDENCIES_VAR _r_deps
@@ -54,8 +60,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     endif()
 
     file(INSTALL ${QT_PLUGIN_DIR}/platforms/qwindows${_d}.dll DESTINATION ${_target_dir}/plugins/platforms)
-    file(INSTALL ${QT_PLUGIN_DIR}/audio/qtaudio_windows${_d}.dll
-                 ${QT_PLUGIN_DIR}/audio/qtaudio_wasapi${_d}.dll DESTINATION ${_target_dir}/plugins/audio)
+    file(INSTALL ${QT_PLUGIN_DIR}/audio/qtaudio_windows${_d}.dll DESTINATION ${_target_dir}/plugins/audio)
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 

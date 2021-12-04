@@ -45,7 +45,7 @@ QT_CHARTS_BEGIN_NAMESPACE
 class ChartAxisElement;
 class MelValueAxisPrivate;
 
-class Q_CHARTS_EXPORT MelValueAxis : public QLogValueAxis {
+class MelValueAxis : public QLogValueAxis {
     Q_OBJECT
     Q_PROPERTY(
         int tickCount READ tickCount WRITE setTickCount NOTIFY tickCountChanged)
