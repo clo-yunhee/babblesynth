@@ -67,6 +67,7 @@ add_custom_command(TARGET babblesynth-gui POST_BUILD
     COMMAND ${CMAKE_COMMAND}
                 -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
                 -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+                -DCMAKE_CROSSCOMPILING=${CMAKE_CROSSCOMPILING}
                 -DTARGET_EXECUTABLE=$<TARGET_FILE:babblesynth-gui>
                 -DQT_RUNTIME_DIR=${QT_RUNTIME_DIR}
                 -DQT_PLUGIN_DIR=${QT_PLUGIN_DIR}

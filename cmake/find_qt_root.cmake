@@ -34,8 +34,23 @@ set(_qt_root "${Qt_DIR}/../../..")
 message(STATUS "Looking for Qt paths")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(QT_RUNTIME_DIR ${_qt_root}/lib)
-    set(QT_PLUGIN_DIR ${_qt_root}/plugins)
+    if(NOT CMAKE_CROSSCOMPILING)
+        set(QT_RUNTIME_DIR ${_qt_root}/lib)
+        set(QT_PLUGIN_DIR ${_qt_root}/plugins)
+    else()
+        set(QT_RUNTIME_DIR ${Qt_DIR}/../..)
+
+        find_path(_qt_prefix
+            NAMES qt5/plugins
+            PATHS
+                ${Qt_DIR}/../..
+            PATH_SUFFIXES
+                platforms
+                audio
+        )
+
+        set(QT_PLUGIN_DIR ${_qt_prefix}/qt5/plugins)
+    endif()
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 

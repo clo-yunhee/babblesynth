@@ -46,7 +46,7 @@
 
 QT_CHARTS_BEGIN_NAMESPACE
 
-class Q_CHARTS_PRIVATE_EXPORT MelValueAxisPrivate
+class MelValueAxisPrivate
     : public QLogValueAxisPrivate {
     Q_OBJECT
    public:

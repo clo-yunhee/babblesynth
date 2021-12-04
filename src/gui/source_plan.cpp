@@ -463,6 +463,8 @@ void SourcePlan::setPointStyle(int index, PointStyle style) {
         case HoverSegment:
             throw std::invalid_argument(
                 "HoverSegment style is not applicable to point series");
+        default:
+            throw std::invalid_argument("Unknown PointStyle value");
     }
 
     m_pointGraph->setPointConfiguration(

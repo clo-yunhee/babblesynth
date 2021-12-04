@@ -72,7 +72,7 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
     QAreaSeries *spectrumArea = new QAreaSeries(m_spectrum);
 
     QValueAxis *freqAxis = new QValueAxis(this);
-    freqAxis->setRange(0, 10'000);
+    freqAxis->setRange(0, 10000);
 
     QValueAxis *magAxis = new QValueAxis(this);
     magAxis->setRange(-90, 110);

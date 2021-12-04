@@ -518,6 +518,8 @@ void FilterTracks::setPointStyle(int formant, int index, PointStyle style) {
         case HoverSegment:
             throw std::invalid_argument(
                 "HoverSegment style is not applicable to point series");
+        default:
+            throw std::invalid_argument("Unknown PointStyle value");
     }
 
     m_formantPoints[formant]->setPointConfiguration(
@@ -548,6 +550,8 @@ void FilterTracks::setGraphPointStyle(int formant, int index,
             size = 6;
             color = QColor(255, 97, 76);
             break;
+        default:
+            throw std::invalid_argument("Unknown PointStyle value");
     }
 
     m_formantGraph[formant]->setPointConfiguration(
