@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=BabbleSynth
+Comment=A low-level parametric voice synthesizer
+Exec=babblesynth
+Icon=babblesynth
+Categories=AudioVideo;Audio;
