@@ -8,7 +8,7 @@ set(AUDIO_PLUGINS qtaudio_wasapi qtaudio_windows)
 set(RUNTIME_DEPS TRUE)
 set(RUNTIME_DEPS_PRE_EX "api-ms-*" "ext-ms-*")
 set(RUNTIME_DEPS_POST_EX ".*system32/.*\\.dll")
-set(RUNTIME_DEPS_DIRS ${QT_ROOT}/bin)
+set(RUNTIME_DEPS_DIRS "${QT_RUNTIME_DIR}" "$<TARGET_FILE_DIR:fftw3>")
 
 set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_NAME}")
 set(CPACK_NSIS_PACKAGE_NAME "${CPACK_PACKAGE_NAME}")

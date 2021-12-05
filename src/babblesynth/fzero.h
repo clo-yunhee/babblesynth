@@ -23,15 +23,6 @@
 #include <cmath>
 #include <limits>
 
-#ifdef __has_cpp_attribute
-#if __has_cpp_attribute(const)
-#define ATTR_CONST __attribute__((const))
-#endif
-#endif
-#ifndef ATTR_CONST
-#define ATTR_CONST
-#endif
-
 namespace babblesynth {
 
 template <typename T>
@@ -40,7 +31,7 @@ int sgn(T val) {
 }
 
 template <typename Func>
-double fzero(double a, double b, ATTR_CONST Func f,
+double fzero(double a, double b, Func f,
              double tol = std::numeric_limits<double>::epsilon()) {
     double fa, fb, fc, fs;
     double c, s, d;
@@ -112,7 +103,7 @@ double fzero(double a, double b, ATTR_CONST Func f,
 }
 
 template <typename Func>
-double fzero(double a, ATTR_CONST Func f,
+double fzero(double a, Func f,
              double tol = std::numeric_limits<double>::epsilon()) {
     // Try to find a value for b which brackets a zero-crossing.
     const double fa = f(a);
