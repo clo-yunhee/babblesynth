@@ -2,11 +2,12 @@ name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches:
+    - main
   pull_request:
-    branches: [ main ]
-  release:
-    types: [ created ]
+    branches:
+    - main
+  create:
 
 env:
   BUILD_TYPE: Release
@@ -220,7 +221,9 @@ jobs:
     name: Create GitHub release
     runs-on: ubuntu-latest
 
-    needs: [ubuntu-18_04-appimage, windows-2019-build]
+    needs:
+    - ubuntu-18_04-appimage
+    - windows-2019-build
 
     steps:
     - name: Download AppImage artifacts
