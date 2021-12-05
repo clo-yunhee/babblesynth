@@ -37,7 +37,6 @@ add_executable(babblesynth-gui WIN32
     colorplot/melvalueaxis/chartmelvalueaxisy.cpp
     colorplot/melvalueaxis/melvalueaxis.cpp
     main.cpp
-    qt_conf.qrc
     fonts/fonts.qrc
     icons/icons.qrc
     qdarkstyle/dark/style.qrc
@@ -69,7 +68,9 @@ add_custom_command(TARGET babblesynth-gui POST_BUILD
                 -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
                 -DCMAKE_CROSSCOMPILING=${CMAKE_CROSSCOMPILING}
                 -DTARGET_EXECUTABLE=$<TARGET_FILE:babblesynth-gui>
+                -DFFTW_OUTPUT_DIRECTORY=$<TARGET_FILE_DIR:fftw3>
                 -DQT_RUNTIME_DIR=${QT_RUNTIME_DIR}
+                -DQT_LIBRARY_DIR=${QT_LIBRARY_DIR}
                 -DQT_PLUGIN_DIR=${QT_PLUGIN_DIR}
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/copy_runtime_deps.cmake
 )
