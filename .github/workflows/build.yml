@@ -2,13 +2,14 @@ name: Build
 
 on:
   push:
+    tags:
+    - 'v*'
     branches:
     - main
   pull_request:
     branches:
     - main
-  create:
-
+    
 env:
   BUILD_TYPE: Release
 
@@ -20,13 +21,6 @@ jobs:
     steps:
     - name: Checkout source
       uses: actions/checkout@v2
-
-    - name: Get version
-      id: get_version
-      uses: battila7/get-version-action@v2
-
-    - name: Print version
-      run: echo ${{steps.get_version.outputs.version}}
 
     - name: Cache compilation (ccache)
       uses: hendrikmuhs/ccache-action@v1
