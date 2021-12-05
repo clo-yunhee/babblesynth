@@ -36,11 +36,11 @@ formant_filter::formant_filter(int sampleRate)
       m_F4(true),
       m_F5(true),
       m_sampleRate(sampleRate) {
-    addParameter("F1 plan", variable_plan(1000));
-    addParameter("F2 plan", variable_plan(1300));
-    addParameter("F3 plan", variable_plan(2400));
-    addParameter("F4 plan", variable_plan(2900));
-    addParameter("F5 plan", variable_plan(3800));
+    addParameter("F1 plan", variable_plan(true, 1000));
+    addParameter("F2 plan", variable_plan(true, 1300));
+    addParameter("F3 plan", variable_plan(true, 2400));
+    addParameter("F4 plan", variable_plan(true, 2900));
+    addParameter("F5 plan", variable_plan(true, 3800));
 }
 
 std::vector<double> formant_filter::generateFrom(
