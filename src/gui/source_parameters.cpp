@@ -43,6 +43,41 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
         sourceType->addItem(QString::fromStdString(type.name()));
     }
 
+    auto jitterParam = appState->source()->getParameter("Jitter");
+    auto jitter = new QDoubleSpinBox;
+    jitter->setDecimals(3);
+    jitter->setSingleStep(0.002);
+    jitter->setRange(0, 2);
+    jitter->setValue(jitterParam.value<double>());
+    QObject::connect(jitter, qOverload<double>(&QDoubleSpinBox::valueChanged),
+                     this, [jitter, &jitterParam](double value) {
+                         auto o = jitterParam.setValue(value);
+                         if (o.has_value()) {
+                             jitter->setValue(o.value());
+                         }
+                     });
+    auto jitterRow = new QHBoxLayout;
+    jitterRow->addWidget(new QLabel("Jitter"));
+    jitterRow->addWidget(jitter);
+
+    auto aspirationParam = appState->source()->getParameter("Jitter");
+    auto aspiration = new QDoubleSpinBox;
+    aspiration->setDecimals(2);
+    aspiration->setSingleStep(0.01);
+    aspiration->setRange(0, 2);
+    aspiration->setValue(aspirationParam.value<double>());
+    QObject::connect(aspiration,
+                     qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+                     [aspiration, &aspirationParam](double value) {
+                         auto o = aspirationParam.setValue(value);
+                         if (o.has_value()) {
+                             aspiration->setValue(o.value());
+                         }
+                     });
+    auto aspirationRow = new QHBoxLayout;
+    aspirationRow->addWidget(new QLabel("Aspiration"));
+    aspirationRow->addWidget(aspiration);
+
     m_sourceParams = new QFormLayout;
 
     m_sourceGraph = new QSplineSeries(this);
@@ -97,6 +132,8 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
     bottomLayout->addWidget(spectrumView);
 
     QVBoxLayout *rootLayout = new QVBoxLayout;
+    rootLayout->addLayout(jitterRow);
+    rootLayout->addLayout(aspirationRow);
     rootLayout->addWidget(sourceType);
     rootLayout->addLayout(bottomLayout);
     setLayout(rootLayout);

@@ -37,8 +37,10 @@ source_generator::source_generator(int sampleRate)
       m_antialiasFilter(filter::butterworth::lowPass(
           8, double(sampleRate) / 2 - 2000, sampleRate)) {
     addParameter("Source type", source::sources.valueOf("LF"));
-    addParameter("Pitch plan", variable_plan(220).stepToValueAtTime(220, 1.0));
-    addParameter("Amplitude plan", variable_plan(1).stepToValueAtTime(1, 1.0));
+    addParameter("Pitch plan",
+                 variable_plan(false, 220).stepToValueAtTime(220, 1.0));
+    addParameter("Amplitude plan",
+                 variable_plan(false, 1).stepToValueAtTime(1, 1.0));
     addParameter("Jitter", 0.03).setMin(0).setMax(1);
     addParameter("Aspiration", 0.10).setMin(0).setMax(1);
 }
