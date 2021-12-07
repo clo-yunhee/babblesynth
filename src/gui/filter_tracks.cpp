@@ -119,15 +119,16 @@ FilterTracks::FilterTracks(int nFormants, QWidget* parent)
 
     for (int n = 0; n < nFormants; ++n) {
         m_points[n].append(QPointF(0.0, freqsA[n]));
-        m_points[n].append(QPointF(0.3, freqsA[n]));
-        m_points[n].append(QPointF(0.5, freqsE[n]));
+        m_points[n].append(QPointF(0.7, freqsA[n]));
+        m_points[n].append(QPointF(2.0, freqsA[n]));
+        /*m_points[n].append(QPointF(0.5, freqsE[n]));
         m_points[n].append(QPointF(0.7, freqsE[n]));
         m_points[n].append(QPointF(0.9, freqsI[n]));
         m_points[n].append(QPointF(1.1, freqsI[n]));
         m_points[n].append(QPointF(1.3, freqsO[n]));
         m_points[n].append(QPointF(1.5, freqsO[n]));
         m_points[n].append(QPointF(1.7, freqsU[n]));
-        m_points[n].append(QPointF(2.0, freqsU[n]));
+        m_points[n].append(QPointF(2.0, freqsU[n]));*/
     }
 
     updatePlans();

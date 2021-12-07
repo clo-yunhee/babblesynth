@@ -17,10 +17,19 @@
  */
 
 #include <QtWidgets>
+#include <xercesc/util/PlatformUtils.hpp>
 
 #include "app_window.h"
 
-int main(int argc, char *argv[]) {
+using namespace xercesc;
+
+int main(int argc, char* argv[]) {
+    try {
+        XMLPlatformUtils::Initialize();
+    } catch (const XMLException& toCatch) {
+        return EXIT_FAILURE;
+    }
+
     QApplication app(argc, argv);
 
     QApplication::setWindowIcon(QIcon(":/icons/appicon.png"));
@@ -38,5 +47,9 @@ int main(int argc, char *argv[]) {
     babblesynth::gui::AppWindow appWindow;
     appWindow.setVisible(true);
 
-    return app.exec();
+    int exitCode = app.exec();
+
+    XMLPlatformUtils::Terminate();
+
+    return exitCode;
 }

@@ -68,11 +68,22 @@ std::vector<double> formant_filter::generateFrom(
 
         sosfilt(m_filter, input, output, startIndex, gci - 1, m_filterState);
 
-        const double F1c = m_F1.evaluateAtTime(closedTime) + 100;
-        const double F2c = m_F2.evaluateAtTime(closedTime) + 150;
-        const double F3c = m_F3.evaluateAtTime(closedTime) + 200;
-        const double F4c = m_F4.evaluateAtTime(closedTime) + 250;
-        const double F5c = m_F5.evaluateAtTime(closedTime) + 300;
+        const double gciTime = gci / m_sampleRate;
+        const double flutter =
+            (sin(24.1 * M_PI * gciTime) + sin(12.7 * M_PI * gciTime) +
+             sin(7.1 * M_PI * gciTime) + sin(4.7 * M_PI * gciTime)) /
+            4;
+
+        const double F1c =
+            m_F1.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);  // 100;
+        const double F2c =
+            m_F2.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);  // 150;
+        const double F3c =
+            m_F3.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);  // 200;
+        const double F4c =
+            m_F4.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);  // 250;
+        const double F5c =
+            m_F5.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);  // 300;
 
         designFilter({F1c, F2c, F3c, F4c, F5c});
 

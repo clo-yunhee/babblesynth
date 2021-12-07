@@ -43,15 +43,32 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
         sourceType->addItem(QString::fromStdString(type.name()));
     }
 
-    auto jitterParam = appState->source()->getParameter("Jitter");
+    auto flutterParam = &appState->source()->getParameter("Flutter");
+    auto flutter = new QDoubleSpinBox;
+    flutter->setDecimals(3);
+    flutter->setSingleStep(0.002);
+    flutter->setRange(0, 2);
+    flutter->setValue(flutterParam->value<double>());
+    QObject::connect(flutter, qOverload<double>(&QDoubleSpinBox::valueChanged),
+                     this, [flutter, flutterParam](double value) {
+                         auto o = flutterParam->setValue(value);
+                         if (o.has_value()) {
+                             flutter->setValue(o.value());
+                         }
+                     });
+    auto flutterRow = new QHBoxLayout;
+    flutterRow->addWidget(new QLabel("Flutter"));
+    flutterRow->addWidget(flutter);
+
+    auto jitterParam = &appState->source()->getParameter("Jitter");
     auto jitter = new QDoubleSpinBox;
     jitter->setDecimals(3);
     jitter->setSingleStep(0.002);
     jitter->setRange(0, 2);
-    jitter->setValue(jitterParam.value<double>());
+    jitter->setValue(jitterParam->value<double>());
     QObject::connect(jitter, qOverload<double>(&QDoubleSpinBox::valueChanged),
-                     this, [jitter, &jitterParam](double value) {
-                         auto o = jitterParam.setValue(value);
+                     this, [jitter, jitterParam](double value) {
+                         auto o = jitterParam->setValue(value);
                          if (o.has_value()) {
                              jitter->setValue(o.value());
                          }
@@ -60,16 +77,16 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
     jitterRow->addWidget(new QLabel("Jitter"));
     jitterRow->addWidget(jitter);
 
-    auto aspirationParam = appState->source()->getParameter("Jitter");
+    auto aspirationParam = &appState->source()->getParameter("Aspiration");
     auto aspiration = new QDoubleSpinBox;
     aspiration->setDecimals(2);
     aspiration->setSingleStep(0.01);
     aspiration->setRange(0, 2);
-    aspiration->setValue(aspirationParam.value<double>());
+    aspiration->setValue(aspirationParam->value<double>());
     QObject::connect(aspiration,
                      qOverload<double>(&QDoubleSpinBox::valueChanged), this,
-                     [aspiration, &aspirationParam](double value) {
-                         auto o = aspirationParam.setValue(value);
+                     [aspiration, aspirationParam](double value) {
+                         auto o = aspirationParam->setValue(value);
                          if (o.has_value()) {
                              aspiration->setValue(o.value());
                          }
@@ -132,6 +149,7 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
     bottomLayout->addWidget(spectrumView);
 
     QVBoxLayout *rootLayout = new QVBoxLayout;
+    rootLayout->addLayout(flutterRow);
     rootLayout->addLayout(jitterRow);
     rootLayout->addLayout(aspirationRow);
     rootLayout->addWidget(sourceType);
