@@ -16,4 +16,8 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(fftw3 xerces-c)
 
-target_include_directories(fftw3 INTERFACE $<TARGET_PROPERTY:fftw3,SOURCE_DIR>/api)
+target_include_directories(fftw3 INTERFACE $<BUILD_INTERFACE:${fftw3_SOURCE_DIR}/api>)
+
+target_include_directories(xerces-c INTERFACE
+    $<BUILD_INTERFACE:${xerces-c_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${xerces-c_BINARY_DIR}/src>)

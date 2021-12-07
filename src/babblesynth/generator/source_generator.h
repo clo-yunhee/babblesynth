@@ -43,6 +43,7 @@ class source_generator : public parameter_holder {
     variable m_amplitude;
     double m_jitterPercentage;
     double m_aspirationPercentage;
+    double m_flutterAmplitude;
 
     int m_sampleRate;
 
