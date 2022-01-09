@@ -85,7 +85,7 @@ SourcePlan::SourcePlan(QWidget* parent)
     rootLayout->addWidget(m_chartView);
     setLayout(rootLayout);
 
-    m_pitch.append(QPointF(0.0, 210));
+    m_pitch.append(QPointF(0.0, 220));
     m_amplitude.append(QPointF(0.0, 1.0));
 
     m_pitch.append(QPointF(2.0, 220));
