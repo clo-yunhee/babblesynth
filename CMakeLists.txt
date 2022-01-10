@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
-project(BabbleSynth LANGUAGES CXX VERSION 1.0)
+project(BabbleSynth LANGUAGES C CXX)
+set(PROJECT_VERSION 0.2-alpha.0)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/find_qt_root.cmake)
 
