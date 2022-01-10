@@ -22,7 +22,7 @@
 
 using namespace babblesynth::gui;
 
-void AudioWriter::write(const QString &filePath,
+void AudioWriter::write(const QString &filePath, const int formatIndex,
                         const std::vector<double> &data) {
     SNDFILE *sndfile;
     int mode = SFM_WRITE;
@@ -30,7 +30,7 @@ void AudioWriter::write(const QString &filePath,
     SF_INFO sfinfo;
     sfinfo.samplerate = 48000;
     sfinfo.channels = 1;
-    sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_24;
+    sfinfo.format = (formatIndex & SF_FORMAT_TYPEMASK) | SF_FORMAT_PCM_24;
 
 #if defined(_WIN32) && defined(_UNICODE)
     std::wstring filePathString = filePath.toStdWString();
@@ -53,21 +53,35 @@ void AudioWriter::write(const QString &filePath,
     }
 }
 
-QStringList AudioWriter::supportedFileFormats() const {
+std::pair<std::vector<int>, QStringList> AudioWriter::supportedFileFormats()
+    const {
     // List supported file formats by this build of sndfile.
-    SF_FORMAT_INFO format_info;
-    int k, count;
+    SF_FORMAT_INFO info;
+    SF_INFO sfinfo;
+    int majorCount;
 
-    sf_command(nullptr, SFC_GET_SIMPLE_FORMAT_COUNT, &count, sizeof(int));
+    sf_command(nullptr, SFC_GET_FORMAT_MAJOR_COUNT, &majorCount, sizeof(int));
 
-    std::set<QString> extSet;
+    std::vector<int> indexList;
+    QStringList typeList;
 
-    for (k = 0; k < count; k++) {
-        format_info.format = k;
-        sf_command(nullptr, SFC_GET_SIMPLE_FORMAT, &format_info,
-                   sizeof(format_info));
-        extSet.emplace(QString("*.%1").arg(format_info.extension));
-    };
+    sfinfo.samplerate = 48000;
+    sfinfo.channels = 1;
 
-    return QStringList(extSet.cbegin(), extSet.cend());
+    for (int m = 0; m < majorCount; m++) {
+        info.format = m;
+        sf_command(NULL, SFC_GET_FORMAT_MAJOR, &info, sizeof(info));
+
+        QString name = QString::fromLocal8Bit(info.name);
+        QString extension = QString::fromLocal8Bit(info.extension);
+
+        sfinfo.format = (info.format & SF_FORMAT_TYPEMASK) | SF_FORMAT_PCM_24;
+
+        if (sf_format_check(&sfinfo)) {
+            indexList.push_back(info.format & SF_FORMAT_TYPEMASK);
+            typeList.append(QString("%1 (*.%2)").arg(name).arg(extension));
+        }
+    }
+
+    return std::make_pair(indexList, typeList);
 }

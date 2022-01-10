@@ -30,9 +30,10 @@ namespace gui {
 
 class AudioWriter {
    public:
-    void write(const QString &filePath, const std::vector<double> &data);
+    void write(const QString &filePath, int formatIndex,
+               const std::vector<double> &data);
 
-    QStringList supportedFileFormats() const;
+    std::pair<std::vector<int>, QStringList> supportedFileFormats() const;
 };
 
 }  // namespace gui

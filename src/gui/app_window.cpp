@@ -91,17 +91,21 @@ std::vector<double> AppWindow::render() const {
 void AppWindow::renderAndPlay() { m_audioPlayer->play(render()); }
 
 void AppWindow::renderAndSave() {
-    QString extFilter = m_audioWriter.supportedFileFormats().join(", ");
+    const auto &[filterIndices, filters] = m_audioWriter.supportedFileFormats();
+    QString selectedFilter;
+
     QString filePath = QFileDialog::getSaveFileName(
         this, "Save audio file",
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
-        QString("Audio files (%1)").arg(extFilter));
+        filters.join(";;"), &selectedFilter);
 
     if (filePath.isNull()) {
         return;
     }
 
-    m_audioWriter.write(filePath, render());
+    int formatIndex = filterIndices.at(filters.indexOf(selectedFilter));
+
+    m_audioWriter.write(filePath, formatIndex, render());
 }
 
 void AppWindow::closeEvent(QCloseEvent *event) { qApp->quit(); }
