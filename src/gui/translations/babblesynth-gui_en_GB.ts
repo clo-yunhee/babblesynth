@@ -4,12 +4,22 @@
 <context>
     <name>babblesynth::gui::AppWindow</name>
     <message>
-        <location filename="../app_window.cpp" line="42"/>
+        <location filename="../app_window.cpp" line="43"/>
+        <source>Save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../app_window.cpp" line="48"/>
         <source>Source parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="56"/>
+        <location filename="../app_window.cpp" line="53"/>
+        <source>Voice FX type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../app_window.cpp" line="39"/>
         <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
