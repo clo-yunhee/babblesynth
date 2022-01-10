@@ -14,7 +14,16 @@ FetchContent_Declare(
     URL_HASH SHA256=fb96fc49b1fb892d1e64e53a6ada8accf6f0e6d30ce0937956ec68d39bd72c7e
 )
 
-FetchContent_MakeAvailable(fftw3 xerces-c)
+FetchContent_Declare(
+    libsndfile
+    URL      https://github.com/libsndfile/libsndfile/releases/download/1.0.31/libsndfile-1.0.31.tar.bz2
+    URL_HASH SHA256=a8cfb1c09ea6e90eff4ca87322d4168cdbe5035cb48717b40bf77e751cc02163
+)
+
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
+set(BUILD_TESTING OFF CACHE INTERNAL "" FORCE)
+
+FetchContent_MakeAvailable(fftw3 xerces-c libsndfile)
 
 target_include_directories(fftw3 INTERFACE $<BUILD_INTERFACE:${fftw3_SOURCE_DIR}/api>)
 

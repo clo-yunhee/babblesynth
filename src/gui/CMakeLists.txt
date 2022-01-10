@@ -13,29 +13,12 @@ add_executable(babblesynth-gui WIN32
     app_window.h
     audio_player.cpp
     audio_player.h
-    chart_view.cpp
-    chart_view.h
+    audio_writer.cpp
+    audio_writer.h
     clickable_label.cpp
     clickable_label.h
-    filter_tracks.cpp
-    filter_tracks.h
     source_parameters.cpp
     source_parameters.h
-    source_plan_item.cpp
-    source_plan_item.h
-    source_plan.cpp
-    source_plan.h
-    colorplot/coloraxis/chartcoloraxisx.cpp
-    colorplot/coloraxis/chartcoloraxisy.cpp
-    colorplot/coloraxis/coloraxis.cpp
-    colorplot/coloraxis/qcoloraxis.cpp
-    colorplot/colorlineseries/colorlinechartitem.cpp
-    colorplot/colorlineseries/qcolorlineseries.cpp
-    colorplot/colorxyseries/colorxychart.cpp
-    colorplot/colorxyseries/qcolorxyseries.cpp
-    colorplot/melvalueaxis/chartmelvalueaxisx.cpp
-    colorplot/melvalueaxis/chartmelvalueaxisy.cpp
-    colorplot/melvalueaxis/melvalueaxis.cpp
     main.cpp
     fonts/fonts.qrc
     icons/icons.qrc
@@ -46,14 +29,9 @@ add_executable(babblesynth-gui WIN32
 
 qt5_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${TS_FILES})
 
-target_compile_definitions(babblesynth-gui PRIVATE
-    $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
-    _UNICODE
-)
-
 target_link_libraries(babblesynth-gui PRIVATE
     Qt5::Core Qt5::Widgets Qt5::Multimedia Qt5::Charts Qt5::ChartsPrivate
-    babblesynth fftw3
+    babblesynth fftw3 xerces-c sndfile
 )
 
 set_target_properties(babblesynth-gui PROPERTIES

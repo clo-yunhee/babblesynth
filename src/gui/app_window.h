@@ -22,9 +22,8 @@
 #include <QtWidgets>
 
 #include "audio_player.h"
-#include "filter_tracks.h"
+#include "audio_writer.h"
 #include "source_parameters.h"
-#include "source_plan.h"
 
 namespace babblesynth {
 namespace gui {
@@ -38,17 +37,19 @@ class AppWindow : public QMainWindow {
 
    private slots:
     void renderAndPlay();
+    void renderAndSave();
 
    protected:
     void closeEvent(QCloseEvent *event) override;
 
    private:
+    std::vector<double> render() const;
+
     int m_sampleRate;
 
     AudioPlayer *m_audioPlayer;
+    AudioWriter m_audioWriter;
     SourceParameters *m_sourceParameters;
-    SourcePlan *m_sourcePlan;
-    FilterTracks *m_filterTracks;
 };
 
 }  // namespace gui

@@ -26,6 +26,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    add_compile_definitions(WIN32 _USE_MATH_DEFINES)
+endif()
+
 string(TOUPPER ${CMAKE_BUILD_TYPE} _flags_var_suffix)
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS_${_flags_var_suffix}} ${CMAKE_CXX_FLAGS}")
 
