@@ -19,6 +19,11 @@ add_executable(babblesynth-gui WIN32
     clickable_label.h
     source_parameters.cpp
     source_parameters.h
+    voicefxtype/animal_crossing.cpp
+    voicefxtype/animal_crossing.h
+    voicefxtype/undertale.cpp
+    voicefxtype/undertale.h
+    voicefxtype/voicefxtype.h
     main.cpp
     fonts/fonts.qrc
     icons/icons.qrc

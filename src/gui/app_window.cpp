@@ -18,6 +18,9 @@
 
 #include "app_window.h"
 
+#include "voicefxtype/animal_crossing.h"
+#include "voicefxtype/undertale.h"
+
 using namespace babblesynth::gui;
 
 std::shared_ptr<AppState> babblesynth::gui::appState;
@@ -49,8 +52,53 @@ AppWindow::AppWindow() : QMainWindow() {
     QObject::connect(sourceButton, &QPushButton::pressed, m_sourceParameters,
                      &QWidget::show);
 
+    QButtonGroup *voiceFxBtnGroup = new QButtonGroup(this);
+
+    QRadioButton *voiceFxBtnUndertale = new QRadioButton(tr("Undertale"));
+    voiceFxBtnGroup->addButton(voiceFxBtnUndertale, VoiceFxUndertale);
+
+    QRadioButton *voiceFxBtnAnimalCrossing =
+        new QRadioButton(tr("Animal Crossing"));
+    voiceFxBtnGroup->addButton(voiceFxBtnAnimalCrossing, VoiceFxAnimalCrossing);
+
+    QHBoxLayout *voiceFxBtnLayout = new QHBoxLayout;
+    voiceFxBtnLayout->addStretch();
+    voiceFxBtnLayout->addWidget(voiceFxBtnUndertale);
+    voiceFxBtnLayout->addWidget(voiceFxBtnAnimalCrossing);
+    voiceFxBtnLayout->addStretch();
+
+    m_voiceFxLayout = new QStackedLayout;
+    m_voiceFxLayout->addWidget(new voicefx::Undertale);
+    m_voiceFxLayout->addWidget(new voicefx::AnimalCrossing);
+
+    QObject::connect(voiceFxBtnGroup, &QButtonGroup::idToggled, this,
+                     &AppWindow::chooseVoiceFxType);
+
+    voiceFxBtnUndertale->setChecked(true);
+
+    m_dialogueText = new QTextEdit(centralWidget);
+    m_dialogueText->setPlaceholderText("Enter example dialogue text here.");
+    m_dialogueText->setAcceptRichText(false);
+
+    QObject::connect(m_dialogueText, &QTextEdit::textChanged, this,
+                     &AppWindow::handleDialogueTextChanged);
+
+    m_dialogueText->setText(
+        tr("Hey! If I asked you about bugs that would be easy to "
+           "imitate...which ones would you pick?"));
+
     QVBoxLayout *leftLayout = new QVBoxLayout;
+    leftLayout->addWidget(
+        new QLabel(tr("Voice effect settings template:"), centralWidget), 0,
+        Qt::AlignHCenter);
+    leftLayout->addLayout(voiceFxBtnLayout);
+    leftLayout->addSpacing(1);
+    leftLayout->addLayout(m_voiceFxLayout);
     leftLayout->addStretch();
+    leftLayout->addWidget(
+        new QLabel(tr("Example dialogue text:"), centralWidget), 0,
+        Qt::AlignHCenter);
+    leftLayout->addWidget(m_dialogueText);
 
     QVBoxLayout *rightLayout = new QVBoxLayout;
     rightLayout->addWidget(playButton);
@@ -95,7 +143,7 @@ void AppWindow::renderAndSave() {
     QString selectedFilter;
 
     QString filePath = QFileDialog::getSaveFileName(
-        this, "Save audio file",
+        this, tr("Save audio file"),
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
         filters.join(";;"), &selectedFilter);
 
@@ -106,6 +154,21 @@ void AppWindow::renderAndSave() {
     int formatIndex = filterIndices.at(filters.indexOf(selectedFilter));
 
     m_audioWriter.write(filePath, formatIndex, render());
+}
+
+void AppWindow::chooseVoiceFxType(int id, bool checked) {
+    if (!checked) return;
+
+    m_voiceFxLayout->setCurrentIndex(id);
+}
+
+void AppWindow::handleDialogueTextChanged() {
+    auto widget =
+        static_cast<voicefx::VoiceFxType *>(m_voiceFxLayout->currentWidget());
+
+    QString text = m_dialogueText->toPlainText();
+
+    widget->updateDialogueTextChanged(text);
 }
 
 void AppWindow::closeEvent(QCloseEvent *event) { qApp->quit(); }

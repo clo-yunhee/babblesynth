@@ -1,4 +1,4 @@
-﻿/*
+/*
  * BabbleSynth
  * Copyright (C) 2021  Clo Yun-Hee Dufour
  *
@@ -16,54 +16,53 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BABBLESYNTH_APP_WINDOW_H
-#define BABBLESYNTH_APP_WINDOW_H
+#ifndef BABBLESYNTH_VOICEFX_UNDERTALE_H
+#define BABBLESYNTH_VOICEFX_UNDERTALE_H
 
-#include <QtWidgets>
+#include <QLabel>
 
-#include "audio_player.h"
-#include "audio_writer.h"
-#include "source_parameters.h"
+#include "voicefxtype.h"
 
 namespace babblesynth {
 namespace gui {
+namespace voicefx {
 
-class AppWindow : public QMainWindow {
+class Undertale : public VoiceFxType {
     Q_OBJECT
-
    public:
-    enum VoiceFxType {
-        VoiceFxUndertale = 0,
-        VoiceFxAnimalCrossing,
-    };
+    Undertale();
+    ~Undertale();
 
-    AppWindow();
-    ~AppWindow();
+   public slots:
+    void updateDialogueTextChanged(const QString &text) override;
 
    private slots:
-    void renderAndPlay();
-    void renderAndSave();
-    void chooseVoiceFxType(int id, bool checked);
-    void handleDialogueTextChanged();
-
-   protected:
-    void closeEvent(QCloseEvent *event) override;
+    void handlePitchChanged(int value);
+    void handleDurationChanged(int value);
+    void handlePauseChanged(int value);
 
    private:
-    std::vector<double> render() const;
+    void updatePlans();
 
-    int m_sampleRate;
+    QLabel *m_pitchLabel;
+    QLabel *m_durationLabel;
+    QLabel *m_pauseLabel;
 
-    AudioPlayer *m_audioPlayer;
-    AudioWriter m_audioWriter;
-    SourceParameters *m_sourceParameters;
+    double m_pitch;
+    double m_duration;
+    double m_pauseRatio;
 
-    QStackedLayout *m_voiceFxLayout;
+    enum CharType {
+        CharTypeLetter,
+        CharTypeSpace,
+        CharTypePunctuation,
+    };
 
-    QTextEdit *m_dialogueText;
+    std::vector<CharType> m_chars;
 };
 
+}  // namespace voicefx
 }  // namespace gui
 }  // namespace babblesynth
 
-#endif  // BABBLESYNTH_APP_WINDOW_H
+#endif  // BABBLESYNTH_VOICEFX_UNDERTALE_H
