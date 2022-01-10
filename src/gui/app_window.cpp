@@ -33,40 +33,28 @@ AppWindow::AppWindow() : QMainWindow() {
     appState->updatePlans();
 
     m_sourceParameters = new SourceParameters;
-    m_sourcePlan = new SourcePlan(this);
-    m_filterTracks = new FilterTracks(5, this);
-
-    QObject::connect(m_sourcePlan, &SourcePlan::updated, m_filterTracks,
-                     &FilterTracks::redrawGraph);
 
     QWidget *centralWidget = new QWidget;
+
+    QPushButton *playButton = new QPushButton(tr("Play"), centralWidget);
+    QObject::connect(playButton, &QPushButton::pressed, this,
+                     &AppWindow::renderAndPlay);
+
+    QPushButton *saveButton = new QPushButton(tr("Save"), centralWidget);
+    QObject::connect(saveButton, &QPushButton::pressed, this,
+                     &AppWindow::renderAndSave);
 
     QPushButton *sourceButton =
         new QPushButton(tr("Source parameters"), centralWidget);
     QObject::connect(sourceButton, &QPushButton::pressed, m_sourceParameters,
                      &QWidget::show);
 
-    /*
-    QPushButton *filterButton = new QPushButton(tr("Filter tracks"),
-    centralWidget); QObject::connect(filterButton, &QPushButton::pressed,
-    m_filterTracks, &QWidget::show);
-
-    QPushButton *pitchPlan = new QPushButton(tr("Edit pitch track"));
-    QObject::connect(pitchPlan, &QPushButton::pressed, m_sourcePlan,
-    &QWidget::show);
-    */
-
-    QPushButton *playButton = new QPushButton(tr("Play"), centralWidget);
-    QObject::connect(playButton, &QPushButton::pressed, this,
-                     &AppWindow::renderAndPlay);
-
     QVBoxLayout *leftLayout = new QVBoxLayout;
-    leftLayout->addWidget(m_filterTracks, 2);
-    leftLayout->addWidget(m_sourcePlan, 1);
     leftLayout->addStretch();
 
     QVBoxLayout *rightLayout = new QVBoxLayout;
     rightLayout->addWidget(playButton);
+    rightLayout->addWidget(saveButton);
     rightLayout->addWidget(sourceButton);
     rightLayout->addStretch();
 
@@ -87,7 +75,7 @@ AppWindow::AppWindow() : QMainWindow() {
 
 AppWindow::~AppWindow() { delete m_sourceParameters; }
 
-void AppWindow::renderAndPlay() {
+std::vector<double> AppWindow::render() const {
     std::vector<std::pair<int, int>> pitchPeriods;
     double Oq;
 
@@ -97,7 +85,23 @@ void AppWindow::renderAndPlay() {
     std::vector<double> output = appState->formantFilter()->generateFrom(
         glottalSource, pitchPeriods, Oq);
 
-    m_audioPlayer->play(output);
+    return output;
+}
+
+void AppWindow::renderAndPlay() { m_audioPlayer->play(render()); }
+
+void AppWindow::renderAndSave() {
+    QString extFilter = m_audioWriter.supportedFileFormats().join(", ");
+    QString filePath = QFileDialog::getSaveFileName(
+        this, "Save audio file",
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
+        QString("Audio files (%1)").arg(extFilter));
+
+    if (filePath.isNull()) {
+        return;
+    }
+
+    m_audioWriter.write(filePath, render());
 }
 
 void AppWindow::closeEvent(QCloseEvent *event) { qApp->quit(); }

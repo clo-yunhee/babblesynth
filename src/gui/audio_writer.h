@@ -16,11 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BABBLESYNTH_COLOR_PLOT_H
-#define BABBLESYNTH_COLOR_PLOT_H
+#ifndef BABBLESYNTH_AUDIO_WRITER_H
+#define BABBLESYNTH_AUDIO_WRITER_H
 
-#include "coloraxis/qcoloraxis.h"
-#include "colorlineseries/qcolorlineseries.h"
-#include "melvalueaxis/melvalueaxis.h"
+#include <QtMultimedia>
+#include <QtWidgets>
 
-#endif  // BABBLESYNTH_COLOR_PLOT_H
+#include "app_state.h"
+#include "source_parameters.h"
+
+namespace babblesynth {
+namespace gui {
+
+class AudioWriter {
+   public:
+    void write(const QString &filePath, const std::vector<double> &data);
+
+    QStringList supportedFileFormats() const;
+};
+
+}  // namespace gui
+}  // namespace babblesynth
+
+#endif  // BABBLESYNTH_AUDIO_WRITER_H
