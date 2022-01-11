@@ -2,7 +2,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 COMPONENTS Core Widgets Multimedia Charts LinguistTools REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Multimedia Charts PrintSupport LinguistTools REQUIRED)
 
 set(TS_FILES translations/babblesynth-gui_en_GB.ts)
 
@@ -19,6 +19,8 @@ add_executable(babblesynth-gui WIN32
     clickable_label.h
     source_parameters.cpp
     source_parameters.h
+    qcustomplot/qcustomplot.cpp
+    qcustomplot/qcustomplot.h
     voicefxtype/animal_crossing.cpp
     voicefxtype/animal_crossing.h
     voicefxtype/undertale.cpp
@@ -35,7 +37,7 @@ add_executable(babblesynth-gui WIN32
 qt5_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${TS_FILES})
 
 target_link_libraries(babblesynth-gui PRIVATE
-    Qt5::Core Qt5::Widgets Qt5::Multimedia Qt5::Charts Qt5::ChartsPrivate
+    Qt5::Core Qt5::Widgets Qt5::Multimedia Qt5::Charts Qt5::ChartsPrivate Qt5::PrintSupport
     babblesynth fftw3 xerces-c sndfile
 )
 

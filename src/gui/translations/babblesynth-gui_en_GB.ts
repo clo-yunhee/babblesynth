@@ -4,22 +4,47 @@
 <context>
     <name>babblesynth::gui::AppWindow</name>
     <message>
-        <location filename="../app_window.cpp" line="43"/>
+        <location filename="../app_window.cpp" line="46"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="48"/>
+        <location filename="../app_window.cpp" line="51"/>
         <source>Source parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="53"/>
-        <source>Voice FX type</source>
+        <location filename="../app_window.cpp" line="57"/>
+        <source>Undertale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="39"/>
+        <location filename="../app_window.cpp" line="61"/>
+        <source>Animal Crossing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../app_window.cpp" line="87"/>
+        <source>Hey! If I asked you about bugs that would be easy to imitate...which ones would you pick?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../app_window.cpp" line="92"/>
+        <source>Voice effect settings template:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../app_window.cpp" line="99"/>
+        <source>Example dialogue text:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../app_window.cpp" line="146"/>
+        <source>Save audio file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../app_window.cpp" line="42"/>
         <source>Play</source>
         <translation type="unfinished"></translation>
     </message>

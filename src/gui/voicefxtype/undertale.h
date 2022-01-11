@@ -21,6 +21,7 @@
 
 #include <QLabel>
 
+#include "../qcustomplot/qcustomplot.h"
 #include "voicefxtype.h"
 
 namespace babblesynth {
@@ -41,16 +42,26 @@ class Undertale : public VoiceFxType {
     void handleDurationChanged(int value);
     void handlePauseChanged(int value);
 
+    void handlePlotPress(QMouseEvent *event);
+    void handlePlotRelease(QMouseEvent *event);
+    void handlePlotMove(QMouseEvent *event);
+
    private:
+    void checkAndSetFormants(const QPoint &pos);
+
     void updatePlans();
 
     QLabel *m_pitchLabel;
     QLabel *m_durationLabel;
     QLabel *m_pauseLabel;
+    QCPGraph *m_formantGraph;
+    bool m_isDraggingGraph;
 
     double m_pitch;
     double m_duration;
     double m_pauseRatio;
+    double m_F1;
+    double m_F2;
 
     enum CharType {
         CharTypeLetter,

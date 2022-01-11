@@ -41,8 +41,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         RESOLVED_DEPENDENCIES_VAR _r_deps
         UNRESOLVED_DEPENDENCIES_VAR _u_deps
         PRE_EXCLUDE_REGEXES "api-ms-*" "ext-ms-*"
-        POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" "${target_dir}/(?!fftw3).*\\.dll"*
-        DIRECTORIES ${QT_RUNTIME_DIR} ${FFTW_OUTPUT_DIRECTORY}*
+        POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" "${_target_dir}/(?!fftw3).*\\.dll"
+        DIRECTORIES ${QT_RUNTIME_DIR} ${FFTW_OUTPUT_DIRECTORY}
     )
 
     foreach(_file ${_r_deps})

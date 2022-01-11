@@ -28,7 +28,8 @@
 
 using namespace babblesynth::gui::voicefx;
 
-Undertale::Undertale() {
+Undertale::Undertale()
+    : m_isDraggingGraph(false), m_pauseRatio(0), m_F1(700), m_F2(1200) {
     QGroupBox *pitchBox = new QGroupBox("Pitch");
     {
         QSlider *pitchSlider = new QSlider(Qt::Horizontal);
@@ -81,6 +82,7 @@ Undertale::Undertale() {
         connect(pauseSlider, &QSlider::valueChanged, this,
                 &Undertale::handlePauseChanged);
 
+        m_pauseLabel->setText("0 %");
         pauseSlider->setValue(0);
 
         QHBoxLayout *pauseLayout = new QHBoxLayout;
@@ -96,9 +98,67 @@ Undertale::Undertale() {
     hLayout->addWidget(pauseBox);
     hLayout->addStretch();
 
+    QCustomPlot *customPlot = new QCustomPlot(this);
+
+    QObject::connect(customPlot, &QCustomPlot::mousePress, this,
+                     &Undertale::handlePlotPress);
+    QObject::connect(customPlot, &QCustomPlot::mouseRelease, this,
+                     &Undertale::handlePlotRelease);
+    QObject::connect(customPlot, &QCustomPlot::mouseMove, this,
+                     &Undertale::handlePlotMove);
+
+    // Styling.
+    QColor colorBg = QColor::fromRgb(0x19232D);
+    QColor colorFg = QColor::fromRgb(0xE0E1E3);
+    customPlot->xAxis->setBasePen(QPen(colorFg, 1));
+    customPlot->yAxis->setBasePen(QPen(colorFg, 1));
+    customPlot->xAxis->setTickPen(QPen(colorFg, 1));
+    customPlot->yAxis->setTickPen(QPen(colorFg, 1));
+    customPlot->xAxis->setSubTickPen(QPen(colorFg, 1));
+    customPlot->yAxis->setSubTickPen(QPen(colorFg, 1));
+    customPlot->xAxis->setTickLabelColor(colorFg);
+    customPlot->yAxis->setTickLabelColor(colorFg);
+    customPlot->xAxis->setLabelColor(colorFg);
+    customPlot->yAxis->setLabelColor(colorFg);
+    customPlot->setBackground(colorBg);
+    customPlot->axisRect()->setBackground(colorBg);
+    customPlot->setSizePolicy(QSizePolicy::MinimumExpanding,
+                              QSizePolicy::Expanding);
+
+    // set title of plot:
+    customPlot->plotLayout()->insertRow(0);
+    QFont boldFont(font());
+    boldFont.setBold(true);
+    auto plotTitle = new QCPTextElement(customPlot, "Vowel color", boldFont);
+    plotTitle->setTextColor(colorFg);
+    customPlot->plotLayout()->addElement(0, 0, plotTitle);
+
+    QCPGraph *F1F2graph = customPlot->addGraph();
+    F1F2graph->setPen(QPen(colorFg, 1.5));
+    F1F2graph->addData(0, 0);
+    F1F2graph->addData(10000, 10000);
+
+    m_formantGraph = customPlot->addGraph();
+    m_formantGraph->setScatterStyle(
+        QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(colorFg, 1.5),
+                        QColor::fromRgb(0x455364), 14));
+    m_formantGraph->addData(m_F1, m_F2);
+
+    customPlot->xAxis->setLabel("F1 (Hz)");
+    customPlot->yAxis->setLabel("F2 (Hz)");
+
+    customPlot->rescaleAxes();
+    customPlot->xAxis->setRange(300, 1300);
+    customPlot->yAxis->setRange(500, 3000);
+
+    QHBoxLayout *hLayout2 = new QHBoxLayout;
+    hLayout2->addStretch(1);
+    hLayout2->addWidget(customPlot, 4);
+    hLayout2->addStretch(1);
+
     QVBoxLayout *vLayout = new QVBoxLayout;
     vLayout->addLayout(hLayout);
-    vLayout->addStretch();
+    vLayout->addLayout(hLayout2, 1);
 
     setLayout(vLayout);
 }
@@ -149,6 +209,46 @@ void Undertale::handlePauseChanged(int value) {
     updatePlans();
 }
 
+void Undertale::handlePlotPress(QMouseEvent *event) {
+    m_isDraggingGraph = true;
+    checkAndSetFormants(event->pos());
+}
+
+void Undertale::handlePlotRelease(QMouseEvent *event) {
+    if (m_isDraggingGraph) {
+        m_isDraggingGraph = false;
+        checkAndSetFormants(event->pos());
+    }
+}
+
+void Undertale::handlePlotMove(QMouseEvent *event) {
+    if (m_isDraggingGraph) {
+        checkAndSetFormants(event->pos());
+    }
+}
+
+void Undertale::checkAndSetFormants(const QPoint &pos) {
+    double F1, F2;
+    m_formantGraph->pixelsToCoords(pos.x(), pos.y(), F1, F2);
+
+    const auto &rangeF1 = m_formantGraph->keyAxis()->range();
+    const auto &rangeF2 = m_formantGraph->valueAxis()->range();
+
+    F1 = std::clamp(F1, rangeF1.lower, rangeF1.upper);
+    F2 = std::clamp(F2, rangeF2.lower, rangeF2.upper);
+
+    // Make sure F2 > F1
+    F2 = std::max(F1, F2);
+
+    m_F1 = F1;
+    m_F2 = F2;
+
+    m_formantGraph->setData({m_F1}, {m_F2});
+    m_formantGraph->parentPlot()->replot();
+
+    updatePlans();
+}
+
 void Undertale::updatePlans() {
     appState->pitchPlan()->reset(m_pitch);
     appState->amplitudePlan()->reset(0);
@@ -159,9 +259,11 @@ void Undertale::updatePlans() {
 
     for (const auto &ch : m_chars) {
         if (ch == CharTypeLetter) {
+            appState->amplitudePlan()->linearToValueAtTime(
+                1, time + 15.0 / 1000.0);
             time += m_duration;
             appState->amplitudePlan()->linearToValueAtTime(1,
-                                                           time - 2.0 / 1000.0);
+                                                           time - 5.0 / 1000.0);
             appState->amplitudePlan()->linearToValueAtTime(0, time);
             if (!qFuzzyIsNull(m_pauseRatio)) {
                 time += m_pauseRatio * m_duration;
@@ -178,9 +280,14 @@ void Undertale::updatePlans() {
 
     appState->pitchPlan()->linearToValueAtTime(m_pitch, time);
 
-    const double factor = (m_pitch - 50) / 450;
-    const double F1 = 700 + factor * 600;
-    const double F2 = 1200 + factor * 900;
+    // const double factor = (m_pitch - 50) / 450;
+    // const double F1 = m_F1 + factor * 600;
+    // const double F2 = m_F2 + factor * 900;
+    // const double F1 = 230 + factor * 600;
+    // const double F2 = 3000 + factor * 900;
+
+    const double F1 = m_F1;
+    const double F2 = m_F2;
 
     appState->formantPlan(0)->reset(F1);
     appState->formantPlan(0)->linearToValueAtTime(F1, time);

@@ -76,14 +76,18 @@ AppWindow::AppWindow() : QMainWindow() {
 
     voiceFxBtnUndertale->setChecked(true);
 
-    m_dialogueText = new QTextEdit(centralWidget);
+    m_dialogueText = new QPlainTextEdit(centralWidget);
     m_dialogueText->setPlaceholderText("Enter example dialogue text here.");
-    m_dialogueText->setAcceptRichText(false);
+    // Fix to three rows.
+    {
+        QFontMetrics m(m_dialogueText->font());
+        m_dialogueText->setMaximumHeight(3 * m.lineSpacing());
+    }
 
-    QObject::connect(m_dialogueText, &QTextEdit::textChanged, this,
+    QObject::connect(m_dialogueText, &QPlainTextEdit::textChanged, this,
                      &AppWindow::handleDialogueTextChanged);
 
-    m_dialogueText->setText(
+    m_dialogueText->setPlainText(
         tr("Hey! If I asked you about bugs that would be easy to "
            "imitate...which ones would you pick?"));
 
@@ -93,8 +97,8 @@ AppWindow::AppWindow() : QMainWindow() {
         Qt::AlignHCenter);
     leftLayout->addLayout(voiceFxBtnLayout);
     leftLayout->addSpacing(1);
-    leftLayout->addLayout(m_voiceFxLayout);
-    leftLayout->addStretch();
+    leftLayout->addLayout(m_voiceFxLayout, 4);
+    leftLayout->addStretch(1);
     leftLayout->addWidget(
         new QLabel(tr("Example dialogue text:"), centralWidget), 0,
         Qt::AlignHCenter);
