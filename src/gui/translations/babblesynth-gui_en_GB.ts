@@ -4,6 +4,11 @@
 <context>
     <name>babblesynth::gui::AppWindow</name>
     <message>
+        <location filename="../app_window.cpp" line="42"/>
+        <source>Play</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../app_window.cpp" line="46"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
@@ -24,28 +29,23 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="87"/>
+        <location filename="../app_window.cpp" line="91"/>
         <source>Hey! If I asked you about bugs that would be easy to imitate...which ones would you pick?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="92"/>
+        <location filename="../app_window.cpp" line="96"/>
         <source>Voice effect settings template:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="99"/>
+        <location filename="../app_window.cpp" line="103"/>
         <source>Example dialogue text:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="146"/>
+        <location filename="../app_window.cpp" line="150"/>
         <source>Save audio file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../app_window.cpp" line="42"/>
-        <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
