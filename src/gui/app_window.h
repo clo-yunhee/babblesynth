@@ -60,7 +60,7 @@ class AppWindow : public QMainWindow {
 
     QStackedLayout *m_voiceFxLayout;
 
-    QTextEdit *m_dialogueText;
+    QPlainTextEdit *m_dialogueText;
 };
 
 }  // namespace gui
