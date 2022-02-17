@@ -16,46 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BABBLESYNTH_VOICEFX_ANIMAL_CROSSING_H
-#define BABBLESYNTH_VOICEFX_ANIMAL_CROSSING_H
+#ifndef BABBLESYNTH_PHONEMES_POLE_ZERO_H
+#define BABBLESYNTH_PHONEMES_POLE_ZERO_H
 
-#include <QLabel>
-
-#include "../phonemes/phoneme_dictionary.h"
-#include "voicefxtype.h"
+#include <complex>
 
 namespace babblesynth {
 namespace gui {
-namespace voicefx {
+namespace phonemes {
 
-class AnimalCrossing : public VoiceFxType {
-    Q_OBJECT
-   public:
-    AnimalCrossing();
-    virtual ~AnimalCrossing();
+struct PoleZero {
+    double frequency;
+    double quality;
 
-   public slots:
-    void updateDialogueTextChanged(const QString &text) override;
-
-   private slots:
-    void handleOpenDictionaryFile();
-    void handlePitchChanged(int value);
-
-   private:
-    void updatePlans();
-
-    QLabel *m_dictionaryFileLabel;
-    QLabel *m_pitchLabel;
-
-    double m_pitch;
-
-    phonemes::PhonemeDictionary *m_phonemeDictionary;
-
-    std::vector<phonemes::PhonemeMapping> m_phonemeMappings;
+    std::complex<double> toComplex(double fs);
 };
 
-}  // namespace voicefx
+}  // namespace phonemes
 }  // namespace gui
 }  // namespace babblesynth
 
-#endif  // BABBLESYNTH_VOICEFX_ANIMAL_CROSSING_H
+#endif  // BABBLESYNTH_PHONEMES_POLE_ZERO_H
