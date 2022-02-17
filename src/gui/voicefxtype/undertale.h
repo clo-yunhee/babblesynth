@@ -32,7 +32,7 @@ class Undertale : public VoiceFxType {
     Q_OBJECT
    public:
     Undertale();
-    ~Undertale();
+    virtual ~Undertale();
 
    public slots:
     void updateDialogueTextChanged(const QString &text) override;

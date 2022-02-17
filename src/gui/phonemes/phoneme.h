@@ -16,46 +16,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BABBLESYNTH_VOICEFX_ANIMAL_CROSSING_H
-#define BABBLESYNTH_VOICEFX_ANIMAL_CROSSING_H
+#ifndef BABBLESYNTH_PHONEMES_PHONEME_H
+#define BABBLESYNTH_PHONEMES_PHONEME_H
 
-#include <QLabel>
+#include <vector>
+#include <xercesc/util/XMLString.hpp>
 
-#include "../phonemes/phoneme_dictionary.h"
-#include "voicefxtype.h"
+#include "pole_zero.h"
 
 namespace babblesynth {
 namespace gui {
-namespace voicefx {
+namespace phonemes {
 
-class AnimalCrossing : public VoiceFxType {
-    Q_OBJECT
+class Phoneme {
    public:
-    AnimalCrossing();
-    virtual ~AnimalCrossing();
-
-   public slots:
-    void updateDialogueTextChanged(const QString &text) override;
-
-   private slots:
-    void handleOpenDictionaryFile();
-    void handlePitchChanged(int value);
+    Phoneme(const XMLCh *name);
+    virtual ~Phoneme();
 
    private:
-    void updatePlans();
+    XMLCh *m_name;
+    std::vector<PoleZero> m_poles;
+    std::vector<PoleZero> m_zeros;
 
-    QLabel *m_dictionaryFileLabel;
-    QLabel *m_pitchLabel;
+    void addPole(double frequency, double quality);
+    void addZero(double frequency, double quality);
 
-    double m_pitch;
-
-    phonemes::PhonemeDictionary *m_phonemeDictionary;
-
-    std::vector<phonemes::PhonemeMapping> m_phonemeMappings;
+    friend class PhonemeDictionary;
 };
 
-}  // namespace voicefx
+}  // namespace phonemes
 }  // namespace gui
 }  // namespace babblesynth
 
-#endif  // BABBLESYNTH_VOICEFX_ANIMAL_CROSSING_H
+#endif  // BABBLESYNTH_PHONEMES_PHONEME_H

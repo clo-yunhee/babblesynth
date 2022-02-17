@@ -17,7 +17,9 @@
  */
 
 #include <QtWidgets>
+#include <iostream>
 #include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/util/XMLString.hpp>
 
 #include "app_window.h"
 
@@ -27,6 +29,9 @@ int main(int argc, char* argv[]) {
     try {
         XMLPlatformUtils::Initialize();
     } catch (const XMLException& toCatch) {
+        char* message = XMLString::transcode(toCatch.getMessage());
+        std::cout << "Error during initialization! :\n" << message << "\n";
+        XMLString::release(&message);
         return EXIT_FAILURE;
     }
 

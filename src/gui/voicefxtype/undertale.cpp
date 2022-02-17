@@ -30,7 +30,7 @@ using namespace babblesynth::gui::voicefx;
 
 Undertale::Undertale()
     : m_isDraggingGraph(false), m_pauseRatio(0), m_F1(700), m_F2(1200) {
-    QGroupBox *pitchBox = new QGroupBox("Pitch");
+    QGroupBox *pitchBox = new QGroupBox(tr("Pitch"));
     {
         QSlider *pitchSlider = new QSlider(Qt::Horizontal);
         pitchSlider->setRange(hzToMel(50), hzToMel(500));
@@ -50,7 +50,7 @@ Undertale::Undertale()
         pitchBox->setLayout(pitchLayout);
     }
 
-    QGroupBox *durationBox = new QGroupBox("Duration");
+    QGroupBox *durationBox = new QGroupBox(tr("Duration"));
     {
         QSlider *durationSlider = new QSlider(Qt::Horizontal);
         durationSlider->setRange(50, 500);
@@ -70,7 +70,7 @@ Undertale::Undertale()
         durationBox->setLayout(durationLayout);
     }
 
-    QGroupBox *pauseBox = new QGroupBox("Pause ratio");
+    QGroupBox *pauseBox = new QGroupBox(tr("Pause ratio"));
     {
         QSlider *pauseSlider = new QSlider(Qt::Horizontal);
         pauseSlider->setRange(0, 50);
@@ -129,7 +129,8 @@ Undertale::Undertale()
     customPlot->plotLayout()->insertRow(0);
     QFont boldFont(font());
     boldFont.setBold(true);
-    auto plotTitle = new QCPTextElement(customPlot, "Vowel color", boldFont);
+    auto plotTitle =
+        new QCPTextElement(customPlot, tr("Vowel color"), boldFont);
     plotTitle->setTextColor(colorFg);
     customPlot->plotLayout()->addElement(0, 0, plotTitle);
 
