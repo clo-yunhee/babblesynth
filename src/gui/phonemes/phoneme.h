@@ -30,11 +30,13 @@ namespace phonemes {
 
 class Phoneme {
    public:
-    Phoneme(const XMLCh *name);
+    Phoneme(const XMLCh* name);
     virtual ~Phoneme();
 
+    const XMLCh* name() const;
+
    private:
-    XMLCh *m_name;
+    XMLCh* m_name;
     std::vector<PoleZero> m_poles;
     std::vector<PoleZero> m_zeros;
 

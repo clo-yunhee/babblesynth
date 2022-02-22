@@ -5,7 +5,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     set(CMAKE_CXX_FLAGS "-Wall -Wno-sign-compare -fno-math-errno")
     set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -g0 -flto -ftree-vectorize -DNDEBUG")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-    set(CMAKE_CXX_FLAGS_DEBUG "-Og -g")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 
     include(CheckLinkerFlag)
     check_linker_flag(CXX "-fuse-ld=lld" can_use_lld)

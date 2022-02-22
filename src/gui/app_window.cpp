@@ -71,11 +71,6 @@ AppWindow::AppWindow() : QMainWindow() {
     m_voiceFxLayout->addWidget(new voicefx::Undertale);
     m_voiceFxLayout->addWidget(new voicefx::AnimalCrossing);
 
-    QObject::connect(voiceFxBtnGroup, &QButtonGroup::idToggled, this,
-                     &AppWindow::chooseVoiceFxType);
-
-    voiceFxBtnUndertale->setChecked(true);
-
     m_dialogueText = new QPlainTextEdit(centralWidget);
     m_dialogueText->setPlaceholderText("Enter example dialogue text here.");
     // Fix to three rows.
@@ -90,6 +85,11 @@ AppWindow::AppWindow() : QMainWindow() {
     m_dialogueText->setPlainText(
         tr("Hey! If I asked you about bugs that would be easy to "
            "imitate...which ones would you pick?"));
+
+    QObject::connect(voiceFxBtnGroup, &QButtonGroup::idToggled, this,
+                     &AppWindow::chooseVoiceFxType);
+
+    voiceFxBtnUndertale->setChecked(true);
 
     QVBoxLayout *leftLayout = new QVBoxLayout;
     leftLayout->addWidget(
@@ -167,12 +167,14 @@ void AppWindow::chooseVoiceFxType(int id, bool checked) {
 }
 
 void AppWindow::handleDialogueTextChanged() {
-    auto widget =
-        static_cast<voicefx::VoiceFxType *>(m_voiceFxLayout->currentWidget());
-
     QString text = m_dialogueText->toPlainText();
 
-    widget->updateDialogueTextChanged(text);
+    for (int i = 0; i < m_voiceFxLayout->count(); ++i) {
+        auto widget =
+            static_cast<voicefx::VoiceFxType *>(m_voiceFxLayout->widget(i));
+
+        widget->updateDialogueTextChanged(text);
+    }
 }
 
 void AppWindow::closeEvent(QCloseEvent *event) { qApp->quit(); }

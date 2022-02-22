@@ -33,6 +33,7 @@ add_executable(babblesynth-gui WIN32
     voicefxtype/undertale.h
     voicefxtype/voicefxtype.h
     main.cpp
+    dictionaries/dictionaries.qrc
     fonts/fonts.qrc
     icons/icons.qrc
     qdarkstyle/dark/style.qrc

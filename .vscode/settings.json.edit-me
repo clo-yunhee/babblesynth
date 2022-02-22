@@ -2,5 +2,6 @@
     "cmake.generator": "<preferred generator>",
     "cmake.configureSettings": {
         "CMAKE_PREFIX_PATH": "<path to Qt 5.15.2 installation if not system>"
-    }
+    },
+    "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}"
 }

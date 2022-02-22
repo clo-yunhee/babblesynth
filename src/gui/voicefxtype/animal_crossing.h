@@ -40,17 +40,25 @@ class AnimalCrossing : public VoiceFxType {
    private slots:
     void handleOpenDictionaryFile();
     void handlePitchChanged(int value);
+    void handleDurationChanged(int value);
 
    private:
+    void extractDictionaryFiles();
+    void loadDictionaryFile(const QString &filePath);
+
+    void updatePhonemes();
     void updatePlans();
 
     QLabel *m_dictionaryFileLabel;
     QLabel *m_pitchLabel;
+    QLabel *m_durationLabel;
 
     double m_pitch;
+    double m_duration;
 
     phonemes::PhonemeDictionary *m_phonemeDictionary;
 
+    QByteArray m_textBytes;
     std::vector<phonemes::PhonemeMapping> m_phonemeMappings;
 };
 

@@ -29,7 +29,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app_window.cpp" line="91"/>
+        <location filename="../app_window.cpp" line="86"/>
         <source>Hey! If I asked you about bugs that would be easy to imitate...which ones would you pick?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -84,6 +84,64 @@
     <message>
         <location filename="../source_parameters.cpp" line="294"/>
         <source>Parameter info for %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>babblesynth::gui::voicefx::AnimalCrossing</name>
+    <message>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="39"/>
+        <source>Phoneme dictionary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="42"/>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="123"/>
+        <source>Open dictionary file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="55"/>
+        <source>Pitch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="75"/>
+        <source>Duration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="172"/>
+        <source>Phoneme dictionary failed to load</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="173"/>
+        <source>Phoneme dictionary at %1 failed to load:
+%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>babblesynth::gui::voicefx::Undertale</name>
+    <message>
+        <location filename="../voicefxtype/undertale.cpp" line="33"/>
+        <source>Pitch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../voicefxtype/undertale.cpp" line="53"/>
+        <source>Duration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../voicefxtype/undertale.cpp" line="73"/>
+        <source>Pause ratio</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../voicefxtype/undertale.cpp" line="133"/>
+        <source>Vowel color</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

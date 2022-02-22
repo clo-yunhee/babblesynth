@@ -1,6 +1,6 @@
 <dictionary>
     <phonemes>
-        <phoneme name=""></phoneme>
+        <phoneme name=" "></phoneme>
         <phoneme name="a">
             <pole frequency="900" quality="6" />
             <pole frequency="1300" quality="6" />
@@ -11,7 +11,7 @@
             <phoneme intensity="1" duration="1">a</phoneme>
         </mapping>
         <mapping for=" ">
-            <phoneme intensity="0" duration="0.5"></phoneme>
+            <phoneme intensity="0" duration="0.5"> </phoneme>
         </mapping>
     </mappings>
 </dictionary>
