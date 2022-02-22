@@ -35,18 +35,36 @@ class formant_filter : public parameter_holder {
         const std::vector<std::pair<int, int>>& periods, double Oq);
 
    private:
-    void designFilter(const std::vector<double>& freqs);
-    double designFilterSection(double f, double bw, std::vector<double>& b,
+    void designFilter(const std::vector<double>& resF,
+                      const std::vector<double>& resB,
+                      const std::vector<double>& antiF,
+                      const std::vector<double>& antiB);
+
+    double designResonance(double f, double bw, std::vector<double>& b,
+                           std::vector<double>& a);
+
+    double designAntiresonance(double f, double bw, std::vector<double>& b,
                                std::vector<double>& a);
 
     bool onParameterChange(const parameter& param) override;
 
     variable m_F1;
     variable m_F2;
-
     variable m_F3;
     variable m_F4;
     variable m_F5;
+
+    variable m_B1;
+    variable m_B2;
+    variable m_B3;
+    variable m_B4;
+    variable m_B5;
+
+    variable m_Z1;
+    variable m_Z2;
+
+    variable m_A1;
+    variable m_A2;
 
     std::vector<std::array<double, 6>> m_filter;
     std::vector<std::array<double, 2>> m_filterState;

@@ -25,6 +25,8 @@ Phoneme::Phoneme(const XMLCh* name) : m_name(XMLString::replicate(name)) {}
 
 Phoneme::~Phoneme() { XMLString::release(&m_name); }
 
+const XMLCh* Phoneme::name() const { return m_name; }
+
 void Phoneme::addPole(const double frequency, const double quality) {
     m_poles.push_back({frequency, quality});
 }

@@ -29,7 +29,7 @@ namespace babblesynth {
 
 class parameter_holder {
    public:
-    static constexpr int maxNumberOfParameters = 10;
+    static constexpr int maxNumberOfParameters = 30;
 
     const std::vector<std::string> getParameterNames() const;
 

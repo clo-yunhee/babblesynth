@@ -29,17 +29,36 @@ namespace babblesynth {
 namespace gui {
 namespace phonemes {
 
+class PhonemeDictionary;
+
+struct PhonemeMapping {
+    Phoneme *phoneme;
+    double duration;
+    double intensity;
+};
+
+}  // namespace phonemes
+}  // namespace gui
+}  // namespace babblesynth
+
+std::ostream &operator<<(
+    std::ostream &os,
+    const babblesynth::gui::phonemes::PhonemeDictionary &dictionary);
+
+std::ostream &operator<<(
+    std::ostream &os,
+    const std::vector<babblesynth::gui::phonemes::PhonemeMapping> &mappings);
+
+namespace babblesynth {
+namespace gui {
+namespace phonemes {
+
 class PhonemeDictionary {
    public:
-    struct MappingDef {
-        Phoneme *phoneme;
-        double duration;
-        double intensity;
-    };
-
+    PhonemeDictionary() = default;
     virtual ~PhonemeDictionary();
 
-    std::vector<MappingDef> mappingsFor(const char *text);
+    std::vector<PhonemeMapping> mappingsFor(const char *text);
 
     static PhonemeDictionary *loadFromXML(const char *xmlFilename);
 
@@ -47,10 +66,11 @@ class PhonemeDictionary {
     PhonemeDictionary(xercesc::DOMDocument *doc);
 
     std::unordered_map<XMLCh *, std::unique_ptr<Phoneme>> m_phonemes;
-    std::unordered_map<XMLCh *, std::vector<MappingDef>> m_mappings;
-};
+    std::unordered_map<XMLCh *, std::vector<PhonemeMapping>> m_mappings;
 
-using PhonemeMapping = PhonemeDictionary::MappingDef;
+    friend std::ostream & ::operator<<(std::ostream &os,
+                                       const PhonemeDictionary &phoneme);
+};
 
 }  // namespace phonemes
 }  // namespace gui

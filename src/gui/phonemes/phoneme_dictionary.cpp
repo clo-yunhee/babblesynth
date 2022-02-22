@@ -55,13 +55,13 @@ std::vector<PhonemeMapping> PhonemeDictionary::mappingsFor(const char *text) {
     XMLCh *textXml = XMLString::transcode(text);
     int textLength = XMLString::stringLen(textXml);
 
-    std::vector<MappingDef> mappings;
+    std::vector<PhonemeMapping> mappings;
 
     int chIndex = 0;
 
     while (chIndex < textLength) {
         int prefixLengthFound = 0;
-        std::vector<MappingDef> mappingFound;
+        std::vector<PhonemeMapping> mappingFound;
 
         // Search for the longest mapping that starts at chIndex.
         for (const auto &[prefix, mapping] : m_mappings) {
@@ -98,7 +98,7 @@ PhonemeDictionary *PhonemeDictionary::loadFromXML(const char *xmlFilename) {
         ((DOMImplementationLS *)impl)
             ->createLSParser(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
 
-    DOMDocument *doc = 0;
+    DOMDocument *doc = nullptr;
 
     try {
         doc = parser->parseURI(xmlFilename);
@@ -166,6 +166,10 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
     constexpr XMLCh tagIntensity[] = {
         chLatin_i, chLatin_n, chLatin_t, chLatin_e, chLatin_n,
         chLatin_s, chLatin_i, chLatin_t, chLatin_y, chNull};
+
+    if (doc == nullptr) {
+        throw std::logic_error("Phoneme dictionary document does not exist");
+    }
 
     DOMElement *root = doc->getDocumentElement();
 
@@ -329,7 +333,7 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
                     "tag");
             }
 
-            std::vector<MappingDef> mappingDefs;
+            std::vector<PhonemeMapping> mappingDefs;
 
             for (int iPh = 0; iPh < phonemeList->getLength(); ++iPh) {
                 DOMElement *phonemeElement =
@@ -405,4 +409,42 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
                                std::move(mappingDefs));
         }
     }
+}
+
+std::ostream &operator<<(std::ostream &os,
+                         const PhonemeDictionary &dictionary) {
+    os << "PhonemeDictionary[\n";
+    os << "  phonemes: [\n";
+
+    for (const auto &[name, phoneme] : dictionary.m_phonemes) {
+        char *str = XMLString::transcode(name);
+        os << "    (" << str << "),\n";
+        XMLString::release(&str);
+    }
+
+    os << "  ],\n";
+    os << "  mappings: [\n";
+
+    for (const auto &[name, mappings] : dictionary.m_mappings) {
+        char *str = XMLString::transcode(name);
+        os << "    (" << str << " => " << mappings << "),\n";
+        XMLString::release(&str);
+    }
+
+    os << "  ]\n";
+    os << "]" << std::endl;
+
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os,
+                         const std::vector<PhonemeMapping> &mappings) {
+    os << "[";
+    for (const auto &def : mappings) {
+        char *str2 = XMLString::transcode(def.phoneme->name());
+        os << "<" << str2 << ">, ";
+        XMLString::release(&str2);
+    }
+    os << "]";
+    return os;
 }
