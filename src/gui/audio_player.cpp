@@ -18,9 +18,10 @@
 
 #include "audio_player.h"
 
-#include <qaudiodeviceinfo.h>
-
+#include <QDebug>
 #include <stdexcept>
+
+#include "widgets/app_window.h"
 
 using namespace babblesynth::gui;
 

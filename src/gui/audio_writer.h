@@ -19,11 +19,13 @@
 #ifndef BABBLESYNTH_AUDIO_WRITER_H
 #define BABBLESYNTH_AUDIO_WRITER_H
 
-#include <QtMultimedia>
-#include <QtWidgets>
+#include <QString>
+#include <QStringList>
+#include <utility>
+#include <vector>
 
 #include "app_state.h"
-#include "source_parameters.h"
+#include "widgets/source_parameters.h"
 
 namespace babblesynth {
 namespace gui {

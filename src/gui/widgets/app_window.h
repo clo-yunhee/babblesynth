@@ -19,10 +19,13 @@
 #ifndef BABBLESYNTH_APP_WINDOW_H
 #define BABBLESYNTH_APP_WINDOW_H
 
-#include <QtWidgets>
+#include <QMainWindow>
+#include <QPlainTextEdit>
+#include <QStackedLayout>
+#include <vector>
 
-#include "audio_player.h"
-#include "audio_writer.h"
+#include "../audio_player.h"
+#include "../audio_writer.h"
 #include "source_parameters.h"
 
 namespace babblesynth {

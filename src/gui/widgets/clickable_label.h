@@ -19,7 +19,9 @@
 #ifndef BABBLESYNTH_CLICKABLE_LABEL_H
 #define BABBLESYNTH_CLICKABLE_LABEL_H
 
-#include <QtWidgets>
+#include <QLabel>
+#include <QMouseEvent>
+#include <QWidget>
 
 namespace babblesynth {
 namespace gui {

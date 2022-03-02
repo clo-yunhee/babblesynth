@@ -20,6 +20,8 @@
 
 #include <sndfile.h>
 
+#include <QDebug>
+
 using namespace babblesynth::gui;
 
 void AudioWriter::write(const QString &filePath, const int formatIndex,

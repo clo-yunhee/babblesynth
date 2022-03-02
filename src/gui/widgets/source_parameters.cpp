@@ -20,15 +20,20 @@
 
 #include <babblesynth.h>
 #include <fftw3.h>
-#include <private/qlogvalueaxis_p.h>
-#include <qareaseries.h>
-#include <qlogvalueaxis.h>
 
+#include <QAreaSeries>
+#include <QChart>
+#include <QChartView>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QMessageBox>
+#include <QValueAxis>
 #include <cmath>
 #include <new>
 #include <stdexcept>
 
-#include "app_state.h"
+#include "../app_state.h"
 #include "clickable_label.h"
 
 using namespace babblesynth::gui;

@@ -18,8 +18,8 @@
 
 #include "app_window.h"
 
-#include "voicefxtype/animal_crossing.h"
-#include "voicefxtype/undertale.h"
+#include "../voicefxtype/animal_crossing.h"
+#include "../voicefxtype/undertale.h"
 
 using namespace babblesynth::gui;
 

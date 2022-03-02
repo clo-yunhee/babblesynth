@@ -9,16 +9,16 @@ set(TS_FILES translations/babblesynth-gui_en_GB.ts)
 add_executable(babblesynth-gui WIN32
     app_state.cpp
     app_state.h
-    app_window.cpp
-    app_window.h
     audio_player.cpp
     audio_player.h
     audio_writer.cpp
     audio_writer.h
-    clickable_label.cpp
-    clickable_label.h
-    source_parameters.cpp
-    source_parameters.h
+    widgets/app_window.cpp
+    widgets/app_window.h
+    widgets/clickable_label.cpp
+    widgets/clickable_label.h
+    widgets/source_parameters.cpp
+    widgets/source_parameters.h
     phonemes/pole_zero.h
     phonemes/phoneme_dictionary.cpp
     phonemes/phoneme_dictionary.h
