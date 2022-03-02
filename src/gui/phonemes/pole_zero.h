@@ -26,10 +26,9 @@ namespace gui {
 namespace phonemes {
 
 struct PoleZero {
+    int i;
     double frequency;
-    double quality;
-
-    std::complex<double> toComplex(double fs);
+    double bandwidth;
 };
 
 }  // namespace phonemes

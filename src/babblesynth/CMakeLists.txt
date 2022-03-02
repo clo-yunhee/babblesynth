@@ -1,12 +1,11 @@
 add_library(babblesynth OBJECT
     filter/butterworth.cpp
     filter/butterworth.h
+    filter/filters.h
     filter/formant_filter.cpp
     filter/formant_filter.h
     filter/lfilter.cpp
-    filter/sos_filter.h
     filter/sosfilt.cpp
-    filter/tf_filter.h
     filter/zpk2sos.cpp
     generator/noise.cpp
     generator/noise.h

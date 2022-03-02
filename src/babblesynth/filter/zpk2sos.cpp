@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-#include "sos_filter.h"
+#include "filters.h"
 
 using namespace babblesynth;
 

@@ -35,13 +35,23 @@ class Phoneme {
 
     const XMLCh* name() const;
 
+    template <typename PoleFn, typename ZeroFn>
+    void updatePlansWith(const PoleFn& fnPole, const ZeroFn& fnZero) {
+        for (const auto& pole : m_poles) {
+            fnPole(pole.i, pole.frequency, pole.bandwidth);
+        }
+        for (const auto& zero : m_zeros) {
+            fnZero(zero.i, zero.frequency, zero.bandwidth);
+        }
+    }
+
    private:
     XMLCh* m_name;
     std::vector<PoleZero> m_poles;
     std::vector<PoleZero> m_zeros;
 
-    void addPole(double frequency, double quality);
-    void addZero(double frequency, double quality);
+    void addPole(double frequency, double bandwidth, int i = -1);
+    void addZero(double frequency, double bandwidth, int i = -1);
 
     friend class PhonemeDictionary;
 };

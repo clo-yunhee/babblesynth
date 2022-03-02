@@ -42,7 +42,7 @@ Undertale::Undertale()
         connect(pitchSlider, &QSlider::valueChanged, this,
                 &Undertale::handlePitchChanged);
 
-        pitchSlider->setValue(hzToMel(120));
+        pitchSlider->setValue(hzToMel(180));
 
         QHBoxLayout *pitchLayout = new QHBoxLayout;
         pitchLayout->addWidget(pitchSlider);
@@ -62,7 +62,7 @@ Undertale::Undertale()
         connect(durationSlider, &QSlider::valueChanged, this,
                 &Undertale::handleDurationChanged);
 
-        durationSlider->setValue(90);
+        durationSlider->setValue(65);
 
         QHBoxLayout *durationLayout = new QHBoxLayout;
         durationLayout->addWidget(durationSlider);
@@ -251,6 +251,13 @@ void Undertale::checkAndSetFormants(const QPoint &pos) {
 }
 
 void Undertale::updatePlans() {
+    /*qDebug() << "Rendering Undertale-type dialogue with parameters:";
+    qDebug() << "- pitch: " << m_pitch;
+    qDebug() << "- duration: " << m_duration;
+    qDebug() << "- pause ratio: " << m_pauseRatio;
+    qDebug() << "- F1: " << m_F1;
+    qDebug() << "- F2: " << m_F2;*/
+
     appState->pitchPlan()->reset(m_pitch);
     appState->amplitudePlan()->reset(0);
 
@@ -290,10 +297,10 @@ void Undertale::updatePlans() {
     const double F1 = m_F1;
     const double F2 = m_F2;
 
-    appState->formantPlan(0)->reset(F1);
-    appState->formantPlan(0)->linearToValueAtTime(F1, time);
-    appState->formantPlan(1)->reset(F2);
-    appState->formantPlan(1)->linearToValueAtTime(F2, time);
+    appState->formantFrequencyPlan(0)->reset(F1);
+    appState->formantFrequencyPlan(0)->linearToValueAtTime(F1, time);
+    appState->formantFrequencyPlan(1)->reset(F2);
+    appState->formantFrequencyPlan(1)->linearToValueAtTime(F2, time);
 
     appState->updatePlans();
 }
