@@ -1,6 +1,6 @@
 ﻿/*
  * BabbleSynth
- * Copyright (C) 2021  Clo Yun-Hee Dufour
+ * Copyright (C) 2022  Clo Yun-Hee Dufour
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class AppWindow : public QMainWindow {
     };
 
     AppWindow();
-    ~AppWindow();
+    virtual ~AppWindow();
 
    private slots:
     void renderAndPlay();
