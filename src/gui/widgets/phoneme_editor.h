@@ -1,4 +1,4 @@
-﻿/*
+/*
  * BabbleSynth
  * Copyright (C) 2021  Clo Yun-Hee Dufour
  *
@@ -16,53 +16,57 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BABBLESYNTH_AUDIO_PLAYER_H
-#define BABBLESYNTH_AUDIO_PLAYER_H
+#ifndef BABBLESYNTH_PHONEME_EDITOR_H
+#define BABBLESYNTH_PHONEME_EDITOR_H
 
-#include <QAudio>
-#include <QAudioDeviceInfo>
-#include <QAudioFormat>
-#include <QAudioOutput>
-#include <QBuffer>
-#include <QByteArray>
-#include <QObject>
+#include <QMainWindow>
+#include <QPlainTextEdit>
+#include <QStackedLayout>
 #include <vector>
 
-#include "app_state.h"
+#include "audio_player.h"
+#include "audio_writer.h"
+#include "source_parameters.h"
 
 namespace babblesynth {
 namespace gui {
 
-class AudioPlayer : public QObject {
+class PhonemeEditor : public QMainWindow {
     Q_OBJECT
 
    public:
-    AudioPlayer(QObject *parent = nullptr);
+    enum VoiceFxType {
+        VoiceFxUndertale = 0,
+        VoiceFxAnimalCrossing,
+    };
 
-    void play(const std::vector<double> &data);
-
-    int preferredSampleRate() const;
+    AppWindow();
+    ~AppWindow();
 
    private slots:
-    void onStateChanged(QAudio::State state);
+    void renderAndPlay();
+    void renderAndSave();
+    void chooseVoiceFxType(int id, bool checked);
+    void handleDialogueTextChanged();
+
+   protected:
+    void closeEvent(QCloseEvent *event) override;
 
    private:
-    void initAudio();
-
-    QAudioDeviceInfo m_deviceInfo;
+    std::vector<double> render() const;
 
     int m_sampleRate;
-    QAudioFormat m_audioFormat;
 
-    QAudioOutput *m_audio;
+    AudioPlayer *m_audioPlayer;
+    AudioWriter m_audioWriter;
+    SourceParameters *m_sourceParameters;
 
-    QByteArray m_data;
-    QBuffer m_buffer;
+    QStackedLayout *m_voiceFxLayout;
 
-    bool m_playing;
+    QPlainTextEdit *m_dialogueText;
 };
 
 }  // namespace gui
 }  // namespace babblesynth
 
-#endif  // BABBLESYNTH_AUDIO_PLAYER_H
+#endif  // BABBLESYNTH_PHONEME_EDITOR_H

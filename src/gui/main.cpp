@@ -21,7 +21,7 @@
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/util/XMLString.hpp>
 
-#include "app_window.h"
+#include "widgets/app_window.h"
 
 using namespace xercesc;
 

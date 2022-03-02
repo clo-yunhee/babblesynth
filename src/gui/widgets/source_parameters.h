@@ -21,11 +21,17 @@
 
 #include <babblesynth.h>
 
-#include <QtCharts>
-#include <QtWidgets>
+#include <QFormLayout>
+#include <QLineSeries>
+#include <QPointF>
+#include <QSplineSeries>
+#include <QVector>
+#include <QWidget>
 
 namespace babblesynth {
 namespace gui {
+
+using namespace QtCharts;
 
 class SourceParameters : public QWidget {
     Q_OBJECT
