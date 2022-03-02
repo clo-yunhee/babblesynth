@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "tf_filter.h"
+#include "filters.h"
 
 using namespace babblesynth;
 
@@ -55,39 +55,4 @@ void filter::lfilter(const std::vector<double>& b, const std::vector<double>& a,
             y[k] = x[k] * b[j];
         }
     }
-}
-
-std::vector<double> filter::lfiltic(const std::vector<double>& b,
-                                    const std::vector<double>& a,
-                                    const std::vector<double>& x,
-                                    const std::vector<double>& y, int end) {
-    const int N = a.size() - 1;
-    const int M = b.size() - 1;
-    const int K = std::max(M, N);
-
-    std::vector<double> zi(K, 0);
-
-    double sum;
-
-    for (int m = 0; m < M; ++m) {
-        sum = 0;
-        for (int j = 0; j < M - m; ++j) {
-            if (end - M + j >= 0) {
-                sum += b[m + 1 + j] * x[end - M + j];
-            }
-        }
-        zi[m] = sum;
-    }
-
-    for (int n = 0; n < N; ++n) {
-        sum = 0;
-        for (int j = 0; j < N - n; ++j) {
-            if (end - N + j >= 0) {
-                sum += a[n + 1 + j] * y[end - N + j];
-            }
-        }
-        zi[n] -= sum;
-    }
-
-    return zi;
 }

@@ -19,7 +19,6 @@ add_executable(babblesynth-gui WIN32
     clickable_label.h
     source_parameters.cpp
     source_parameters.h
-    phonemes/pole_zero.cpp
     phonemes/pole_zero.h
     phonemes/phoneme_dictionary.cpp
     phonemes/phoneme_dictionary.h

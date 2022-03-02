@@ -27,10 +27,14 @@ Phoneme::~Phoneme() { XMLString::release(&m_name); }
 
 const XMLCh* Phoneme::name() const { return m_name; }
 
-void Phoneme::addPole(const double frequency, const double quality) {
-    m_poles.push_back({frequency, quality});
+void Phoneme::addPole(const double frequency, const double bandwidth,
+                      const int i) {
+    const int ri = i >= 0 ? i : m_poles.size();
+    m_poles.push_back({ri, frequency, bandwidth});
 }
 
-void Phoneme::addZero(const double frequency, const double quality) {
-    m_zeros.push_back({frequency, quality});
+void Phoneme::addZero(const double frequency, const double bandwidth,
+                      const int i) {
+    const int ri = i >= 0 ? i : m_zeros.size();
+    m_zeros.push_back({ri, frequency, bandwidth});
 }

@@ -2,13 +2,79 @@
     <phonemes>
         <phoneme name=" "></phoneme>
         <phoneme name="a">
-            <pole frequency="900" quality="6" />
-            <pole frequency="1300" quality="6" />
+            <pole frequency="900"  bandwidth="90" />
+            <pole frequency="1600" bandwidth="110" />
+            <pole frequency="2600" bandwidth="140" />
+            <pole frequency="3600" bandwidth="130" />
+            <pole frequency="4200" bandwidth="120" />
+        </phoneme>
+        <phoneme name="e">
+            <pole frequency="450"  bandwidth="60" />
+            <pole frequency="2300" bandwidth="100" />
+            <pole frequency="2800" bandwidth="100" />
+            <pole frequency="3900" bandwidth="140" />
+            <pole frequency="4800" bandwidth="160" />
+        </phoneme>
+        <phoneme name="i">
+            <pole frequency="280"  bandwidth="70" />
+            <pole frequency="2500" bandwidth="120" />
+            <pole frequency="3200" bandwidth="110" />
+            <pole frequency="3600" bandwidth="120" />
+            <pole frequency="3900" bandwidth="130" />
+        </phoneme>
+        <phoneme name="o">
+            <pole frequency="480"  bandwidth="90" />
+            <pole frequency="110"  bandwidth="100" />
+            <pole frequency="2500" bandwidth="120" />
+            <pole frequency="3600" bandwidth="160" />
+            <pole frequency="4200" bandwidth="200" />
+        </phoneme>
+        <phoneme name="uh">
+            <pole frequency="680" bandwidth="90" />
+            <pole frequency="1400" bandwidth="110" />
+            <pole frequency="2600" bandwidth="120" />
+            <pole frequency="3500" bandwidth="110" />
+            <pole frequency="5300" bandwidth="130" />
+        </phoneme>
+        <phoneme name="b">
+            <pole frequency="400" bandwidth="300" />
+            <pole frequency="1300" bandwidth="110" />
+            <pole frequency="2600" bandwidth="130" />
+            <pole frequency="3500" bandwidth="160" />
+            <pole frequency="4500" bandwidth="140" />
+            <zero frequency="2300" bandwidth="100" />
+        </phoneme>
+        <phoneme name="l">
+            <pole frequency="290"  bandwidth="90" />
+            <pole frequency="1650" bandwidth="100" />
+            <pole frequency="2550" bandwidth="110" />
+            <pole frequency="3500" bandwidth="160" />
+            <pole frequency="4200" bandwidth="200" />
+            <zero frequency="900"  bandwidth="130" />
+            <zero frequency="2100" bandwidth="160" />
         </phoneme>
     </phonemes>
     <mappings>
         <mapping for="a">
             <phoneme intensity="1" duration="1">a</phoneme>
+        </mapping>
+        <mapping for="e">
+            <phoneme intensity="1" duration="0.8">e</phoneme>
+        </mapping>
+        <mapping for="i">
+            <phoneme intensity="1" duration="0.8">i</phoneme>
+        </mapping>
+        <mapping for="b">
+            <phoneme intensity="1" duration="0.1">b</phoneme>
+            <phoneme intensity="1" duration="0.9">uh</phoneme>
+        </mapping>
+        <mapping for="l">
+            <phoneme intensity="1" duration="0.1">l</phoneme>
+            <phoneme intensity="1" duration="0.9">uh</phoneme>
+        </mapping>
+        <mapping for="h">
+            <phoneme intensity="1" duration="0.1">uh</phoneme>
+            <phoneme intensity="1" duration="0.9">uh</phoneme>
         </mapping>
         <mapping for=" ">
             <phoneme intensity="0" duration="0.5"> </phoneme>

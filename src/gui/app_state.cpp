@@ -26,26 +26,33 @@
 
 using namespace babblesynth::gui;
 
+constexpr int nF = 5;
+constexpr int nZ = 2;
+
 AppState::AppState(int sampleRate)
     : m_pitchPlan(false),
       m_amplitudePlan(false),
-      m_F1_plan(true),
-      m_F2_plan(true),
-      m_F3_plan(true),
-      m_F4_plan(true),
-      m_F5_plan(true) {
+      m_formantFrequencyPlans(nF),
+      m_formantBandwidthPlans(nF),
+      m_antiformantFrequencyPlans(nZ),
+      m_antiformantBandwidthPlans(nZ) {
     setSampleRate(sampleRate);
     m_pitchPlan.reset(140).stepToValueAtTime(140, 1.0);
     m_amplitudePlan.reset(1).stepToValueAtTime(1, 0.95).cubicToValueAtTime(0,
                                                                            1.0);
-    m_F1_plan.reset(700).stepToValueAtTime(700, 0.35).cubicToValueAtTime(1100,
-                                                                         0.9);
-    m_F2_plan.reset(1200)
-        .stepToValueAtTime(1200, 0.35)
-        .cubicToValueAtTime(1300, 0.9);
-    m_F3_plan.reset(2400);
-    m_F4_plan.reset(2900);
-    m_F5_plan.reset(4200);
+    formantFrequencyPlan(2)->reset(2400);
+    formantFrequencyPlan(3)->reset(2900);
+    formantFrequencyPlan(4)->reset(4200);
+
+    for (int i = 0; i < nF; ++i) {
+        formantBandwidthPlan(i)->reset(80 + i * 15);
+    }
+
+    antiformantFrequencyPlan(0)->reset(400);
+    antiformantBandwidthPlan(0)->reset(70);
+
+    antiformantFrequencyPlan(1)->reset(1200);
+    antiformantBandwidthPlan(1)->reset(100);
 }
 
 void AppState::setSampleRate(int sampleRate) {
@@ -68,30 +75,61 @@ babblesynth::filter::formant_filter *AppState::formantFilter() {
     return m_formantFilter.get();
 }
 
-babblesynth::variable_plan *AppState::formantPlan(int n) {
-    switch (n) {
-        case 0:
-            return &m_F1_plan;
-        case 1:
-            return &m_F2_plan;
-        case 2:
-            return &m_F3_plan;
-        case 3:
-            return &m_F4_plan;
-        case 4:
-            return &m_F5_plan;
-        default:
-            throw std::invalid_argument("invalid formant plan number");
+babblesynth::variable_plan *AppState::formantFrequencyPlan(int n) {
+    if (n < 0 || n >= m_formantFrequencyPlans.size()) {
+        throw std::invalid_argument("invalid formant plan number");
     }
+
+    return &m_formantFrequencyPlans[n];
+}
+
+babblesynth::variable_plan *AppState::formantBandwidthPlan(int n) {
+    if (n < 0 || n >= m_formantBandwidthPlans.size()) {
+        throw std::invalid_argument("invalid formant plan number");
+    }
+
+    return &m_formantBandwidthPlans[n];
+}
+
+babblesynth::variable_plan *AppState::antiformantFrequencyPlan(int n) {
+    if (n < 0 || n >= m_antiformantFrequencyPlans.size()) {
+        throw std::invalid_argument("invalid antiformant plan number");
+    }
+
+    return &m_antiformantFrequencyPlans[n];
+}
+
+babblesynth::variable_plan *AppState::antiformantBandwidthPlan(int n) {
+    if (n < 0 || n >= m_antiformantBandwidthPlans.size()) {
+        throw std::invalid_argument("invalid antiformant plan number");
+    }
+
+    return &m_antiformantBandwidthPlans[n];
 }
 
 void AppState::updatePlans() {
     m_sourceGenerator->getParameter("Pitch plan").setValue(m_pitchPlan);
     m_sourceGenerator->getParameter("Amplitude plan").setValue(m_amplitudePlan);
 
-    m_formantFilter->getParameter("F1 plan").setValue(m_F1_plan);
-    m_formantFilter->getParameter("F2 plan").setValue(m_F2_plan);
-    m_formantFilter->getParameter("F3 plan").setValue(m_F3_plan);
-    m_formantFilter->getParameter("F4 plan").setValue(m_F4_plan);
-    m_formantFilter->getParameter("F5 plan").setValue(m_F5_plan);
+    for (int n = 0; n < m_formantFrequencyPlans.size(); ++n) {
+        std::string nameF = "F" + std::to_string(n + 1) + " plan";
+        std::string nameB = "B" + std::to_string(n + 1) + " plan";
+
+        m_formantFilter->getParameter(nameF).setValue(
+            m_formantFrequencyPlans[n]);
+
+        m_formantFilter->getParameter(nameB).setValue(
+            m_formantBandwidthPlans[n]);
+    }
+
+    for (int n = 0; n < m_antiformantFrequencyPlans.size(); ++n) {
+        std::string nameF = "AF" + std::to_string(n + 1) + " plan";
+        std::string nameB = "AB" + std::to_string(n + 1) + " plan";
+
+        m_formantFilter->getParameter(nameF).setValue(
+            m_antiformantFrequencyPlans[n]);
+
+        m_formantFilter->getParameter(nameB).setValue(
+            m_antiformantBandwidthPlans[n]);
+    }
 }

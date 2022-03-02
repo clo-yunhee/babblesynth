@@ -23,8 +23,7 @@
 #include <numeric>
 
 #include "../generator/noise.h"
-#include "sos_filter.h"
-#include "tf_filter.h"
+#include "filters.h"
 
 using namespace babblesynth::filter;
 
@@ -79,23 +78,35 @@ std::vector<double> formant_filter::generateFrom(
         const double openTime = ((startIndex + gci) / 2) / double(m_sampleRate);
         const double closedTime = ((gci + endIndex) / 2) / double(m_sampleRate);
 
+        const double openFlutter =
+            (sin(24.1 * M_PI * openTime) + sin(12.7 * M_PI * openTime) +
+             sin(7.1 * M_PI * openTime) + sin(4.7 * M_PI * openTime)) /
+            4;
+
         const double F1o = m_F1.evaluateAtTime(openTime);
         const double F2o = m_F2.evaluateAtTime(openTime);
         const double F3o = m_F3.evaluateAtTime(openTime);
         const double F4o = m_F4.evaluateAtTime(openTime);
         const double F5o = m_F5.evaluateAtTime(openTime);
 
-        const double B1o = m_B1.evaluateAtTime(openTime);
-        const double B2o = m_B2.evaluateAtTime(openTime);
-        const double B3o = m_B3.evaluateAtTime(openTime);
-        const double B4o = m_B4.evaluateAtTime(openTime);
-        const double B5o = m_B5.evaluateAtTime(openTime);
+        const double B1o =
+            m_B1.evaluateAtTime(openTime) * (1 + 0.025 * openFlutter);
+        const double B2o =
+            m_B2.evaluateAtTime(openTime) * (1 + 0.025 * openFlutter);
+        const double B3o =
+            m_B3.evaluateAtTime(openTime) * (1 + 0.025 * openFlutter);
+        const double B4o =
+            m_B4.evaluateAtTime(openTime) * (1 + 0.025 * openFlutter);
+        const double B5o =
+            m_B5.evaluateAtTime(openTime) * (1 + 0.025 * openFlutter);
 
         const double Z1o = m_Z1.evaluateAtTime(openTime);
         const double Z2o = m_Z2.evaluateAtTime(openTime);
 
-        const double A1o = m_A1.evaluateAtTime(openTime);
-        const double A2o = m_A2.evaluateAtTime(openTime);
+        const double A1o =
+            m_A1.evaluateAtTime(openTime) * (1 + 0.01 * openFlutter);
+        const double A2o =
+            m_A2.evaluateAtTime(openTime) * (1 + 0.01 * openFlutter);
 
         designFilter({F1o, F2o, F3o, F4o, F5o}, {B1o, B2o, B3o, B4o, B5o},
                      {Z1o, Z2o}, {A1o, A2o});
@@ -103,38 +114,42 @@ std::vector<double> formant_filter::generateFrom(
         sosfilt(m_filter, input, output, startIndex, gci - 1, m_filterState);
 
         const double gciTime = gci / m_sampleRate;
-        const double flutter =
+        const double gciFlutter =
             (sin(24.1 * M_PI * gciTime) + sin(12.7 * M_PI * gciTime) +
              sin(7.1 * M_PI * gciTime) + sin(4.7 * M_PI * gciTime)) /
             4;
 
         const double F1c =
-            m_F1.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);
+            m_F1.evaluateAtTime(closedTime) * (1 + 0.05 * gciFlutter);
         const double F2c =
-            m_F2.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);
+            m_F2.evaluateAtTime(closedTime) * (1 + 0.05 * gciFlutter);
         const double F3c =
-            m_F3.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);
+            m_F3.evaluateAtTime(closedTime) * (1 + 0.05 * gciFlutter);
         const double F4c =
-            m_F4.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);
+            m_F4.evaluateAtTime(closedTime) * (1 + 0.05 * gciFlutter);
         const double F5c =
-            m_F5.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);
+            m_F5.evaluateAtTime(closedTime) * (1 + 0.05 * gciFlutter);
 
         const double B1c =
-            m_B1.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);
+            m_B1.evaluateAtTime(closedTime) * (1 + 0.025 * gciFlutter);
         const double B2c =
-            m_B2.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);
+            m_B2.evaluateAtTime(closedTime) * (1 + 0.025 * gciFlutter);
         const double B3c =
-            m_B3.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);
+            m_B3.evaluateAtTime(closedTime) * (1 + 0.025 * gciFlutter);
         const double B4c =
-            m_B4.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);
+            m_B4.evaluateAtTime(closedTime) * (1 + 0.025 * gciFlutter);
         const double B5c =
-            m_B5.evaluateAtTime(closedTime) * (1 + 0.05 * flutter);
+            m_B5.evaluateAtTime(closedTime) * (1 + 0.025 * gciFlutter);
 
-        const double Z1c = m_Z1.evaluateAtTime(closedTime);
-        const double Z2c = m_Z2.evaluateAtTime(closedTime);
+        const double Z1c =
+            m_Z1.evaluateAtTime(closedTime) * (1 + 0.02 * gciFlutter);
+        const double Z2c =
+            m_Z2.evaluateAtTime(closedTime) * (1 + 0.02 * gciFlutter);
 
-        const double A1c = m_A1.evaluateAtTime(closedTime);
-        const double A2c = m_A2.evaluateAtTime(closedTime);
+        const double A1c =
+            m_A1.evaluateAtTime(closedTime) * (1 + 0.01 * gciFlutter);
+        const double A2c =
+            m_A2.evaluateAtTime(closedTime) * (1 + 0.01 * gciFlutter);
 
         designFilter({F1c, F2c, F3c, F4c, F5c}, {B1c, B2c, B3c, B4c, B5c},
                      {Z1c, Z2c}, {A1c, A2c});

@@ -98,6 +98,14 @@ PhonemeDictionary *PhonemeDictionary::loadFromXML(const char *xmlFilename) {
         ((DOMImplementationLS *)impl)
             ->createLSParser(DOMImplementationLS::MODE_SYNCHRONOUS, 0);
 
+    // Make sure the parser gives ownership of the document before being
+    // released.
+    constexpr const char *paramStr =
+        "http://apache.org/xml/features/dom/user-adopts-DOMDocument";
+    XMLCh *paramXmlStr = XMLString::transcode(paramStr);
+    parser->getDomConfig()->setParameter(paramXmlStr, true);  // Set param.
+    XMLString::release(&paramXmlStr);
+
     DOMDocument *doc = nullptr;
 
     try {
@@ -147,8 +155,9 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
         chLatin_f, chLatin_r, chLatin_e, chLatin_q, chLatin_u,
         chLatin_e, chLatin_n, chLatin_c, chLatin_y, chNull};
 
-    constexpr XMLCh tagQuality[] = {chLatin_q, chLatin_u, chLatin_a, chLatin_l,
-                                    chLatin_i, chLatin_t, chLatin_y, chNull};
+    constexpr XMLCh tagBandwidth[] = {
+        chLatin_b, chLatin_a, chLatin_n, chLatin_d, chLatin_w,
+        chLatin_i, chLatin_d, chLatin_t, chLatin_h, chNull};
 
     constexpr XMLCh tagMappings[] = {chLatin_m, chLatin_a, chLatin_p,
                                      chLatin_p, chLatin_i, chLatin_n,
@@ -234,22 +243,23 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
                 double frequency =
                     std::stod(std::string(frequencyCStr), nullptr);
 
-                const XMLCh *qualityXmlStr =
-                    poleElement->getAttribute(tagQuality);
+                const XMLCh *bandwidthXmlStr =
+                    poleElement->getAttribute(tagBandwidth);
 
-                if (qualityXmlStr == nullptr) {
+                if (bandwidthXmlStr == nullptr) {
                     throw std::logic_error(
-                        "<pole> tag must have a quality attribute");
+                        "<pole> tag must have a bandwidth attribute");
                 }
 
-                char *qualityCStr = XMLString::transcode(qualityXmlStr);
+                char *bandwidthCStr = XMLString::transcode(bandwidthXmlStr);
 
-                double quality = std::stod(std::string(qualityCStr), nullptr);
+                double bandwidth =
+                    std::stod(std::string(bandwidthCStr), nullptr);
 
-                phoneme->addPole(frequency, quality);
+                phoneme->addPole(frequency, bandwidth);
 
                 XMLString::release(&frequencyCStr);
-                XMLString::release(&qualityCStr);
+                XMLString::release(&bandwidthCStr);
             }
 
             // Find zero definitions.
@@ -272,22 +282,23 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
                 double frequency =
                     std::stod(std::string(frequencyCStr), nullptr);
 
-                const XMLCh *qualityXmlStr =
-                    zeroElement->getAttribute(tagQuality);
+                const XMLCh *bandwidthXmlStr =
+                    zeroElement->getAttribute(tagBandwidth);
 
-                if (qualityXmlStr == nullptr) {
+                if (bandwidthXmlStr == nullptr) {
                     throw std::logic_error(
-                        "<zero> tag must have a quality attribute");
+                        "<zero> tag must have a bandwidth attribute");
                 }
 
-                char *qualityCStr = XMLString::transcode(qualityXmlStr);
+                char *bandwidthCStr = XMLString::transcode(bandwidthXmlStr);
 
-                double quality = std::stod(std::string(qualityCStr), nullptr);
+                double bandwidth =
+                    std::stod(std::string(bandwidthCStr), nullptr);
 
-                phoneme->addZero(frequency, quality);
+                phoneme->addZero(frequency, bandwidth);
 
                 XMLString::release(&frequencyCStr);
-                XMLString::release(&qualityCStr);
+                XMLString::release(&bandwidthCStr);
             }
 
             m_phonemes.emplace(XMLString::replicate(name), std::move(phoneme));

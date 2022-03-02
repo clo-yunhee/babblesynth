@@ -37,7 +37,10 @@ class AppState {
     babblesynth::variable_plan *amplitudePlan();
 
     babblesynth::filter::formant_filter *formantFilter();
-    babblesynth::variable_plan *formantPlan(int n);
+    babblesynth::variable_plan *formantFrequencyPlan(int n);
+    babblesynth::variable_plan *formantBandwidthPlan(int n);
+    babblesynth::variable_plan *antiformantFrequencyPlan(int n);
+    babblesynth::variable_plan *antiformantBandwidthPlan(int n);
 
     void updatePlans();
 
@@ -49,11 +52,10 @@ class AppState {
     babblesynth::variable_plan m_amplitudePlan;
 
     std::unique_ptr<babblesynth::filter::formant_filter> m_formantFilter;
-    babblesynth::variable_plan m_F1_plan;
-    babblesynth::variable_plan m_F2_plan;
-    babblesynth::variable_plan m_F3_plan;
-    babblesynth::variable_plan m_F4_plan;
-    babblesynth::variable_plan m_F5_plan;
+    std::vector<babblesynth::variable_plan> m_formantFrequencyPlans;
+    std::vector<babblesynth::variable_plan> m_formantBandwidthPlans;
+    std::vector<babblesynth::variable_plan> m_antiformantFrequencyPlans;
+    std::vector<babblesynth::variable_plan> m_antiformantBandwidthPlans;
 };
 
 extern std::shared_ptr<AppState> appState;

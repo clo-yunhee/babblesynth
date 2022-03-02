@@ -49,9 +49,10 @@ class AnimalCrossing : public VoiceFxType {
     void updatePhonemes();
     void updatePlans();
 
-    QLabel *m_dictionaryFileLabel;
     QLabel *m_pitchLabel;
     QLabel *m_durationLabel;
+    QLabel *m_dictionaryFileLabel;
+    QLabel *m_dictionaryDirtyLabel;
 
     double m_pitch;
     double m_duration;

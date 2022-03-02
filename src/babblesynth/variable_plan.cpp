@@ -90,7 +90,7 @@ variable_plan& variable_plan::reset(double initialValue) {
 
 double variable_plan::evaluateAtTime(double time) const {
     int leftIndex = 0;
-    while (m_times[leftIndex] < time) {
+    while (leftIndex < m_times.size() && m_times[leftIndex] < time) {
         ++leftIndex;
     }
     leftIndex -= 1;

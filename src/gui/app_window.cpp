@@ -164,17 +164,17 @@ void AppWindow::chooseVoiceFxType(int id, bool checked) {
     if (!checked) return;
 
     m_voiceFxLayout->setCurrentIndex(id);
+
+    handleDialogueTextChanged();
 }
 
 void AppWindow::handleDialogueTextChanged() {
     QString text = m_dialogueText->toPlainText();
 
-    for (int i = 0; i < m_voiceFxLayout->count(); ++i) {
-        auto widget =
-            static_cast<voicefx::VoiceFxType *>(m_voiceFxLayout->widget(i));
+    auto widget =
+        static_cast<voicefx::VoiceFxType *>(m_voiceFxLayout->currentWidget());
 
-        widget->updateDialogueTextChanged(text);
-    }
+    widget->updateDialogueTextChanged(text);
 }
 
 void AppWindow::closeEvent(QCloseEvent *event) { qApp->quit(); }

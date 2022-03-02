@@ -22,7 +22,7 @@
 #include <cmath>
 
 #include "../filter/butterworth.h"
-#include "../filter/sos_filter.h"
+#include "../filter/filters.h"
 #include "../source/abstract_source.h"
 #include "../source/lf.h"
 #include "noise.h"

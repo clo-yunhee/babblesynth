@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BABBLESYNTH_SOS_FILTER
-#define BABBLESYNTH_SOS_FILTER
+#ifndef BABBLESYNTH_FILTERS
+#define BABBLESYNTH_FILTERS
 
 #include <array>
 #include <complex>
@@ -36,14 +36,15 @@ std::vector<std::array<double, 6>> zpk2sos(
     const std::vector<std::complex<double>>& z,
     const std::vector<std::complex<double>>& p, double k);
 
+void lfilter(const std::vector<double>& b, const std::vector<double>& a,
+             const std::vector<double>& x, std::vector<double>& y, int start,
+             int end, std::vector<double>& z);
+
 void sosfilt(const std::vector<std::array<double, 6>>& sos,
              const std::vector<double>& x, std::vector<double>& y, int start,
              int end, std::vector<std::array<double, 2>>& zi);
 
-std::vector<std::array<double, 2>> sosfilt_zi(
-    const std::vector<std::array<double, 6>>& sos);
-
 }  // namespace filter
 }  // namespace babblesynth
 
-#endif  // BABBLESYNTH_SOS_FILTER
+#endif  // BABBLESYNTH_FILTERS

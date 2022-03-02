@@ -90,33 +90,33 @@
 <context>
     <name>babblesynth::gui::voicefx::AnimalCrossing</name>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="39"/>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="42"/>
         <source>Phoneme dictionary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="42"/>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="123"/>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="45"/>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="125"/>
         <source>Open dictionary file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="55"/>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="58"/>
         <source>Pitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="75"/>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="77"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="172"/>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="183"/>
         <source>Phoneme dictionary failed to load</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="173"/>
+        <location filename="../voicefxtype/animal_crossing.cpp" line="184"/>
         <source>Phoneme dictionary at %1 failed to load:
 %2</source>
         <translation type="unfinished"></translation>

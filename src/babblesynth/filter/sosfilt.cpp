@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sos_filter.h"
+#include "filters.h"
 
 using namespace babblesynth;
 
@@ -35,42 +35,4 @@ void filter::sosfilt(const std::vector<std::array<double, 6>>& sos,
         }
         y[k] = x_cur;
     }
-}
-
-static std::array<double, 2> lfilter3_zi(const std::array<double, 3>& b,
-                                         const std::array<double, 3>& a) {
-    std::array<double, 2> zi;
-
-    zi[0] = (a[1] + a[2]) / (b[1] + b[2] - b[0] * (a[1] + a[2]));
-    zi[1] = 1 + a[1] * zi[0] - b[1] + a[1] * b[0];
-
-    return zi;
-}
-
-std::vector<std::array<double, 2>> filter::sosfilt_zi(
-    const std::vector<std::array<double, 6>>& sos) {
-    const int nsecs = sos.size();
-
-    std::vector<std::array<double, 2>> zi(nsecs);
-    double scale = 1.0;
-
-    for (int section = 0; section < nsecs; ++section) {
-        const auto& [b0, b1, b2, a0, a1, a2] = sos[section];
-
-        std::array b{b0, b1, b2};
-        std::array a{a0, a1, a2};
-
-        if (a0 != 1) {
-            for (auto& x : b) x /= a0;
-            for (auto& x : a) x /= a0;
-        }
-
-        zi[section] = lfilter3_zi(b, a);
-        zi[section][0] *= scale;
-        zi[section][1] *= scale;
-
-        scale *= (b0 + b1 + b2) / (a0 + a1 + a2);
-    }
-
-    return zi;
 }
