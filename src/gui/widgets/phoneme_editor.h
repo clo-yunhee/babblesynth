@@ -1,6 +1,6 @@
 /*
  * BabbleSynth
- * Copyright (C) 2021  Clo Yun-Hee Dufour
+ * Copyright (C) 2022  Clo Yun-Hee Dufour
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,51 +19,29 @@
 #ifndef BABBLESYNTH_PHONEME_EDITOR_H
 #define BABBLESYNTH_PHONEME_EDITOR_H
 
-#include <QMainWindow>
-#include <QPlainTextEdit>
-#include <QStackedLayout>
-#include <vector>
+#include <QListWidget>
+#include <QPushButton>
+#include <QWidget>
 
-#include "audio_player.h"
-#include "audio_writer.h"
-#include "source_parameters.h"
+#include "../phonemes/phoneme_dictionary.h"
 
 namespace babblesynth {
 namespace gui {
 
-class PhonemeEditor : public QMainWindow {
+class PhonemeEditor : public QWidget {
     Q_OBJECT
 
    public:
-    enum VoiceFxType {
-        VoiceFxUndertale = 0,
-        VoiceFxAnimalCrossing,
-    };
-
-    AppWindow();
-    ~AppWindow();
+    PhonemeEditor(QWidget *parent = nullptr);
 
    private slots:
-    void renderAndPlay();
-    void renderAndSave();
-    void chooseVoiceFxType(int id, bool checked);
-    void handleDialogueTextChanged();
 
    protected:
-    void closeEvent(QCloseEvent *event) override;
-
    private:
-    std::vector<double> render() const;
+    phonemes::PhonemeDictionary *m_dictionary;
 
-    int m_sampleRate;
-
-    AudioPlayer *m_audioPlayer;
-    AudioWriter m_audioWriter;
-    SourceParameters *m_sourceParameters;
-
-    QStackedLayout *m_voiceFxLayout;
-
-    QPlainTextEdit *m_dialogueText;
+    QListWidget *m_mappingList;
+    QPushButton *m_recordButton;
 };
 
 }  // namespace gui

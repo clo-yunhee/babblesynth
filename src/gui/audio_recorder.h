@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BABBLESYNTH_AUDIO_PLAYER_H
-#define BABBLESYNTH_AUDIO_PLAYER_H
+#ifndef BABBLESYNTH_AUDIO_RECORDER_H
+#define BABBLESYNTH_AUDIO_RECORDER_H
 
 #include <QAudio>
 #include <QAudioDeviceInfo>
@@ -33,22 +33,16 @@
 namespace babblesynth {
 namespace gui {
 
-class AudioPlayer : public QObject {
+class AudioRecorder : public QObject {
     Q_OBJECT
 
    public:
-    AudioPlayer(QObject *parent = nullptr);
+    AudioRecorder(QObject *parent = nullptr);
 
-    void play(const std::vector<double> &data);
+    void start();
+    void stop();
 
     int preferredSampleRate() const;
-
-   signals:
-    void started();
-    void stopped();
-
-   public slots:
-    void stop();
 
    private slots:
     void onStateChanged(QAudio::State state);
@@ -61,15 +55,15 @@ class AudioPlayer : public QObject {
     int m_sampleRate;
     QAudioFormat m_audioFormat;
 
-    QAudioOutput *m_audio;
+    QAudioInput *m_audio;
 
     QByteArray m_data;
     QBuffer m_buffer;
 
-    bool m_playing;
+    bool m_recording;
 };
 
 }  // namespace gui
 }  // namespace babblesynth
 
-#endif  // BABBLESYNTH_AUDIO_PLAYER_H
+#endif  // BABBLESYNTH_AUDIO_RECORDER_H

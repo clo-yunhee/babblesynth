@@ -21,7 +21,7 @@
 
 #include <QLabel>
 
-#include "../qcustomplot/qcustomplot.h"
+#include "../../qcustomplot/qcustomplot.h"
 #include "voicefxtype.h"
 
 namespace babblesynth {
