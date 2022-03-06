@@ -13,12 +13,6 @@ add_executable(babblesynth-gui WIN32
     audio_player.h
     audio_writer.cpp
     audio_writer.h
-    widgets/app_window.cpp
-    widgets/app_window.h
-    widgets/clickable_label.cpp
-    widgets/clickable_label.h
-    widgets/source_parameters.cpp
-    widgets/source_parameters.h
     phonemes/pole_zero.h
     phonemes/phoneme_dictionary.cpp
     phonemes/phoneme_dictionary.h
@@ -26,11 +20,19 @@ add_executable(babblesynth-gui WIN32
     phonemes/phoneme.h
     qcustomplot/qcustomplot.cpp
     qcustomplot/qcustomplot.h
-    voicefxtype/animal_crossing.cpp
-    voicefxtype/animal_crossing.h
-    voicefxtype/undertale.cpp
-    voicefxtype/undertale.h
-    voicefxtype/voicefxtype.h
+    widgets/app_window.cpp
+    widgets/app_window.h
+    widgets/clickable_label.cpp
+    widgets/clickable_label.h
+    widgets/phoneme_editor.cpp
+    widgets/phoneme_editor.h
+    widgets/source_parameters.cpp
+    widgets/source_parameters.h
+    widgets/voicefxtype/animal_crossing.cpp
+    widgets/voicefxtype/animal_crossing.h
+    widgets/voicefxtype/undertale.cpp
+    widgets/voicefxtype/undertale.h
+    widgets/voicefxtype/voicefxtype.h
     main.cpp
     dictionaries/dictionaries.qrc
     fonts/fonts.qrc

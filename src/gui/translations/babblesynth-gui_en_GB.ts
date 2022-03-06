@@ -4,85 +4,109 @@
 <context>
     <name>babblesynth::gui::AppWindow</name>
     <message>
-        <location filename="../widgets/app_window.cpp" line="42"/>
+        <location filename="../widgets/app_window.cpp" line="41"/>
+        <location filename="../widgets/app_window.cpp" line="48"/>
         <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="46"/>
+        <location filename="../widgets/app_window.cpp" line="45"/>
+        <source>Stop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/app_window.cpp" line="50"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="51"/>
+        <location filename="../widgets/app_window.cpp" line="54"/>
         <source>Source parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="57"/>
+        <location filename="../widgets/app_window.cpp" line="60"/>
         <source>Undertale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="61"/>
+        <location filename="../widgets/app_window.cpp" line="64"/>
         <source>Animal Crossing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="86"/>
+        <location filename="../widgets/app_window.cpp" line="89"/>
         <source>Hey! If I asked you about bugs that would be easy to imitate...which ones would you pick?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="96"/>
+        <location filename="../widgets/app_window.cpp" line="99"/>
         <source>Voice effect settings template:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="103"/>
+        <location filename="../widgets/app_window.cpp" line="106"/>
         <source>Example dialogue text:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="150"/>
+        <location filename="../widgets/app_window.cpp" line="153"/>
         <source>Save audio file</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>babblesynth::gui::PhonemeEditor</name>
+    <message>
+        <location filename="../widgets/phoneme_editor.cpp" line="28"/>
+        <source>Phoneme dictionary editor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/phoneme_editor.cpp" line="40"/>
+        <source>Recording</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/phoneme_editor.cpp" line="45"/>
+        <source>Record</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>babblesynth::gui::SourceParameters</name>
     <message>
-        <location filename="../widgets/source_parameters.cpp" line="35"/>
+        <location filename="../widgets/source_parameters.cpp" line="43"/>
         <source>Source parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/source_parameters.cpp" line="110"/>
+        <location filename="../widgets/source_parameters.cpp" line="117"/>
         <source>Glottal source waveform</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/source_parameters.cpp" line="134"/>
+        <location filename="../widgets/source_parameters.cpp" line="141"/>
         <source>Glottal source spectrum</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/source_parameters.cpp" line="254"/>
+        <location filename="../widgets/source_parameters.cpp" line="261"/>
         <source>the open quotient, defined by the ratio between the open phase duration and the fundamental period. It translates spectrally to a lower or higher frequency peak in the glottal spectrum, also known as the glottal &quot;formant&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/source_parameters.cpp" line="260"/>
+        <location filename="../widgets/source_parameters.cpp" line="267"/>
         <source>the asymmetry coefficient, defined by the ratio between the opening phase and the open phase durations. It translates spectrally to a wider or narrower bandwidth of the peak in the glottal spectrum. It can also be defined in terms of %2, the speed quotient, sometimes used in scientific literature: %1 = %2 / (1 + %2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/source_parameters.cpp" line="270"/>
+        <location filename="../widgets/source_parameters.cpp" line="277"/>
         <source>the return phase quotient, defined by the ratio between the return phase time constant and the duration between the glottal closing instant and the end of the period: %1 = %2 / [(1 - %3) %4]. It translates to a flatter or steeper spectrum, also called spectral tilt or rolloff.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/source_parameters.cpp" line="291"/>
+        <location filename="../widgets/source_parameters.cpp" line="297"/>
         <source>Parameter info for %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -90,42 +114,42 @@
 <context>
     <name>babblesynth::gui::voicefx::AnimalCrossing</name>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="82"/>
-        <source>Phoneme dictionary</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="134"/>
-        <source>Open dictionary file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="42"/>
+        <location filename="../widgets/voicefxtype/animal_crossing.cpp" line="43"/>
         <source>Pitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="62"/>
+        <location filename="../widgets/voicefxtype/animal_crossing.cpp" line="63"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="85"/>
+        <location filename="../widgets/voicefxtype/animal_crossing.cpp" line="83"/>
+        <source>Phoneme dictionary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/voicefxtype/animal_crossing.cpp" line="86"/>
         <source>Load dictionary file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="92"/>
+        <location filename="../widgets/voicefxtype/animal_crossing.cpp" line="93"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="192"/>
+        <location filename="../widgets/voicefxtype/animal_crossing.cpp" line="138"/>
+        <source>Open dictionary file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/voicefxtype/animal_crossing.cpp" line="196"/>
         <source>Phoneme dictionary failed to load</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/animal_crossing.cpp" line="193"/>
+        <location filename="../widgets/voicefxtype/animal_crossing.cpp" line="197"/>
         <source>Phoneme dictionary at %1 failed to load:
 %2</source>
         <translation type="unfinished"></translation>
@@ -134,22 +158,22 @@
 <context>
     <name>babblesynth::gui::voicefx::Undertale</name>
     <message>
-        <location filename="../voicefxtype/undertale.cpp" line="33"/>
+        <location filename="../widgets/voicefxtype/undertale.cpp" line="32"/>
         <source>Pitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/undertale.cpp" line="53"/>
+        <location filename="../widgets/voicefxtype/undertale.cpp" line="52"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/undertale.cpp" line="73"/>
+        <location filename="../widgets/voicefxtype/undertale.cpp" line="72"/>
         <source>Pause ratio</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../voicefxtype/undertale.cpp" line="133"/>
+        <location filename="../widgets/voicefxtype/undertale.cpp" line="132"/>
         <source>Vowel color</source>
         <translation type="unfinished"></translation>
     </message>

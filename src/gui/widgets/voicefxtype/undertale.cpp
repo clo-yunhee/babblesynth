@@ -16,15 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "undertale.h"
-
 #include <QGroupBox>
 #include <QSlider>
 #include <QVBoxLayout>
 #include <random>
 
-#include "../app_state.h"
+#include "../../app_state.h"
 #include "frequency_scale.h"
+#include "undertale.h"
 
 using namespace babblesynth::gui::voicefx;
 
@@ -100,12 +99,12 @@ Undertale::Undertale()
 
     QCustomPlot *customPlot = new QCustomPlot(this);
 
-    QObject::connect(customPlot, &QCustomPlot::mousePress, this,
-                     &Undertale::handlePlotPress);
-    QObject::connect(customPlot, &QCustomPlot::mouseRelease, this,
-                     &Undertale::handlePlotRelease);
-    QObject::connect(customPlot, &QCustomPlot::mouseMove, this,
-                     &Undertale::handlePlotMove);
+    connect(customPlot, &QCustomPlot::mousePress, this,
+            &Undertale::handlePlotPress);
+    connect(customPlot, &QCustomPlot::mouseRelease, this,
+            &Undertale::handlePlotRelease);
+    connect(customPlot, &QCustomPlot::mouseMove, this,
+            &Undertale::handlePlotMove);
 
     // Styling.
     QColor colorBg = QColor::fromRgb(0x19232D);

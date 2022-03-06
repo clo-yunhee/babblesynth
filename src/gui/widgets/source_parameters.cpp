@@ -54,13 +54,13 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
     flutter->setSingleStep(0.002);
     flutter->setRange(0, 2);
     flutter->setValue(flutterParam->value<double>());
-    QObject::connect(flutter, qOverload<double>(&QDoubleSpinBox::valueChanged),
-                     this, [flutter, flutterParam](double value) {
-                         auto o = flutterParam->setValue(value);
-                         if (o.has_value()) {
-                             flutter->setValue(o.value());
-                         }
-                     });
+    connect(flutter, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+            [flutter, flutterParam](double value) {
+                auto o = flutterParam->setValue(value);
+                if (o.has_value()) {
+                    flutter->setValue(o.value());
+                }
+            });
     auto flutterRow = new QHBoxLayout;
     flutterRow->addWidget(new QLabel("Flutter"));
     flutterRow->addWidget(flutter);
@@ -71,13 +71,13 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
     jitter->setSingleStep(0.002);
     jitter->setRange(0, 2);
     jitter->setValue(jitterParam->value<double>());
-    QObject::connect(jitter, qOverload<double>(&QDoubleSpinBox::valueChanged),
-                     this, [jitter, jitterParam](double value) {
-                         auto o = jitterParam->setValue(value);
-                         if (o.has_value()) {
-                             jitter->setValue(o.value());
-                         }
-                     });
+    connect(jitter, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+            [jitter, jitterParam](double value) {
+                auto o = jitterParam->setValue(value);
+                if (o.has_value()) {
+                    jitter->setValue(o.value());
+                }
+            });
     auto jitterRow = new QHBoxLayout;
     jitterRow->addWidget(new QLabel("Jitter"));
     jitterRow->addWidget(jitter);
@@ -88,14 +88,13 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
     aspiration->setSingleStep(0.01);
     aspiration->setRange(0, 2);
     aspiration->setValue(aspirationParam->value<double>());
-    QObject::connect(aspiration,
-                     qOverload<double>(&QDoubleSpinBox::valueChanged), this,
-                     [aspiration, aspirationParam](double value) {
-                         auto o = aspirationParam->setValue(value);
-                         if (o.has_value()) {
-                             aspiration->setValue(o.value());
-                         }
-                     });
+    connect(aspiration, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+            [aspiration, aspirationParam](double value) {
+                auto o = aspirationParam->setValue(value);
+                if (o.has_value()) {
+                    aspiration->setValue(o.value());
+                }
+            });
     auto aspirationRow = new QHBoxLayout;
     aspirationRow->addWidget(new QLabel("Aspiration"));
     aspirationRow->addWidget(aspiration);
@@ -164,8 +163,8 @@ SourceParameters::SourceParameters(QWidget *parent) : QWidget(parent) {
     updateFields();
     redrawGraph();
 
-    QObject::connect(sourceType, &QComboBox::currentTextChanged, this,
-                     &SourceParameters::onSourceTypeChanged);
+    connect(sourceType, &QComboBox::currentTextChanged, this,
+            &SourceParameters::onSourceTypeChanged);
 }
 
 void SourceParameters::onSourceTypeChanged(const QString &name) {
@@ -207,15 +206,15 @@ void SourceParameters::addField(parameter &param) {
             spin->setRange(param.min<int>(), param.max<int>());
         }
         spin->setValue(param.value<int>());
-        QObject::connect(spin, qOverload<int>(&QSpinBox::valueChanged), this,
-                         [this, spin, &param](int value) {
-                             auto o = param.setValue(value);
-                             if (!o.has_value()) {
-                                 redrawGraph();
-                             } else {
-                                 spin->setValue(o.value());
-                             }
-                         });
+        connect(spin, qOverload<int>(&QSpinBox::valueChanged), this,
+                [this, spin, &param](int value) {
+                    auto o = param.setValue(value);
+                    if (!o.has_value()) {
+                        redrawGraph();
+                    } else {
+                        spin->setValue(o.value());
+                    }
+                });
         field = spin;
     } else if (type == "double") {
         auto spin = new QDoubleSpinBox;
@@ -225,28 +224,28 @@ void SourceParameters::addField(parameter &param) {
             spin->setRange(param.min<double>(), param.max<double>());
         }
         spin->setValue(param.value<double>());
-        QObject::connect(spin, qOverload<double>(&QDoubleSpinBox::valueChanged),
-                         this, [this, spin, &param](double value) {
-                             auto o = param.setValue(value);
-                             if (!o.has_value()) {
-                                 redrawGraph();
-                             } else {
-                                 spin->setValue(o.value());
-                             }
-                         });
+        connect(spin, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+                [this, spin, &param](double value) {
+                    auto o = param.setValue(value);
+                    if (!o.has_value()) {
+                        redrawGraph();
+                    } else {
+                        spin->setValue(o.value());
+                    }
+                });
         field = spin;
     } else if (type == "bool") {
         auto check = new QCheckBox;
         check->setChecked(param.value<bool>());
-        QObject::connect(check, &QCheckBox::stateChanged, this,
-                         [this, check, &param](const int state) {
-                             auto o = param.setValue(state == Qt::Checked);
-                             if (!o.has_value()) {
-                                 redrawGraph();
-                             } else {
-                                 check->setChecked(o.value());
-                             }
-                         });
+        connect(check, &QCheckBox::stateChanged, this,
+                [this, check, &param](const int state) {
+                    auto o = param.setValue(state == Qt::Checked);
+                    if (!o.has_value()) {
+                        redrawGraph();
+                    } else {
+                        check->setChecked(o.value());
+                    }
+                });
         field = check;
     } else {
         throw std::invalid_argument(
@@ -292,15 +291,14 @@ void SourceParameters::addField(parameter &param) {
     helpIcon->setPixmap(pixmap);
     helpIcon->setCursor(QCursor(Qt::PointingHandCursor));
 
-    QObject::connect(helpIcon, &ClickableLabel::clicked,
-                     [this, name, helpText](QMouseEvent *event) {
-                         QMessageBox dialog(
-                             QMessageBox::NoIcon,
-                             tr("Parameter info for %1").arg(name),
-                             QString("%1: %2").arg(name).arg(helpText),
-                             QMessageBox::Ok, this);
-                         dialog.exec();
-                     });
+    connect(helpIcon, &ClickableLabel::clicked,
+            [this, name, helpText](QMouseEvent *event) {
+                QMessageBox dialog(QMessageBox::NoIcon,
+                                   tr("Parameter info for %1").arg(name),
+                                   QString("%1: %2").arg(name).arg(helpText),
+                                   QMessageBox::Ok, this);
+                dialog.exec();
+            });
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(new QLabel(name));

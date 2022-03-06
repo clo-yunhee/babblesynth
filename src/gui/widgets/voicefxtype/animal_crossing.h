@@ -21,7 +21,8 @@
 
 #include <QLabel>
 
-#include "../phonemes/phoneme_dictionary.h"
+#include "../../phonemes/phoneme_dictionary.h"
+#include "../phoneme_editor.h"
 #include "voicefxtype.h"
 
 namespace babblesynth {
@@ -53,6 +54,8 @@ class AnimalCrossing : public VoiceFxType {
     QLabel *m_durationLabel;
     QLabel *m_dictionaryFileLabel;
     QLabel *m_dictionaryDirtyLabel;
+
+    PhonemeEditor *m_phonemeEditor;
 
     double m_pitch;
     double m_duration;

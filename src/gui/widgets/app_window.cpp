@@ -17,9 +17,8 @@
  */
 
 #include "app_window.h"
-
-#include "../voicefxtype/animal_crossing.h"
-#include "../voicefxtype/undertale.h"
+#include "voicefxtype/animal_crossing.h"
+#include "voicefxtype/undertale.h"
 
 using namespace babblesynth::gui;
 
@@ -40,17 +39,29 @@ AppWindow::AppWindow() : QMainWindow() {
     QWidget *centralWidget = new QWidget;
 
     QPushButton *playButton = new QPushButton(tr("Play"), centralWidget);
-    QObject::connect(playButton, &QPushButton::pressed, this,
-                     &AppWindow::renderAndPlay);
+    connect(playButton, &QPushButton::pressed, this, &AppWindow::renderAndPlay);
+
+    connect(m_audioPlayer, &AudioPlayer::started, this, [=]() {
+        playButton->setText(tr("Stop"));
+        playButton->disconnect();
+        connect(playButton, &QPushButton::pressed, m_audioPlayer,
+                &AudioPlayer::stop);
+    });
+
+    connect(m_audioPlayer, &AudioPlayer::stopped, this, [=]() {
+        playButton->setText(tr("Play"));
+        playButton->disconnect();
+        connect(playButton, &QPushButton::pressed, this,
+                &AppWindow::renderAndPlay);
+    });
 
     QPushButton *saveButton = new QPushButton(tr("Save"), centralWidget);
-    QObject::connect(saveButton, &QPushButton::pressed, this,
-                     &AppWindow::renderAndSave);
+    connect(saveButton, &QPushButton::pressed, this, &AppWindow::renderAndSave);
 
     QPushButton *sourceButton =
         new QPushButton(tr("Source parameters"), centralWidget);
-    QObject::connect(sourceButton, &QPushButton::pressed, m_sourceParameters,
-                     &QWidget::show);
+    connect(sourceButton, &QPushButton::pressed, m_sourceParameters,
+            &QWidget::show);
 
     QButtonGroup *voiceFxBtnGroup = new QButtonGroup(this);
 
@@ -79,15 +90,15 @@ AppWindow::AppWindow() : QMainWindow() {
         m_dialogueText->setMaximumHeight(3 * m.lineSpacing());
     }
 
-    QObject::connect(m_dialogueText, &QPlainTextEdit::textChanged, this,
-                     &AppWindow::handleDialogueTextChanged);
+    connect(m_dialogueText, &QPlainTextEdit::textChanged, this,
+            &AppWindow::handleDialogueTextChanged);
 
     m_dialogueText->setPlainText(
         tr("Hey! If I asked you about bugs that would be easy to "
            "imitate...which ones would you pick?"));
 
-    QObject::connect(voiceFxBtnGroup, &QButtonGroup::idToggled, this,
-                     &AppWindow::chooseVoiceFxType);
+    connect(voiceFxBtnGroup, &QButtonGroup::idToggled, this,
+            &AppWindow::chooseVoiceFxType);
 
     voiceFxBtnUndertale->setChecked(true);
 

@@ -57,6 +57,8 @@ class AppWindow : public QMainWindow {
 
     int m_sampleRate;
 
+    bool m_isPlaying;
+
     AudioPlayer *m_audioPlayer;
     AudioWriter m_audioWriter;
     SourceParameters *m_sourceParameters;

@@ -19,7 +19,7 @@
 #include <QDebug>
 #include <stdexcept>
 
-#include "audio_player.h"
+#include "audio_recorder.h"
 #include "widgets/app_window.h"
 
 using namespace babblesynth::gui;
@@ -46,15 +46,21 @@ static void f64_to_s16(QByteArray& dst, const std::vector<double>& src) {
     }
 }
 
-AudioPlayer::AudioPlayer(QObject* parent)
+AudioRecorder::AudioRecorder(QObject* parent)
     : QObject(parent),
-      m_deviceInfo(QAudioDeviceInfo::defaultOutputDevice()),
+      m_deviceInfo(QAudioDeviceInfo::defaultInputDevice()),
       m_audio(nullptr) {
     initAudio();
     m_buffer.setBuffer(&m_data);
 }
 
-void AudioPlayer::play(const std::vector<double>& data) {
+void AudioRecorder::start() {
+    if (m_recording) {
+        
+    }
+}
+
+void AudioRecorder::play(const std::vector<double>& data) {
     if (m_playing) {
         m_audio->stop();
     }
@@ -63,36 +69,29 @@ void AudioPlayer::play(const std::vector<double>& data) {
     m_audio->start(&m_buffer);
 }
 
-void AudioPlayer::stop() {
-    if (m_playing) m_audio->stop();
-}
+int AudioRecorder::preferredSampleRate() const { return m_sampleRate; }
 
-int AudioPlayer::preferredSampleRate() const { return m_sampleRate; }
-
-void AudioPlayer::onStateChanged(QAudio::State state) {
+void AudioRecorder::onStateChanged(QAudio::State state) {
     switch (state) {
         case QAudio::ActiveState:
             m_playing = true;
-            emit started();
             break;
         case QAudio::IdleState:
             m_audio->stop();
             m_buffer.close();
             m_playing = false;
-            emit stopped();
             break;
         case QAudio::StoppedState:
             if (m_audio->error() != QAudio::NoError) {
                 qWarning() << "Audio device stopped unexpectedly";
             }
-            emit stopped();
             break;
         default:
             break;
     }
 }
 
-void AudioPlayer::initAudio() {
+void AudioRecorder::initAudio() {
     m_sampleRate = m_deviceInfo.preferredFormat().sampleRate();
 
     m_audioFormat.setSampleRate(m_sampleRate);
@@ -112,6 +111,6 @@ void AudioPlayer::initAudio() {
 
     m_audio = new QAudioOutput(m_deviceInfo, m_audioFormat, this);
     m_audio->setVolume(0.6);
-    connect(m_audio, &QAudioOutput::stateChanged, this,
+    connect(m_audio, &QAudioInput::stateChanged, this,
             &AudioPlayer::onStateChanged);
 }

@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "animal_crossing.h"
-
 #include <QBoxLayout>
 #include <QDebug>
 #include <QDirIterator>
@@ -31,7 +29,8 @@
 #include <iostream>
 #include <random>
 
-#include "../app_state.h"
+#include "../../app_state.h"
+#include "animal_crossing.h"
 #include "frequency_scale.h"
 
 using namespace babblesynth::gui::voicefx;
@@ -39,6 +38,8 @@ using namespace xercesc;
 
 AnimalCrossing::AnimalCrossing()
     : m_phonemeDictionary(new phonemes::PhonemeDictionary) {
+    m_phonemeEditor = new PhonemeEditor;
+
     QGroupBox *pitchBox = new QGroupBox(tr("Pitch"));
     {
         QSlider *pitchSlider = new QSlider(Qt::Horizontal);
@@ -91,6 +92,9 @@ AnimalCrossing::AnimalCrossing()
 
         QPushButton *dictEditButton = new QPushButton(tr("Edit"));
 
+        connect(dictEditButton, &QPushButton::pressed, m_phonemeEditor,
+                &QWidget::show);
+
         QHBoxLayout *dictionaryLayout = new QHBoxLayout;
         dictionaryLayout->addWidget(dictFileButton);
         dictionaryLayout->addWidget(m_dictionaryFileLabel);
@@ -120,7 +124,7 @@ AnimalCrossing::AnimalCrossing()
     loadDictionaryFile("./dictionaries/english.xml");
 }
 
-AnimalCrossing::~AnimalCrossing() {}
+AnimalCrossing::~AnimalCrossing() { delete m_phonemeEditor; }
 
 void AnimalCrossing::updateDialogueTextChanged(const QString &text) {
     m_textBytes = text.toLocal8Bit();
