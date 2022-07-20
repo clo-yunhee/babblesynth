@@ -17,6 +17,9 @@
  */
 
 #include "app_window.h"
+
+#include <SimpleComp.h>
+
 #include "voicefxtype/animal_crossing.h"
 #include "voicefxtype/undertale.h"
 

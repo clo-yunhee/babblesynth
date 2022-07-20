@@ -20,11 +20,12 @@
 #define BABBLESYNTH_AUDIO_PLAYER_H
 
 #include <QAudio>
-#include <QAudioDeviceInfo>
+#include <QAudioDevice>
 #include <QAudioFormat>
-#include <QAudioOutput>
+#include <QAudioSink>
 #include <QBuffer>
 #include <QByteArray>
+#include <QMediaDevices>
 #include <QObject>
 #include <vector>
 
@@ -43,12 +44,12 @@ class AudioPlayer : public QObject {
 
     int preferredSampleRate() const;
 
+   public slots:
+    void stop();
+
    signals:
     void started();
     void stopped();
-
-   public slots:
-    void stop();
 
    private slots:
     void onStateChanged(QAudio::State state);
@@ -56,12 +57,12 @@ class AudioPlayer : public QObject {
    private:
     void initAudio();
 
-    QAudioDeviceInfo m_deviceInfo;
+    QAudioDevice m_deviceInfo;
 
     int m_sampleRate;
     QAudioFormat m_audioFormat;
 
-    QAudioOutput *m_audio;
+    QAudioSink *m_audio;
 
     QByteArray m_data;
     QBuffer m_buffer;

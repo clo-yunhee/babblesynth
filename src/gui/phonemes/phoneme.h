@@ -23,20 +23,28 @@
 #include <xercesc/util/XMLString.hpp>
 
 #include "pole_zero.h"
+#include "xmlwstr.h"
 
 namespace babblesynth {
 namespace gui {
+
+class PhonemeEditor;
+
 namespace phonemes {
 
 class Phoneme {
    public:
-    Phoneme(const XMLCh* name);
-    virtual ~Phoneme();
+    Phoneme() = default;
+    Phoneme(const XMLWStr& name);
 
-    const XMLCh* name() const;
+    Phoneme(const Phoneme& other);
+    Phoneme(Phoneme&& other);
+    Phoneme& operator=(const Phoneme& other) = default;
+
+    const XMLWStr& name() const;
 
     template <typename PoleFn, typename ZeroFn>
-    void updatePlansWith(const PoleFn& fnPole, const ZeroFn& fnZero) {
+    void updatePlansWith(const PoleFn& fnPole, const ZeroFn& fnZero) const {
         for (const auto& pole : m_poles) {
             fnPole(pole.i, pole.frequency, pole.bandwidth);
         }
@@ -46,7 +54,7 @@ class Phoneme {
     }
 
    private:
-    XMLCh* m_name;
+    XMLWStr m_name;
     std::vector<PoleZero> m_poles;
     std::vector<PoleZero> m_zeros;
 
@@ -54,6 +62,7 @@ class Phoneme {
     void addZero(double frequency, double bandwidth, int i = -1);
 
     friend class PhonemeDictionary;
+    friend class gui::PhonemeEditor;
 };
 
 }  // namespace phonemes

@@ -164,9 +164,17 @@ double variable_plan::interpolateLinear(int index, double time) const {
 }
 
 double variable_plan::interpolateCubic(int index, double time) const {
-    if (m_spline != nullptr) {
-        return (*(tk::spline*)m_spline)(time);
-    } else {
-        return interpolateLinear(index, time);
-    }
+    const double T0 = m_times[index];
+    const double V0 = m_values[index];
+
+    const double T1 = m_times[index + 1];
+    const double V1 = m_values[index + 1];
+
+    // 0 < x < 1
+    // 0 < y < 1
+
+    const double x = (time - T0) / (T1 - T0);
+    const double y = x < 0.5 ? 4 * x * x * x : 1 - std::pow(-2 * x + 2, 3) / 2;
+
+    return V0 + (V1 - V0) * y;
 }

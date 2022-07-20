@@ -1,10 +1,15 @@
 add_library(babblesynth OBJECT
+    arma/fit.cpp
+    arma/fit.h
+    arma/utils.cpp
+    arma/utils.h
     filter/butterworth.cpp
     filter/butterworth.h
     filter/filters.h
     filter/formant_filter.cpp
     filter/formant_filter.h
     filter/lfilter.cpp
+    filter/solve_roots.cpp
     filter/sosfilt.cpp
     filter/zpk2sos.cpp
     generator/noise.cpp
@@ -20,6 +25,8 @@ add_library(babblesynth OBJECT
     parameter_holder.cpp
     parameter_holder.h
     parameter.h
+    resample.cpp
+    resample.h
     spline.cpp
     spline.h
     utility.h
@@ -28,6 +35,8 @@ add_library(babblesynth OBJECT
     variable.cpp
     variable.h
 )
+
+target_link_libraries(babblesynth PRIVATE Eigen3::Eigen samplerate)
 
 target_compile_definitions(babblesynth PRIVATE _USE_MATH_DEFINES)
 

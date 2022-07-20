@@ -19,20 +19,24 @@
 #ifndef BABBLESYNTH_PHONEMES_PHONEME_DICTIONARY_H
 #define BABBLESYNTH_PHONEMES_PHONEME_DICTIONARY_H
 
+#include <QObject>
+#include <map>
 #include <memory>
-#include <unordered_map>
 #include <xercesc/dom/DOM.hpp>
 
 #include "phoneme.h"
 
 namespace babblesynth {
 namespace gui {
+
+class PhonemeEditor;
+
 namespace phonemes {
 
 class PhonemeDictionary;
 
 struct PhonemeMapping {
-    Phoneme *phoneme;
+    Phoneme phoneme;
     double duration;
     double intensity;
 };
@@ -53,23 +57,37 @@ namespace babblesynth {
 namespace gui {
 namespace phonemes {
 
-class PhonemeDictionary {
+class PhonemeDictionary : public QObject {
+    Q_OBJECT
    public:
     PhonemeDictionary() = default;
     virtual ~PhonemeDictionary();
 
-    std::vector<PhonemeMapping> mappingsFor(const char *text);
+    static PhonemeDictionary *loadFromXML(const XMLWStr &xmlFilename);
 
-    static PhonemeDictionary *loadFromXML(const char *xmlFilename);
+    void saveToXml(const XMLWStr &xmlFilename);
+
+    std::vector<PhonemeMapping> mappingsFor(const XMLWStr &text);
+
+    void addOrReplaceMapping(const XMLWStr &name,
+                             const std::vector<PhonemeMapping> &mappings);
+    void deleteMapping(const XMLWStr &name);
+    void renameMapping(const XMLWStr &oldName, const XMLWStr &newName);
+
+    bool mappingExists(const XMLWStr &name) const;
+
+    const std::vector<PhonemeMapping> &phonemesForMapping(const XMLWStr &name);
 
    private:
     PhonemeDictionary(xercesc::DOMDocument *doc);
 
-    std::unordered_map<XMLCh *, std::unique_ptr<Phoneme>> m_phonemes;
-    std::unordered_map<XMLCh *, std::vector<PhonemeMapping>> m_mappings;
+    std::map<XMLWStr, Phoneme> m_phonemes;
+    std::map<XMLWStr, std::vector<PhonemeMapping>> m_mappings;
 
     friend std::ostream & ::operator<<(std::ostream &os,
                                        const PhonemeDictionary &phoneme);
+
+    friend class gui::PhonemeEditor;
 };
 
 }  // namespace phonemes

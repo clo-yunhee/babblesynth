@@ -21,11 +21,19 @@
 using namespace babblesynth::gui::phonemes;
 using namespace xercesc;
 
-Phoneme::Phoneme(const XMLCh* name) : m_name(XMLString::replicate(name)) {}
+Phoneme::Phoneme(const XMLWStr& name) : m_name(name) {}
 
-Phoneme::~Phoneme() { XMLString::release(&m_name); }
+Phoneme::Phoneme(const Phoneme& other)
+    : m_name(other.m_name),
+      m_poles(std::move(other.m_poles)),
+      m_zeros(std::move(other.m_zeros)) {}
 
-const XMLCh* Phoneme::name() const { return m_name; }
+Phoneme::Phoneme(Phoneme&& other)
+    : m_name(other.m_name),
+      m_poles(std::move(other.m_poles)),
+      m_zeros(std::move(other.m_zeros)) {}
+
+const XMLWStr& Phoneme::name() const { return m_name; }
 
 void Phoneme::addPole(const double frequency, const double bandwidth,
                       const int i) {

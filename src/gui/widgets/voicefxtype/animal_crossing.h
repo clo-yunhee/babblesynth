@@ -40,22 +40,27 @@ class AnimalCrossing : public VoiceFxType {
 
    private slots:
     void handleOpenDictionaryFile();
+    void handleSaveDictionaryFile();
+    void handleSaveAsDictionaryFile();
     void handlePitchChanged(int value);
     void handleDurationChanged(int value);
+
+    void updatePhonemes();
 
    private:
     void extractDictionaryFiles();
     void loadDictionaryFile(const QString &filePath);
+    void saveDictionaryFile(const QString &filePath);
 
-    void updatePhonemes();
     void updatePlans();
 
     QLabel *m_pitchLabel;
     QLabel *m_durationLabel;
     QLabel *m_dictionaryFileLabel;
     QLabel *m_dictionaryDirtyLabel;
+    QPushButton *m_dictionarySaveButton;
 
-    PhonemeEditor *m_phonemeEditor;
+    QString m_lastFilePath;
 
     double m_pitch;
     double m_duration;
@@ -64,6 +69,8 @@ class AnimalCrossing : public VoiceFxType {
 
     QByteArray m_textBytes;
     std::vector<phonemes::PhonemeMapping> m_phonemeMappings;
+
+    PhonemeEditor *m_phonemeEditor;
 };
 
 }  // namespace voicefx

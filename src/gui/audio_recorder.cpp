@@ -16,57 +16,60 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "audio_recorder.h"
+
 #include <QDebug>
 #include <stdexcept>
 
-#include "audio_recorder.h"
 #include "widgets/app_window.h"
 
 using namespace babblesynth::gui;
 
-static void f64_to_s16(QByteArray& dst, const std::vector<double>& src) {
-    constexpr int channels = 2;
-    const int sampleCount = src.size();
-    dst.resize(sizeof(int16_t) * channels * sampleCount);
+static void s16_to_f64(std::vector<double>& dst, const QByteArray& src) {
+    constexpr int channels = 1;
+    const int sampleCount = (src.size() / sizeof(int16_t)) / channels;
+    dst.resize(sampleCount);
 
-    int16_t* pDst = reinterpret_cast<int16_t*>(dst.data());
+    auto pSrc = reinterpret_cast<const int16_t*>(src.constData());
 
-    int r;
     size_t i, ch;
     for (i = 0; i < sampleCount; ++i) {
-        double x = src[i];
-        double c;
-        c = ((x < -1) ? -1 : ((x > 1) ? 1 : x));
-        c = c + 1;
-        r = (int)(c * 32767.5);
-        r = r - 32768;
+        double x = 0.0;
+
         for (ch = 0; ch < channels; ++ch) {
-            pDst[i * channels + ch] = (int16_t)r;
+            double c;
+            c = pSrc[i * channels + ch];
+            c = c + 32768;
+            c = c * 0.0000305180437933928435187;
+            c = c - 1;
+
+            x += c;
         }
+
+        dst[i] = x / channels;
     }
 }
 
 AudioRecorder::AudioRecorder(QObject* parent)
     : QObject(parent),
-      m_deviceInfo(QAudioDeviceInfo::defaultInputDevice()),
+      m_deviceInfo(QMediaDevices::defaultAudioOutput()),
       m_audio(nullptr) {
+    m_timer.setInterval(50);
+    m_timer.setTimerType(Qt::PreciseTimer);
+    connect(&m_timer, &QTimer::timeout, this, &AudioRecorder::onNotified);
     initAudio();
-    m_buffer.setBuffer(&m_data);
 }
 
 void AudioRecorder::start() {
     if (m_recording) {
-        
-    }
-}
-
-void AudioRecorder::play(const std::vector<double>& data) {
-    if (m_playing) {
         m_audio->stop();
     }
-    f64_to_s16(m_data, data);
-    m_buffer.open(QIODevice::ReadOnly);
+    m_buffer.open(QIODevice::WriteOnly);
     m_audio->start(&m_buffer);
+}
+
+void AudioRecorder::stop() {
+    if (m_recording) m_audio->stop();
 }
 
 int AudioRecorder::preferredSampleRate() const { return m_sampleRate; }
@@ -74,31 +77,47 @@ int AudioRecorder::preferredSampleRate() const { return m_sampleRate; }
 void AudioRecorder::onStateChanged(QAudio::State state) {
     switch (state) {
         case QAudio::ActiveState:
-            m_playing = true;
+            m_recording = true;
+            m_timer.start();
+            emit started();
             break;
         case QAudio::IdleState:
+            // onNotified();
             m_audio->stop();
             m_buffer.close();
-            m_playing = false;
+            m_timer.stop();
+            m_recording = false;
+            onStopped();
             break;
         case QAudio::StoppedState:
             if (m_audio->error() != QAudio::NoError) {
                 qWarning() << "Audio device stopped unexpectedly";
             }
+            m_buffer.close();
+            m_timer.stop();
+            onStopped();
             break;
         default:
             break;
     }
 }
 
+void AudioRecorder::onNotified() {
+    emit recording(m_audio->processedUSecs() / 1000);
+}
+
+void AudioRecorder::onStopped() {
+    std::vector<double> audio;
+    s16_to_f64(audio, m_buffer.data());
+    emit stopped(audio);
+}
+
 void AudioRecorder::initAudio() {
     m_sampleRate = m_deviceInfo.preferredFormat().sampleRate();
 
     m_audioFormat.setSampleRate(m_sampleRate);
-    m_audioFormat.setChannelCount(2);
-    m_audioFormat.setSampleSize(16);
-    m_audioFormat.setSampleType(QAudioFormat::SignedInt);
-    m_audioFormat.setCodec("audio/pcm");
+    m_audioFormat.setChannelCount(1);
+    m_audioFormat.setSampleFormat(QAudioFormat::Int16);
 
     if (!m_deviceInfo.isFormatSupported(m_audioFormat)) {
         throw std::invalid_argument("audio format not supported");
@@ -109,8 +128,8 @@ void AudioRecorder::initAudio() {
         m_audio->deleteLater();
     }
 
-    m_audio = new QAudioOutput(m_deviceInfo, m_audioFormat, this);
-    m_audio->setVolume(0.6);
-    connect(m_audio, &QAudioInput::stateChanged, this,
-            &AudioPlayer::onStateChanged);
+    m_audio = new QAudioSource(m_deviceInfo, m_audioFormat, this);
+
+    connect(m_audio, &QAudioSource::stateChanged, this,
+            &AudioRecorder::onStateChanged);
 }

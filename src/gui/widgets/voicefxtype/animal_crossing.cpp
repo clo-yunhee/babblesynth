@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "animal_crossing.h"
+
 #include <QBoxLayout>
 #include <QDebug>
 #include <QDirIterator>
@@ -30,15 +32,16 @@
 #include <random>
 
 #include "../../app_state.h"
-#include "animal_crossing.h"
 #include "frequency_scale.h"
 
 using namespace babblesynth::gui::voicefx;
 using namespace xercesc;
 
 AnimalCrossing::AnimalCrossing()
-    : m_phonemeDictionary(new phonemes::PhonemeDictionary) {
-    m_phonemeEditor = new PhonemeEditor;
+    : m_phonemeDictionary(new phonemes::PhonemeDictionary),
+      m_phonemeEditor(new PhonemeEditor(&m_phonemeDictionary)) {
+    connect(m_phonemeEditor, &PhonemeEditor::mappingsChanged, this,
+            &AnimalCrossing::updatePhonemes);
 
     QGroupBox *pitchBox = new QGroupBox(tr("Pitch"));
     {
@@ -82,30 +85,64 @@ AnimalCrossing::AnimalCrossing()
 
     QGroupBox *dictionaryBox = new QGroupBox(tr("Phoneme dictionary"));
     {
-        QPushButton *dictFileButton =
-            new QPushButton(tr("Load dictionary file"));
+        QHBoxLayout *topDictLayout = new QHBoxLayout;
+        {
+            QPushButton *dictEditButton =
+                new QPushButton(tr("Edit dictionary"));
 
-        m_dictionaryFileLabel = new QLabel;
+            connect(dictEditButton, &QPushButton::pressed, m_phonemeEditor,
+                    &QWidget::show);
 
-        connect(dictFileButton, &QPushButton::pressed, this,
-                &AnimalCrossing::handleOpenDictionaryFile);
+            topDictLayout->addStretch();
+            topDictLayout->addWidget(dictEditButton);
+            topDictLayout->addStretch();
+        }
 
-        QPushButton *dictEditButton = new QPushButton(tr("Edit"));
+        QHBoxLayout *middleDictLayout = new QHBoxLayout;
+        {
+            QPushButton *dictFileButton = new QPushButton(tr("Load"));
 
-        connect(dictEditButton, &QPushButton::pressed, m_phonemeEditor,
-                &QWidget::show);
+            m_dictionaryFileLabel = new QLabel;
 
-        QHBoxLayout *dictionaryLayout = new QHBoxLayout;
-        dictionaryLayout->addWidget(dictFileButton);
-        dictionaryLayout->addWidget(m_dictionaryFileLabel);
-        dictionaryLayout->addWidget(dictEditButton);
+            connect(dictFileButton, &QPushButton::pressed, this,
+                    &AnimalCrossing::handleOpenDictionaryFile);
+
+            middleDictLayout->addStretch();
+            middleDictLayout->addWidget(dictFileButton);
+            middleDictLayout->addWidget(m_dictionaryFileLabel);
+            middleDictLayout->addStretch();
+        }
+
+        QHBoxLayout *bottomDictLayout = new QHBoxLayout;
+        {
+            m_dictionarySaveButton = new QPushButton(tr("Save"));
+            m_dictionarySaveButton->setEnabled(false);
+
+            QPushButton *dictSaveAsButton = new QPushButton(tr("Save as"));
+
+            connect(m_dictionarySaveButton, &QPushButton::pressed, this,
+                    &AnimalCrossing::handleSaveDictionaryFile);
+
+            connect(dictSaveAsButton, &QPushButton::pressed, this,
+                    &AnimalCrossing::handleSaveAsDictionaryFile);
+
+            bottomDictLayout->addStretch();
+            bottomDictLayout->addWidget(m_dictionarySaveButton);
+            bottomDictLayout->addWidget(dictSaveAsButton);
+            bottomDictLayout->addStretch();
+        }
+
+        QVBoxLayout *dictionaryLayout = new QVBoxLayout;
+        dictionaryLayout->addLayout(topDictLayout);
+        dictionaryLayout->addLayout(middleDictLayout);
+        dictionaryLayout->addLayout(bottomDictLayout);
         dictionaryBox->setLayout(dictionaryLayout);
     }
 
     QHBoxLayout *hLayout = new QHBoxLayout;
     hLayout->addStretch();
-    hLayout->addWidget(durationBox);
     hLayout->addWidget(pitchBox);
+    hLayout->addWidget(durationBox);
     hLayout->addStretch();
 
     QHBoxLayout *hLayout2 = new QHBoxLayout;
@@ -144,6 +181,27 @@ void AnimalCrossing::handleOpenDictionaryFile() {
     }
 
     loadDictionaryFile(filePath);
+}
+
+void AnimalCrossing::handleSaveDictionaryFile() {
+    if (m_lastFilePath.isNull()) {
+        return;
+    }
+
+    saveDictionaryFile(m_lastFilePath);
+}
+
+void AnimalCrossing::handleSaveAsDictionaryFile() {
+    QString filePath = QFileDialog::getSaveFileName(
+        this, tr("Save dictionary file"),
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
+        "Phoneme dictionary definition (*.xml)");
+
+    if (filePath.isNull()) {
+        return;
+    }
+
+    saveDictionaryFile(filePath);
 }
 
 void AnimalCrossing::handlePitchChanged(int value) {
@@ -192,6 +250,11 @@ void AnimalCrossing::loadDictionaryFile(const QString &filePath) {
 
         updatePhonemes();
         updatePlans();
+
+        m_lastFilePath = filePath;
+        m_dictionarySaveButton->setEnabled(false);
+
+        emit m_phonemeEditor->mappingsChanged();
     } catch (const std::logic_error &e) {
         QMessageBox::warning(this, tr("Phoneme dictionary failed to load"),
                              tr("Phoneme dictionary at %1 failed to load:\n%2")
@@ -200,11 +263,19 @@ void AnimalCrossing::loadDictionaryFile(const QString &filePath) {
     }
 }
 
+void AnimalCrossing::saveDictionaryFile(const QString &filePath) {
+    m_phonemeDictionary->saveToXml(filePath);
+
+    QFileInfo fileInfo(filePath);
+    m_dictionaryFileLabel->setText(fileInfo.fileName());
+
+    m_lastFilePath = filePath;
+    m_dictionarySaveButton->setEnabled(false);
+}
+
 void AnimalCrossing::updatePhonemes() {
     m_phonemeMappings =
         m_phonemeDictionary->mappingsFor(m_textBytes.constData());
-
-    std::cout << m_phonemeMappings << std::endl;
 }
 
 void AnimalCrossing::updatePlans() {
@@ -236,66 +307,56 @@ void AnimalCrossing::updatePlans() {
     // Assume the dictionary was measured with an average pitch of 130 Hz.
     // Morph the center frequencies by a constant factor to the set pitch.
 
-    const double heliumFactor = std::max(1.0, m_pitch / 150);
+    const double heliumFactor = 1;  // std::max(1.0, m_pitch / 150);
 
     // Set up the RNG for phoneme duration and inter-phoneme pause duration
     // using the text as a seed.
 
     std::mt19937 rng(std::hash<std::string>{}(m_textBytes.toStdString()));
 
-    std::array intervals{0.0, 3.0, 6.0, 12.0};
-    std::array weights{1.0, 10.0, 80.0, 100.0};
-    std::piecewise_linear_distribution<double> pauseDis(
-        intervals.begin(), intervals.end(), weights.begin());
-
     std::normal_distribution<double> durationFactorDis(1.0, 0.02);
 
     for (const auto &mapping : m_phonemeMappings) {
-        double timeOffset;
+        if (mapping.duration > 0) {
+            double timeOffset;
 
-        const auto &fnPole = [&time, &timeOffset, heliumFactor](
-                                 const int i, const double frequency,
-                                 const double bandwidth) {
-            appState->formantFrequencyPlan(i)->cubicToValueAtTime(
-                frequency * heliumFactor, time + timeOffset);
-            appState->formantBandwidthPlan(i)->cubicToValueAtTime(
-                bandwidth * heliumFactor, time + timeOffset);
-        };
+            const auto &fnPole = [&time, &timeOffset, heliumFactor](
+                                     const int i, const double frequency,
+                                     const double bandwidth) {
+                appState->formantFrequencyPlan(i)->cubicToValueAtTime(
+                    frequency * heliumFactor, time + timeOffset);
+                /*appState->formantBandwidthPlan(i)->cubicToValueAtTime(
+                    bandwidth * heliumFactor, time + timeOffset);*/
+            };
 
-        const auto &fnZero = [&time, &timeOffset, heliumFactor](
-                                 const int i, const double frequency,
-                                 const double bandwidth) {
-            appState->antiformantFrequencyPlan(i)->cubicToValueAtTime(
-                frequency * heliumFactor, time + timeOffset);
-            appState->antiformantBandwidthPlan(i)->cubicToValueAtTime(
-                bandwidth * heliumFactor, time + timeOffset);
-        };
+            const auto &fnZero = [&time, &timeOffset, heliumFactor](
+                                     const int i, const double frequency,
+                                     const double bandwidth) {
+                appState->antiformantFrequencyPlan(i)->cubicToValueAtTime(
+                    frequency * heliumFactor, time + timeOffset);
+                /*appState->antiformantBandwidthPlan(i)->cubicToValueAtTime(
+                    bandwidth * heliumFactor, time + timeOffset);*/
+            };
 
-        const double durationFactor =
-            std::min(std::max(durationFactorDis(rng), 0.75), 1.25);
+            const double durationFactor =
+                std::min(std::max(durationFactorDis(rng), 0.75), 1.25);
 
-        const double duration = mapping.duration * durationFactor;
+            const double duration = mapping.duration * durationFactor;
 
-        timeOffset = duration * 15.0 / 1000.0;
-        appState->amplitudePlan()->linearToValueAtTime(mapping.intensity,
-                                                       time + timeOffset);
-        timeOffset += duration * 5.0 / 1000.0;
-        mapping.phoneme->updatePlansWith(fnPole, fnZero);
+            timeOffset = duration * 15.0 / 1000.0;
+            appState->amplitudePlan()->cubicToValueAtTime(mapping.intensity,
+                                                          time + timeOffset);
+            timeOffset = duration * std::max(m_duration * 0.1, 20.0 / 1000.0);
+            mapping.phoneme.updatePlansWith(fnPole, fnZero);
 
-        time += duration * m_duration;
+            time += duration * m_duration;
 
-        timeOffset = -duration * 5.0 / 1000.0;
-        appState->amplitudePlan()->linearToValueAtTime(mapping.intensity,
-                                                       time + timeOffset);
-        timeOffset -= duration * 15.0 / 1000.0;
-        mapping.phoneme->updatePlansWith(fnPole, fnZero);
-
-        // Pause of random duration.
-        const double pauseDuration = pauseDis(rng);
-
-        time += 0.5 * pauseDuration / 1000.0;
-        appState->amplitudePlan()->linearToValueAtTime(0, time);
-        time += 0.5 * pauseDuration / 1000.0;
+            timeOffset = -duration * 15.0 / 1000.0;
+            appState->amplitudePlan()->cubicToValueAtTime(mapping.intensity,
+                                                          time + timeOffset);
+            timeOffset = -duration * std::max(m_duration * 0.1, 20.0 / 1000.0);
+            mapping.phoneme.updatePlansWith(fnPole, fnZero);
+        }
     }
 
     appState->pitchPlan()->linearToValueAtTime(m_pitch, time);

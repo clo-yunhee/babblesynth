@@ -19,10 +19,16 @@
 #ifndef BABBLESYNTH_PHONEME_EDITOR_H
 #define BABBLESYNTH_PHONEME_EDITOR_H
 
+#include <QCloseEvent>
+#include <QInputDialog>
+#include <QLabel>
+#include <QLineEdit>
 #include <QListWidget>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QWidget>
 
+#include "../audio_recorder.h"
 #include "../phonemes/phoneme_dictionary.h"
 
 namespace babblesynth {
@@ -32,16 +38,47 @@ class PhonemeEditor : public QWidget {
     Q_OBJECT
 
    public:
-    PhonemeEditor(QWidget *parent = nullptr);
+    PhonemeEditor(phonemes::PhonemeDictionary **pDictionary,
+                  QWidget *parent = nullptr);
+
+   signals:
+    void mappingsChanged();
 
    private slots:
+    void onRecordingStopped(const std::vector<double> &audio);
+    void onMappingRenamed(const QString &text);
+    void onMappingSelected(const QString &name);
+    void onMappingAdd();
+    void onMappingDelete();
+    void onMappingSave();
+    void onMappingsChanged();
 
    protected:
+    void closeEvent(QCloseEvent *event) override;
+
    private:
-    phonemes::PhonemeDictionary *m_dictionary;
+    phonemes::Phoneme generatePhoneme(const std::vector<double> &audio,
+                                      double sampleRate);
+
+    phonemes::PhonemeDictionary **m_ptrDictionary;
+
+    AudioRecorder *m_audioRecorder;
+    int m_sampleRate;
 
     QListWidget *m_mappingList;
+    QPushButton *m_saveButton;
+    QLineEdit *m_mappingEdit;
+
+    bool m_recording;
     QPushButton *m_recordButton;
+    QLabel *m_recordDuration;
+
+    int m_selectedRow;
+    QString m_selectedMapping;
+
+    bool m_changed;
+    QString m_newName;
+    std::vector<phonemes::PhonemeMapping> m_newMappings;
 };
 
 }  // namespace gui

@@ -16,16 +16,35 @@ FetchContent_Declare(
 
 FetchContent_Declare(
     libsndfile
-    URL      https://github.com/libsndfile/libsndfile/releases/download/1.0.31/libsndfile-1.0.31.tar.bz2
-    URL_HASH SHA256=a8cfb1c09ea6e90eff4ca87322d4168cdbe5035cb48717b40bf77e751cc02163
+    GIT_REPOSITORY https://github.com/libsndfile/libsndfile.git
+    GIT_TAG        a4f1387ab8084fac7f0301b18e01011be9381672 # latest (because Lame dependency search is broken on 1.1.0)
+)
+
+FetchContent_Declare(
+    libsamplerate
+    URL      https://github.com/libsndfile/libsamplerate/releases/download/0.2.2/libsamplerate-0.2.2.tar.xz
+    URL_HASH SHA256=3258DA280511D24B49D6B08615BBE824D0CACC9842B0E4CAF11C52CF2B043893
+)
+
+FetchContent_Declare(
+    Eigen
+    URL      https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2
+    URL_HASH SHA256=b4c198460eba6f28d34894e3a5710998818515104d6e74e5cc331ce31e46e626
 )
 
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
 set(BUILD_TESTING OFF CACHE INTERNAL "" FORCE)
 set(BUILD_PROGRAMS OFF CACHE INTERNAL "" FORCE)
 set(BUILD_EXAMPLES OFF CACHE INTERNAL "" FORCE)
+set(EIGEN_BUILD_DOC OFF CACHE INTERNAL "" FORCE)
+set(EIGEN_BUILD_PKGCONFIG OFF CACHE INTERNAL "" FORCE)
+set(xmlch-type "char16_t" CACHE INTERNAL "" FORCE)
 
-FetchContent_MakeAvailable(fftw3 xerces-c libsndfile)
+set(BUILD_TESTS OFF CACHE INTERNAL "")
+set(ENABLE_THREADS OFF CACHE INTERNAL "")
+set(ENABLE_SSE ON CACHE INTERNAL "")
+
+FetchContent_MakeAvailable(fftw3 xerces-c libsndfile libsamplerate Eigen)
 
 target_include_directories(fftw3 INTERFACE $<BUILD_INTERFACE:${fftw3_SOURCE_DIR}/api>)
 
