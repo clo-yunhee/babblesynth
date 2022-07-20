@@ -27,7 +27,7 @@ For more information, please refer to <http://unlicense.org>
 
 ]]
 
-find_package(Qt REQUIRED NAMES Qt5)
+find_package(Qt REQUIRED NAMES Qt6)
 
 set(_qt_root "${Qt_DIR}/../../..")
 
@@ -43,7 +43,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(QT_RUNTIME_DIR ${Qt_DIR}/../..)
 
         find_path(_qt_prefix
-            NAMES qt5/plugins
+            NAMES qt6/plugins
             PATHS
                 ${Qt_DIR}/../..
             PATH_SUFFIXES
@@ -69,7 +69,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set(QT_LIBRARY_DIR ${Qt_DIR}/../..)
 
         find_path(_qt_prefix
-            NAMES qt5/plugins
+            NAMES qt6/plugins
             PATHS
                 /usr/lib64
                 /usr/lib
@@ -88,7 +88,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set(QT_PLUGIN_DIR ${_qt_prefix}/qt5/plugins)
     endif()
 else()
-    message(AUTHOR_WARNING "  There is no known Qt 5 installation directory structure for this platform (${CMAKE_SYSTEM_NAME}). Will default to the Windows behaviour.")
+    message(AUTHOR_WARNING "  There is no known Qt 6 installation directory structure for this platform (${CMAKE_SYSTEM_NAME}). Will default to the Windows behaviour.")
 endif()
 
 get_filename_component(QT_RUNTIME_DIR ${QT_RUNTIME_DIR} ABSOLUTE)

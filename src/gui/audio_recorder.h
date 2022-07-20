@@ -20,12 +20,15 @@
 #define BABBLESYNTH_AUDIO_RECORDER_H
 
 #include <QAudio>
-#include <QAudioDeviceInfo>
+#include <QAudioDevice>
 #include <QAudioFormat>
-#include <QAudioOutput>
+#include <QAudioInput>
+#include <QAudioSource>
 #include <QBuffer>
 #include <QByteArray>
+#include <QMediaDevices>
 #include <QObject>
+#include <QTimer>
 #include <vector>
 
 #include "app_state.h"
@@ -39,25 +42,35 @@ class AudioRecorder : public QObject {
    public:
     AudioRecorder(QObject *parent = nullptr);
 
+    int preferredSampleRate() const;
+
+   public slots:
     void start();
     void stop();
 
-    int preferredSampleRate() const;
+   signals:
+    void started();
+    void stopped(std::vector<double> audio);
+    void recording(int durationMillis);
 
    private slots:
     void onStateChanged(QAudio::State state);
+    void onNotified();
 
    private:
+    void onStopped();
+
     void initAudio();
 
-    QAudioDeviceInfo m_deviceInfo;
+    QAudioDevice m_deviceInfo;
 
     int m_sampleRate;
     QAudioFormat m_audioFormat;
 
-    QAudioInput *m_audio;
+    QTimer m_timer;
 
-    QByteArray m_data;
+    QAudioSource *m_audio;
+
     QBuffer m_buffer;
 
     bool m_recording;

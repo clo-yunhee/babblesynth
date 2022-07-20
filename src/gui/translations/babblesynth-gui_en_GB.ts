@@ -5,7 +5,7 @@
     <name>babblesynth::gui::AppWindow</name>
     <message>
         <location filename="../widgets/app_window.cpp" line="41"/>
-        <location filename="../widgets/app_window.cpp" line="48"/>
+        <location filename="../widgets/app_window.cpp" line="52"/>
         <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
@@ -15,42 +15,42 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="50"/>
+        <location filename="../widgets/app_window.cpp" line="58"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="54"/>
+        <location filename="../widgets/app_window.cpp" line="62"/>
         <source>Source parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="60"/>
+        <location filename="../widgets/app_window.cpp" line="68"/>
         <source>Undertale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="64"/>
+        <location filename="../widgets/app_window.cpp" line="72"/>
         <source>Animal Crossing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="89"/>
+        <location filename="../widgets/app_window.cpp" line="97"/>
         <source>Hey! If I asked you about bugs that would be easy to imitate...which ones would you pick?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="99"/>
+        <location filename="../widgets/app_window.cpp" line="107"/>
         <source>Voice effect settings template:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="106"/>
+        <location filename="../widgets/app_window.cpp" line="114"/>
         <source>Example dialogue text:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/app_window.cpp" line="153"/>
+        <location filename="../widgets/app_window.cpp" line="161"/>
         <source>Save audio file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -58,18 +58,29 @@
 <context>
     <name>babblesynth::gui::PhonemeEditor</name>
     <message>
-        <location filename="../widgets/phoneme_editor.cpp" line="28"/>
+        <location filename="../widgets/phoneme_editor.cpp" line="50"/>
         <source>Phoneme dictionary editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/phoneme_editor.cpp" line="40"/>
+        <location filename="../widgets/phoneme_editor.cpp" line="68"/>
+        <source>Mapping</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/phoneme_editor.cpp" line="82"/>
         <source>Recording</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/phoneme_editor.cpp" line="45"/>
+        <location filename="../widgets/phoneme_editor.cpp" line="86"/>
+        <location filename="../widgets/phoneme_editor.cpp" line="99"/>
         <source>Record</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../widgets/phoneme_editor.cpp" line="91"/>
+        <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -158,22 +169,22 @@
 <context>
     <name>babblesynth::gui::voicefx::Undertale</name>
     <message>
-        <location filename="../widgets/voicefxtype/undertale.cpp" line="32"/>
+        <location filename="../widgets/voicefxtype/undertale.cpp" line="33"/>
         <source>Pitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/voicefxtype/undertale.cpp" line="52"/>
+        <location filename="../widgets/voicefxtype/undertale.cpp" line="53"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/voicefxtype/undertale.cpp" line="72"/>
+        <location filename="../widgets/voicefxtype/undertale.cpp" line="73"/>
         <source>Pause ratio</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../widgets/voicefxtype/undertale.cpp" line="132"/>
+        <location filename="../widgets/voicefxtype/undertale.cpp" line="133"/>
         <source>Vowel color</source>
         <translation type="unfinished"></translation>
     </message>

@@ -29,6 +29,9 @@
 // range (min/max).
 #include "parameter.h"
 
+// Defines a resampling function.
+#include "resample.h"
+
 // Defines a variable with special behaviour for continuous variation.
 #include "variable.h"
 
@@ -46,5 +49,11 @@
 
 // Defines a formant filter.
 #include "filter/formant_filter.h"
+
+// Defines general filtering functions.
+#include "filter/filters.h"
+
+// Defines an AR-MA model fit function.
+#include "arma/fit.h"
 
 #endif  // BABBLESYNTH_BABBLESYNTH_H

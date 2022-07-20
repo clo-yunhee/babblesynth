@@ -18,6 +18,7 @@
 
 #include "phoneme_dictionary.h"
 
+#include <QDebug>
 #include <iostream>
 #include <string>
 #include <xercesc/dom/DOM.hpp>
@@ -41,19 +42,11 @@ inline bool stringEqualsI(const XMLCh *xmlStr, const char *cStr2) {
     return test;
 }
 
-PhonemeDictionary::~PhonemeDictionary() {
-    for (auto &[name, phoneme] : m_phonemes) {
-        XMLString::release(const_cast<XMLCh **>(&name));
-    }
+PhonemeDictionary::~PhonemeDictionary() {}
 
-    for (auto &[chars, phoneme] : m_mappings) {
-        XMLString::release(const_cast<XMLCh **>(&chars));
-    }
-}
-
-std::vector<PhonemeMapping> PhonemeDictionary::mappingsFor(const char *text) {
-    XMLCh *textXml = XMLString::transcode(text);
-    int textLength = XMLString::stringLen(textXml);
+std::vector<PhonemeMapping> PhonemeDictionary::mappingsFor(
+    const XMLWStr &text) {
+    int textLength = text.length();
 
     std::vector<PhonemeMapping> mappings;
 
@@ -65,10 +58,10 @@ std::vector<PhonemeMapping> PhonemeDictionary::mappingsFor(const char *text) {
 
         // Search for the longest mapping that starts at chIndex.
         for (const auto &[prefix, mapping] : m_mappings) {
-            const int prefixLength = XMLString::stringLen(prefix);
+            const int prefixLength = prefix.length();
 
             if (prefixLength > prefixLengthFound &&
-                XMLString::startsWithI(textXml + chIndex, prefix)) {
+                text.startsWith(prefix, chIndex)) {
                 prefixLengthFound = prefixLength;
                 mappingFound = mapping;
             }
@@ -84,12 +77,108 @@ std::vector<PhonemeMapping> PhonemeDictionary::mappingsFor(const char *text) {
         }
     }
 
-    XMLString::release(&textXml);
-
     return mappings;
 }
 
-PhonemeDictionary *PhonemeDictionary::loadFromXML(const char *xmlFilename) {
+void PhonemeDictionary::addOrReplaceMapping(
+    const XMLWStr &name, const std::vector<PhonemeMapping> &mappings) {
+    const XMLWStr prefix(name + "_");
+
+    std::vector<PhonemeMapping> namedMappings(mappings);
+
+    for (int num = 0; num < mappings.size(); ++num) {
+        const XMLWStr phonemeName(prefix + std::to_string(num));
+
+        namedMappings[num].phoneme.m_name = phonemeName;
+
+        m_phonemes.emplace(phonemeName, namedMappings[num].phoneme);
+    }
+
+    auto it = m_mappings.find(name);
+    // Replace if it exists.
+    if (it != m_mappings.end()) {
+        it->second = namedMappings;
+    } else {
+        m_mappings.emplace(name, namedMappings);
+    }
+}
+
+void PhonemeDictionary::deleteMapping(const XMLWStr &name) {
+    const XMLWStr prefix(name + "_");
+
+    // Delete it from mappings
+    auto mapIt = m_mappings.begin();
+    while (mapIt != m_mappings.end()) {
+        if (mapIt->first == name) {
+            mapIt = m_mappings.erase(mapIt);
+            break;
+        } else {
+            ++mapIt;
+        }
+    }
+
+    // Delete the corresponding phoneme mappings
+    auto phoneIt = m_phonemes.begin();
+    while (phoneIt != m_phonemes.end()) {
+        if (phoneIt->first.startsWith(prefix)) {
+            phoneIt = m_phonemes.erase(phoneIt);
+        } else {
+            ++phoneIt;
+        }
+    }
+}
+
+void PhonemeDictionary::renameMapping(const XMLWStr &oldName,
+                                      const XMLWStr &newName) {
+    std::vector<PhonemeMapping> mappings;
+
+    const XMLWStr oldPrefix(oldName + "_");
+    const XMLWStr newPrefix(newName + "_");
+
+    // Delete old mapping, save phoneme list
+    auto mapIt = m_mappings.begin();
+    while (mapIt != m_mappings.end()) {
+        if (mapIt->first == oldName) {
+            mappings = mapIt->second;
+            mapIt = m_mappings.erase(mapIt);
+            break;
+        } else {
+            ++mapIt;
+        }
+    }
+
+    // Delete all the old phonemes
+    auto phoneIt = m_phonemes.begin();
+    while (phoneIt != m_phonemes.end()) {
+        if (phoneIt->first.startsWith(oldPrefix)) {
+            phoneIt = m_phonemes.erase(phoneIt);
+        } else {
+            ++phoneIt;
+        }
+    }
+
+    // Remap all the phonemes
+    for (int num = 0; num < mappings.size(); ++num) {
+        const XMLWStr newPhonemeName(newPrefix + std::to_string(num));
+
+        mappings[num].phoneme.m_name = newPhonemeName;
+
+        m_phonemes.emplace(newPhonemeName, mappings[num].phoneme);
+    }
+
+    m_mappings.emplace(newName, std::move(mappings));
+}
+
+bool PhonemeDictionary::mappingExists(const XMLWStr &name) const {
+    return m_mappings.find(name) != m_mappings.end();
+}
+
+const std::vector<PhonemeMapping> &PhonemeDictionary::phonemesForMapping(
+    const XMLWStr &name) {
+    return m_mappings.find(name)->second;
+}
+
+PhonemeDictionary *PhonemeDictionary::loadFromXML(const XMLWStr &filename) {
     XMLCh tempStr[100];
     XMLString::transcode("LS", tempStr, 99);
     DOMImplementation *impl =
@@ -100,16 +189,15 @@ PhonemeDictionary *PhonemeDictionary::loadFromXML(const char *xmlFilename) {
 
     // Make sure the parser gives ownership of the document before being
     // released.
-    constexpr const char *paramStr =
-        "http://apache.org/xml/features/dom/user-adopts-DOMDocument";
-    XMLCh *paramXmlStr = XMLString::transcode(paramStr);
-    parser->getDomConfig()->setParameter(paramXmlStr, true);  // Set param.
-    XMLString::release(&paramXmlStr);
+    if (parser->getDomConfig()->canSetParameter(
+            XMLUni::fgXercesUserAdoptsDOMDocument, true))
+        parser->getDomConfig()->setParameter(
+            XMLUni::fgXercesUserAdoptsDOMDocument, true);
 
     DOMDocument *doc = nullptr;
 
     try {
-        doc = parser->parseURI(xmlFilename);
+        doc = parser->parseURI(filename);
     } catch (const XMLException &toCatch) {
         char *message = XMLString::transcode(toCatch.getMessage());
         std::cout << "Exception message is: \n" << message << "\n";
@@ -131,50 +219,19 @@ PhonemeDictionary *PhonemeDictionary::loadFromXML(const char *xmlFilename) {
 }
 
 PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
-    constexpr XMLCh tagDictionary[] = {
-        chLatin_d, chLatin_i, chLatin_c, chLatin_t, chLatin_i, chLatin_o,
-        chLatin_n, chLatin_a, chLatin_r, chLatin_y, chNull};
-
-    constexpr XMLCh tagPhonemes[] = {chLatin_p, chLatin_h, chLatin_o,
-                                     chLatin_n, chLatin_e, chLatin_m,
-                                     chLatin_e, chLatin_s, chNull};
-
-    constexpr XMLCh tagPhoneme[] = {chLatin_p, chLatin_h, chLatin_o, chLatin_n,
-                                    chLatin_e, chLatin_m, chLatin_e, chNull};
-
-    constexpr XMLCh tagName[] = {chLatin_n, chLatin_a, chLatin_m, chLatin_e,
-                                 chNull};
-
-    constexpr XMLCh tagPole[] = {chLatin_p, chLatin_o, chLatin_l, chLatin_e,
-                                 chNull};
-
-    constexpr XMLCh tagZero[] = {chLatin_z, chLatin_e, chLatin_r, chLatin_o,
-                                 chNull};
-
-    constexpr XMLCh tagFrequency[] = {
-        chLatin_f, chLatin_r, chLatin_e, chLatin_q, chLatin_u,
-        chLatin_e, chLatin_n, chLatin_c, chLatin_y, chNull};
-
-    constexpr XMLCh tagBandwidth[] = {
-        chLatin_b, chLatin_a, chLatin_n, chLatin_d, chLatin_w,
-        chLatin_i, chLatin_d, chLatin_t, chLatin_h, chNull};
-
-    constexpr XMLCh tagMappings[] = {chLatin_m, chLatin_a, chLatin_p,
-                                     chLatin_p, chLatin_i, chLatin_n,
-                                     chLatin_g, chLatin_s, chNull};
-
-    constexpr XMLCh tagMapping[] = {chLatin_m, chLatin_a, chLatin_p, chLatin_p,
-                                    chLatin_i, chLatin_n, chLatin_g, chNull};
-
-    constexpr XMLCh tagFor[] = {chLatin_f, chLatin_o, chLatin_r, chNull};
-
-    constexpr XMLCh tagDuration[] = {chLatin_d, chLatin_u, chLatin_r,
-                                     chLatin_a, chLatin_t, chLatin_i,
-                                     chLatin_o, chLatin_n, chNull};
-
-    constexpr XMLCh tagIntensity[] = {
-        chLatin_i, chLatin_n, chLatin_t, chLatin_e, chLatin_n,
-        chLatin_s, chLatin_i, chLatin_t, chLatin_y, chNull};
+    const auto tagDictionary = "dictionary"_x;
+    const auto tagPhonemes = "phonemes"_x;
+    const auto tagPhoneme = "phoneme"_x;
+    const auto tagName = "name"_x;
+    const auto tagPole = "pole"_x;
+    const auto tagZero = "zero"_x;
+    const auto tagFrequency = "frequency"_x;
+    const auto tagBandwidth = "bandwidth"_x;
+    const auto tagMappings = "mappings"_x;
+    const auto tagMapping = "mapping"_x;
+    const auto tagFor = "for"_x;
+    const auto tagDuration = "duration"_x;
+    const auto tagIntensity = "intensity"_x;
 
     if (doc == nullptr) {
         throw std::logic_error("Phoneme dictionary document does not exist");
@@ -187,7 +244,7 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
             "Phoneme dictionary document element does not exist");
     }
 
-    if (!XMLString::equals(root->getTagName(), tagDictionary)) {
+    if (tagDictionary != root->getTagName()) {
         throw std::logic_error(
             "Phoneme dictionary root tag must be <dictionary>");
     }
@@ -221,7 +278,7 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
                     "<phoneme> tag must have a name attribute");
             }
 
-            auto phoneme = std::make_unique<Phoneme>(name);
+            Phoneme phoneme(name);
 
             // Find pole definitions.
             DOMNodeList *poleList =
@@ -256,7 +313,7 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
                 double bandwidth =
                     std::stod(std::string(bandwidthCStr), nullptr);
 
-                phoneme->addPole(frequency, bandwidth);
+                phoneme.addPole(frequency, bandwidth);
 
                 XMLString::release(&frequencyCStr);
                 XMLString::release(&bandwidthCStr);
@@ -295,13 +352,13 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
                 double bandwidth =
                     std::stod(std::string(bandwidthCStr), nullptr);
 
-                phoneme->addZero(frequency, bandwidth);
+                phoneme.addZero(frequency, bandwidth);
 
                 XMLString::release(&frequencyCStr);
                 XMLString::release(&bandwidthCStr);
             }
 
-            m_phonemes.emplace(XMLString::replicate(name), std::move(phoneme));
+            m_phonemes.emplace(name, std::move(phoneme));
         }
     }
 
@@ -396,12 +453,12 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
 
                 // Check that there is a phoneme with that name.
                 bool doesPhonemeMatch = false;
-                Phoneme *matchingPhoneme;
+                const Phoneme *matchingPhoneme;
 
                 for (const auto &[name, phoneme] : m_phonemes) {
-                    if (XMLString::equals(name, phonemeString)) {
+                    if (name == phonemeString) {
                         doesPhonemeMatch = true;
-                        matchingPhoneme = phoneme.get();
+                        matchingPhoneme = &phoneme;
                         break;
                     }
                 }
@@ -413,12 +470,121 @@ PhonemeDictionary::PhonemeDictionary(DOMDocument *doc) {
                         "the <phonemes> groups");
                 }
 
-                mappingDefs.push_back({matchingPhoneme, duration, intensity});
+                mappingDefs.push_back({*matchingPhoneme, duration, intensity});
             }
 
-            m_mappings.emplace(XMLString::replicate(forString),
-                               std::move(mappingDefs));
+            m_mappings.emplace(forString, std::move(mappingDefs));
         }
+    }
+}
+
+void PhonemeDictionary::saveToXml(const XMLWStr &filename) {
+    const auto tagDictionary = "dictionary"_x;
+    const auto tagPhonemes = "phonemes"_x;
+    const auto tagPhoneme = "phoneme"_x;
+    const auto tagName = "name"_x;
+    const auto tagPole = "pole"_x;
+    const auto tagZero = "zero"_x;
+    const auto tagFrequency = "frequency"_x;
+    const auto tagBandwidth = "bandwidth"_x;
+    const auto tagMappings = "mappings"_x;
+    const auto tagMapping = "mapping"_x;
+    const auto tagFor = "for"_x;
+    const auto tagDuration = "duration"_x;
+    const auto tagIntensity = "intensity"_x;
+
+    XMLCh tempStr[100];
+    XMLString::transcode("LS", tempStr, 99);
+    DOMImplementation *impl =
+        DOMImplementationRegistry::getDOMImplementation(tempStr);
+
+    char buf[128];
+
+    try {
+        DOMDocument *doc = impl->createDocument(0, tagDictionary, 0);
+
+        DOMElement *root = doc->getDocumentElement();
+
+        DOMElement *phonemesElement = doc->createElement(tagPhonemes);
+        root->appendChild(phonemesElement);
+
+        for (const auto &[name, phoneme] : m_phonemes) {
+            DOMElement *phonemeElement = doc->createElement(tagPhoneme);
+            phonemesElement->appendChild(phonemeElement);
+
+            phonemeElement->setAttribute(tagName, name);
+
+            for (const auto &pole : phoneme.m_poles) {
+                DOMElement *poleElement = doc->createElement(tagPole);
+                phonemeElement->appendChild(poleElement);
+
+                std::sprintf(buf, "%g", pole.frequency);
+                poleElement->setAttribute(tagFrequency, XMLWStr(buf));
+
+                std::sprintf(buf, "%g", pole.bandwidth);
+                poleElement->setAttribute(tagBandwidth, XMLWStr(buf));
+            }
+
+            for (const auto &zero : phoneme.m_zeros) {
+                DOMElement *zeroElement = doc->createElement(tagZero);
+                phonemeElement->appendChild(zeroElement);
+
+                std::sprintf(buf, "%g", zero.frequency);
+                zeroElement->setAttribute(tagFrequency, XMLWStr(buf));
+
+                std::sprintf(buf, "%g", zero.bandwidth);
+                zeroElement->setAttribute(tagBandwidth, XMLWStr(buf));
+            }
+        }
+
+        DOMElement *mappingsElement = doc->createElement(tagMappings);
+        root->appendChild(mappingsElement);
+
+        for (const auto &[name, mapping] : m_mappings) {
+            DOMElement *mappingElement = doc->createElement(tagMapping);
+            mappingsElement->appendChild(mappingElement);
+
+            mappingElement->setAttribute(tagFor, name);
+
+            for (const auto &phoneme : mapping) {
+                DOMElement *phonemeElement = doc->createElement(tagPhoneme);
+                mappingElement->appendChild(phonemeElement);
+
+                std::sprintf(buf, "%g", phoneme.duration);
+                phonemeElement->setAttribute(tagDuration, XMLWStr(buf));
+
+                std::sprintf(buf, "%g", phoneme.intensity);
+                phonemeElement->setAttribute(tagIntensity, XMLWStr(buf));
+
+                phonemeElement->setTextContent(phoneme.phoneme.m_name);
+            }
+        }
+
+        DOMLSSerializer *serializer =
+            ((DOMImplementationLS *)impl)->createLSSerializer();
+
+        if (serializer->getDomConfig()->canSetParameter(
+                XMLUni::fgDOMWRTFormatPrettyPrint, true))
+            serializer->getDomConfig()->setParameter(
+                XMLUni::fgDOMWRTFormatPrettyPrint, true);
+
+        serializer->writeToURI(doc, filename);
+
+        serializer->release();
+        doc->release();
+    } catch (const XMLException &toCatch) {
+        char *message = XMLString::transcode(toCatch.getMessage());
+        std::cout << "Exception message is: \n" << message << "\n";
+        XMLString::release(&message);
+        return;
+    } catch (const DOMException &toCatch) {
+        char *message = XMLString::transcode(toCatch.msg);
+        std::cout << "Exception message is: \n" << message << "\n";
+        XMLString::release(&message);
+        return;
+    } catch (...) {
+        std::cout << "Unexpected Exception \n";
+        return;
     }
 }
 
@@ -428,18 +594,14 @@ std::ostream &operator<<(std::ostream &os,
     os << "  phonemes: [\n";
 
     for (const auto &[name, phoneme] : dictionary.m_phonemes) {
-        char *str = XMLString::transcode(name);
-        os << "    (" << str << "),\n";
-        XMLString::release(&str);
+        os << "    (" << name << "),\n";
     }
 
     os << "  ],\n";
     os << "  mappings: [\n";
 
     for (const auto &[name, mappings] : dictionary.m_mappings) {
-        char *str = XMLString::transcode(name);
-        os << "    (" << str << " => " << mappings << "),\n";
-        XMLString::release(&str);
+        os << "    (" << name << " => " << mappings << "),\n";
     }
 
     os << "  ]\n";
@@ -452,9 +614,7 @@ std::ostream &operator<<(std::ostream &os,
                          const std::vector<PhonemeMapping> &mappings) {
     os << "[";
     for (const auto &def : mappings) {
-        char *str2 = XMLString::transcode(def.phoneme->name());
-        os << "<" << str2 << ">, ";
-        XMLString::release(&str2);
+        os << "<" << def.phoneme.name() << ">, ";
     }
     os << "]";
     return os;

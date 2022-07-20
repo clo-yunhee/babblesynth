@@ -42,7 +42,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         UNRESOLVED_DEPENDENCIES_VAR _u_deps
         PRE_EXCLUDE_REGEXES "api-ms-*" "ext-ms-*"
         POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" "${_target_dir}/(?!fftw3).*\\.dll"
-        DIRECTORIES ${QT_RUNTIME_DIR} ${FFTW_OUTPUT_DIRECTORY}
+        DIRECTORIES ${QT_RUNTIME_DIR} ${FFTW_OUTPUT_DIRECTORY} ${DLL_DIRECTORY}
     )
 
     foreach(_file ${_r_deps})
@@ -52,20 +52,25 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     foreach(_file ${_u_deps})
         message(WARNING "Runtime dependency ${_file} could not be resolved.")
     endforeach()
+    
+    if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC" OR CMAKE_CXX_SIMULATE_ID MATCHES "MSVC")
+        if(CMAKE_BUILD_TYPE STREQUAL Debug)
+            set(d_ "d")
+        else()
+            set(d_ "")
+        endif()
 
-    if(CMAKE_BUILD_TYPE STREQUAL Debug)
-        set(_d d)
-    else()
-        set(_d)
+        file(INSTALL ${QT_PLUGIN_DIR}/platforms/qwindows${d_}.dll DESTINATION ${_target_dir}/plugins/platforms)
+        file(INSTALL ${QT_PLUGIN_DIR}/platforms/qwindows${d_}.pdb DESTINATION ${_target_dir}/plugins/platforms)
+
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        file(INSTALL ${QT_PLUGIN_DIR}/platforms/qwindows.dll DESTINATION ${_target_dir}/plugins/platforms)
+        file(INSTALL ${QT_PLUGIN_DIR}/platforms/qwindows.debug DESTINATION ${_target_dir}/plugins/platforms)
+
     endif()
-
-    file(INSTALL ${QT_PLUGIN_DIR}/platforms/qwindows${_d}.dll DESTINATION ${_target_dir}/plugins/platforms)
-    file(INSTALL ${QT_PLUGIN_DIR}/audio/qtaudio_windows${_d}.dll DESTINATION ${_target_dir}/plugins/audio)
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     file(INSTALL ${QT_PLUGIN_DIR}/platforms/libqxcb.so DESTINATION ${_target_dir}/plugins/platforms)
-    file(INSTALL ${QT_PLUGIN_DIR}/audio/libqtaudio_alsa.so
-                 ${QT_PLUGIN_DIR}/audio/libqtmedia_pulse.so DESTINATION ${_target_dir}/plugins/audio)
 endif()

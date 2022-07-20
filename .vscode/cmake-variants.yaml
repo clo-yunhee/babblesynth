@@ -1,0 +1,39 @@
+buildType:
+  default: debug
+  choices:
+    debug:
+      short: Debug
+      long: Emit debug information
+      buildType: Debug
+    reldeb:
+      short: RelWithDebInfo
+      long: Optimize with debug information
+      buildType: RelWithDebInfo
+    release:
+      short: Release
+      long: Optimize generated code
+      buildType: Release
+
+asan:
+  default: none
+  choices:
+    none:
+      short: No Asan
+      long: No Address Sanitizer
+    asan:
+      short: Asan
+      long: Instrument with Address Sanitizer
+      settings:
+        USE_ASAN: TRUE
+
+usan:
+  default: none
+  choices:
+    none:
+      short: No Usan
+      long: No Undefined Sanitizer
+    usan:
+      short: Usan
+      long: Instrument with Undefined Sanitizer
+      settings:
+        USE_USAN: TRUE

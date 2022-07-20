@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "audio_player.h"
+
 #include <QDebug>
 #include <stdexcept>
 
-#include "audio_player.h"
 #include "widgets/app_window.h"
 
 using namespace babblesynth::gui;
@@ -48,7 +49,7 @@ static void f64_to_s16(QByteArray& dst, const std::vector<double>& src) {
 
 AudioPlayer::AudioPlayer(QObject* parent)
     : QObject(parent),
-      m_deviceInfo(QAudioDeviceInfo::defaultOutputDevice()),
+      m_deviceInfo(QMediaDevices::defaultAudioOutput()),
       m_audio(nullptr) {
     initAudio();
     m_buffer.setBuffer(&m_data);
@@ -97,9 +98,7 @@ void AudioPlayer::initAudio() {
 
     m_audioFormat.setSampleRate(m_sampleRate);
     m_audioFormat.setChannelCount(2);
-    m_audioFormat.setSampleSize(16);
-    m_audioFormat.setSampleType(QAudioFormat::SignedInt);
-    m_audioFormat.setCodec("audio/pcm");
+    m_audioFormat.setSampleFormat(QAudioFormat::Int16);
 
     if (!m_deviceInfo.isFormatSupported(m_audioFormat)) {
         throw std::invalid_argument("audio format not supported");
@@ -110,8 +109,8 @@ void AudioPlayer::initAudio() {
         m_audio->deleteLater();
     }
 
-    m_audio = new QAudioOutput(m_deviceInfo, m_audioFormat, this);
+    m_audio = new QAudioSink(m_deviceInfo, m_audioFormat, this);
     m_audio->setVolume(0.6);
-    connect(m_audio, &QAudioOutput::stateChanged, this,
+    connect(m_audio, &QAudioSink::stateChanged, this,
             &AudioPlayer::onStateChanged);
 }

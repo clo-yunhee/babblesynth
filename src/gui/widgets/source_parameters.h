@@ -31,8 +31,6 @@
 namespace babblesynth {
 namespace gui {
 
-using namespace QtCharts;
-
 class SourceParameters : public QWidget {
     Q_OBJECT
 

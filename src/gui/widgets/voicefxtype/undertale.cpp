@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "undertale.h"
+
 #include <QGroupBox>
 #include <QSlider>
 #include <QVBoxLayout>
@@ -23,7 +25,6 @@
 
 #include "../../app_state.h"
 #include "frequency_scale.h"
-#include "undertale.h"
 
 using namespace babblesynth::gui::voicefx;
 
@@ -266,22 +267,22 @@ void Undertale::updatePlans() {
 
     for (const auto &ch : m_chars) {
         if (ch == CharTypeLetter) {
-            appState->amplitudePlan()->linearToValueAtTime(
-                1, time + 15.0 / 1000.0);
+            appState->amplitudePlan()->cubicToValueAtTime(1,
+                                                          time + 15.0 / 1000.0);
             time += m_duration;
-            appState->amplitudePlan()->linearToValueAtTime(1,
-                                                           time - 5.0 / 1000.0);
-            appState->amplitudePlan()->linearToValueAtTime(0, time);
+            appState->amplitudePlan()->cubicToValueAtTime(1,
+                                                          time - 5.0 / 1000.0);
+            appState->amplitudePlan()->cubicToValueAtTime(0, time);
             if (!qFuzzyIsNull(m_pauseRatio)) {
                 time += m_pauseRatio * m_duration;
-                appState->amplitudePlan()->linearToValueAtTime(0, time);
+                appState->amplitudePlan()->cubicToValueAtTime(0, time);
             }
         } else if (ch == CharTypeSpace) {
             time += 0.4 * m_duration;
-            appState->amplitudePlan()->linearToValueAtTime(0, time);
+            appState->amplitudePlan()->cubicToValueAtTime(0, time);
         } else if (ch == CharTypePunctuation) {
             time += 0.6 * m_duration;
-            appState->amplitudePlan()->linearToValueAtTime(0, time);
+            appState->amplitudePlan()->cubicToValueAtTime(0, time);
         }
     }
 
@@ -297,9 +298,21 @@ void Undertale::updatePlans() {
     const double F2 = m_F2;
 
     appState->formantFrequencyPlan(0)->reset(F1);
-    appState->formantFrequencyPlan(0)->linearToValueAtTime(F1, time);
     appState->formantFrequencyPlan(1)->reset(F2);
-    appState->formantFrequencyPlan(1)->linearToValueAtTime(F2, time);
+
+    appState->formantFrequencyPlan(2)->reset(2400);
+    appState->formantFrequencyPlan(3)->reset(2900);
+    appState->formantFrequencyPlan(4)->reset(4200);
+
+    for (int i = 0; i < 5; ++i) {
+        appState->formantBandwidthPlan(i)->reset(80 + i * 15);
+    }
+
+    appState->antiformantFrequencyPlan(0)->reset(400);
+    appState->antiformantBandwidthPlan(0)->reset(80);
+
+    appState->antiformantFrequencyPlan(1)->reset(1200);
+    appState->antiformantBandwidthPlan(1)->reset(110);
 
     appState->updatePlans();
 }
