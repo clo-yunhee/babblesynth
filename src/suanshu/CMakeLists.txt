@@ -4,7 +4,7 @@ add_library(suanshu STATIC
     arima/Fitting/BurgYule.h
 
     arima/Fitting/ConditionalSumOfSquares.cpp
-    arima/Fitting/conditionalSumOfSquares.h
+    arima/Fitting/ConditionalSumOfSquares.h
 
     arima/ARIMAModel.cpp
     arima/ARIMAModel.h
