@@ -1,33 +1,52 @@
 add_library(suanshu STATIC
 
-    arima/fitting/conditional_sum_of_squares.cpp
-    arima/fitting/conditional_sum_of_squares.h
+    arima/fitting/BurgYule.cpp
+    arima/fitting/BurgYule.h
 
-    arima/arima_model.cpp
-    arima/arima_model.h
-    arima/arimax_model.cpp
-    arima/arimax_model.h
-    arima/arma_fitting.h
-    arima/arma_model.cpp
-    arima/arma_model.h
-    arima/armax_model.cpp
-    arima/armax_model.h
+    arima/fitting/ConditionalSumOfSquares.cpp
+    arima/fitting/conditionalSumOfSquares.h
 
-    function/function.h
+    arima/ARIMAModel.cpp
+    arima/ARIMAModel.h
+    arima/ARIMAXModel.cpp
+    arima/ARIMAXModel.h
+    arima/ARMAFitting.h
+    arima/ARMAModel.cpp
+    arima/ARMAModel.h
+    arima/ARMAXModel.cpp
+    arima/ARMAXModel.h
 
-    integration/integrator.h
-    integration/iterative_integrator.h
-    integration/newton_cotes.cpp
-    integration/newton_cotes.h
-    integration/riemann.cpp
-    integration/riemann.h
-    integration/simpson.cpp
-    integration/simpson.h
-    integration/trapezoidal.cpp
-    integration/trapezoidal.h
+    function/Differentiation.h
+    function/FiniteDifference.cpp
+    function/FiniteDifference.h
+    function/Function.h
+    function/GradientFunction.cpp
+    function/HessianFunction.cpp
+    function/OrderedPairs.h
+
+    integration/Integrator.h
+    integration/IterativeIntegrator.h
+    integration/NewtonCotes.cpp
+    integration/NewtonCotes.h
+    integration/Riemann.cpp
+    integration/Riemann.h
+    integration/Romberg.cpp
+    integration/Romberg.h
+    integration/Simpson.cpp
+    integration/Simpson.h
+    integration/Trapezoidal.cpp
+    integration/Trapezoidal.h
+
+    interpolation/NevilleTable.cpp
+    interpolation/NevilleTable.h
+
+    optimization/problem/C2OptimProblem.cpp
+    optimization/problem/OptimProblem.h
+    optimization/unconstrained/NelderMead.cpp
+    optimization/unconstrained/NelderMead.h
 )
 
-target_link_libraries(suanshu PRIVATE Eigen3::Eigen)
+target_link_libraries(suanshu PUBLIC Eigen3::Eigen)
 
 target_compile_definitions(suanshu PRIVATE _USE_MATH_DEFINES)
 

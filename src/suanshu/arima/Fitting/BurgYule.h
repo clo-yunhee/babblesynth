@@ -16,27 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUANSHU_ARIMA_ARIMA_MODEL_H
-#define SUANSHU_ARIMA_ARIMA_MODEL_H
+#ifndef SUANSHU_ARIMA_FITTING_BURG_YULE_H
+#define SUANSHU_ARIMA_FITTING_BURG_YULE_H
 
-#include "arimax_model.h"
+#include "arima/ARMAModel.h"
+#include "defs.h"
 
 namespace suanshu {
 
-class ARMAModel;
+ARMAModel FitBurgYule(const dvec& x, int polesOrder, int zerosOrder = 0);
 
-class ARIMAModel : public ARIMAXModel {
-   public:
-    ARIMAModel(double mu, const dvec& AR, int d, const dvec& MA,
-               double sigma = 1);
+}
 
-    ARIMAModel(const dvec& AR, int d, const dvec& MA, double sigma = 1);
-
-    ARIMAModel(const ARIMAModel&) = default;
-
-    ARMAModel* getArma() const;
-};
-
-}  // namespace suanshu
-
-#endif  // SUANSHU_ARIMA_ARIMA_MODEL_H
+#endif  // SUANSHU_ARIMA_FITTING_BURG_YULE_H

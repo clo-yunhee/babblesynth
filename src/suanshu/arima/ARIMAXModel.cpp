@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "arimax_model.h"
+#include "ARIMAXModel.h"
 
 #include <sstream>
 
-#include "armax_model.h"
+#include "ARMAXModel.h"
 
 using namespace suanshu;
 

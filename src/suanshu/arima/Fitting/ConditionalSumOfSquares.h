@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BABBLESYNTH_ARIMA_FITTING_CONDITIONAL_SUM_OF_SQUARES_H
-#define BABBLESYNTH_ARIMA_FITTING_CONDITIONAL_SUM_OF_SQUARES_H
+#ifndef SUANSHU_ARIMA_FITTING_CONDITIONAL_SUM_OF_SQUARES_H
+#define SUANSHU_ARIMA_FITTING_CONDITIONAL_SUM_OF_SQUARES_H
 
-#include "../arma_fitting.h"
-#include "function/function.h"
+#include "arima/ARMAFitting.h"
+#include "function/Function.h"
 
 namespace suanshu {
 
@@ -28,25 +28,31 @@ class ConditionalSumOfSquares : public ARMAFitting {
    public:
     ConditionalSumOfSquares(const dvec& xt, int p, int d, int q);
 
-    Vector stdErr() const;
+    ARMAModel getFittedARMA() const override;
 
-    int nParams() const;
+    double var() const override;
+    Vector stdErr() const;
+    Matrix covariance() const override;
 
     double AIC() const override;
     double AICC() const override;
-
     std::string toString() const override;
+
+    int nParams() const;
 
    private:
     struct Estimators {
-        const dvec phi;
-        const dvec theta;
-        const double var;
+        dvec phi;
+        dvec theta;
+        double var;
 
-        Estimators(const dvec& coefficients, int p, int q)
+        template <typename Container>
+        Estimators(const Container& coefficients, int p, int q)
             : phi(coefficients.begin(), coefficients.begin() + p),
               theta(coefficients.begin() + p, coefficients.begin() + p + q),
               var(coefficients[p + q]) {}
+
+        Estimators() : var(std::numeric_limits<double>::quiet_NaN()) {}
 
         int p() const { return phi.size(); }
         int q() const { return theta.size(); }
@@ -67,9 +73,9 @@ class ConditionalSumOfSquares : public ARMAFitting {
 
     static RealScalarFunction nLogLikelihood(int p, int q, const dvec& arma);
 
-    UnivariateRealFunction dlogg(int j);
+    UnivariateRealFunction dlogg(int j) const;
 };
 
 }  // namespace suanshu
 
-#endif  // BABBLESYNTH_ARIMA_FITTING_CONDITIONAL_SUM_OF_SQUARES_H
+#endif  // SUANSHU_ARIMA_FITTING_CONDITIONAL_SUM_OF_SQUARES_H

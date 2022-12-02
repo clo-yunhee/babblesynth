@@ -26,6 +26,7 @@
 namespace suanshu {
 
 using dvec = std::vector<double>;
+using dvec2 = std::vector<dvec>;
 
 using Vector = Eigen::VectorXd;
 using Matrix = Eigen::MatrixXd;
@@ -38,7 +39,7 @@ inline void aassert(const bool cond, const char* msg) {
 #endif
 }
 
-inline std::vector<double> toArray(const Vector& vec) {
+inline std::vector<double> stlVector(const Vector& vec) {
     return std::vector<double>(vec.begin(), vec.end());
 }
 

@@ -16,23 +16,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUANSHU_INTEGRATION_INTEGRATOR_H
-#define SUANSHU_INTEGRATION_INTEGRATOR_H
+#ifndef SUANSHU_ARIMA_ARMA_FITTING_H
+#define SUANSHU_ARIMA_ARMA_FITTING_H
 
-#include "function/Function.h"
+#include "ARMAModel.h"
 
 namespace suanshu {
 
-class Integrator {
+class ARMAFitting {
    public:
-    // integrate f from a to b
-    virtual double integrate(const UnivariateRealFunction& f, double a,
-                             double b) = 0;
+    // get the ARMA coefficients
+    virtual ARMAModel getFittedARMA() const = 0;
 
-    // get the convergence threshold
-    virtual double getPrecision() const = 0;
+    // get the variance of the white noise
+    virtual double var() const = 0;
+
+    // get the asymptotic standard errors of the estimators
+    virtual Vector stdErr() const = 0;
+
+    // get the asymptotic covariance matrix of the estimators
+    virtual Matrix covariance() const = 0;
+
+    // compute the AIC of model fitting
+    virtual double AIC() const = 0;
+
+    // compute the AICC of model fitting
+    virtual double AICC() const = 0;
+
+    // get string representation
+    virtual std::string toString() const = 0;
 };
 
 }  // namespace suanshu
 
-#endif  // SUANSHU_INTEGRATION_INTEGRATOR_H
+#endif  // SUANSHU_ARIMA_ARMA_FITTING_H

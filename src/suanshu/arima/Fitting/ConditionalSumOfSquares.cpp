@@ -16,7 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "conditional_sum_of_squares.h"
+#include "ConditionalSumOfSquares.h"
+
+#include "integration/Riemann.h"
+#include "optimization/unconstrained/NelderMead.h"
 
 using namespace suanshu;
 
@@ -43,24 +46,58 @@ ConditionalSumOfSquares::ConditionalSumOfSquares(const dvec& xt, const int p,
         dxt1[i] = dxt0[i] - mu;
     }
 
-    /*RealScalarFunction nL = nLogLikelihood(p, q, dxt1);
+    RealScalarFunction nL = nLogLikelihood(p, q, dxt1);
+
     NelderMead optim(0, 500);
-    NelderMead::Solution soln = optim.solve(C2OptimProblemImpl(nL));
+    NelderMeadSolution soln = optim.solve(C2OptimProblem(nL));
 
     Vector xmin = Vector::Zero(p + q + 1);  // initial AR, MA are 0
     xmin(p + q) = 0.01;                     // initial var is very small
-    xmin = soln.search(xmin);
+    xmin = soln.search({xmin});
 
     maxLikelihood = -1 * nL.evaluate(xmin);
-    estimators = Estimators(xmin, p, q);*/
+    estimators = Estimators(xmin, p, q);
 }
+
+ARMAModel ConditionalSumOfSquares::getFittedARMA() const {
+    double intercept = 1;
+    for (const auto& x : estimators.phi) {
+        intercept -= x;
+    }
+    intercept *= mu;
+
+    return ARMAModel(intercept, estimators.phi, estimators.theta,
+                     estimators.var);
+}
+
+double ConditionalSumOfSquares::var() const { return estimators.var; }
 
 Matrix ConditionalSumOfSquares::covariance() const {
     const int p = estimators.p();
     const int q = estimators.q();
     const int pq = p + q;
 
+    Riemann I;
+    Matrix cov(pq, pq);
 
+    for (int j = 0; j < pq; ++j) {
+        for (int k = j; k < pq; ++k) {
+            const auto dgdj = dlogg(j);
+            const auto dgdk = dlogg(k);
+
+            UnivariateRealFunction integrand(
+                1, 1, [&dgdj, &dgdk](double x) -> double {
+                    return dgdj.evaluate(x) * dgdk.evaluate(x);
+                });
+
+            const double Wjk = I.integrate(integrand, -M_PI, M_PI) / (4 * M_PI);
+
+            cov(j, k) = Wjk;
+            cov(k, j) = Wjk;
+        }
+    }
+
+    return cov.fullPivLu().inverse() / n;
 }
 
 Vector ConditionalSumOfSquares::stdErr() const {
@@ -100,15 +137,14 @@ RealScalarFunction ConditionalSumOfSquares::nLogLikelihood(const int p,
     const int maxPQ = std::max(p, q);
     const int length = arma.size();
 
-    // CSS assumes that the unobserved past observations are 0 with size =
-    // maxPQ
-    const dvec xtExtended(length + maxPQ, 0.0);
+    // CSS assumes that the unobserved past observations are 0 with size = maxPQ
+    dvec xtExtended(length + maxPQ, 0.0);
     std::copy(arma.begin(), arma.end(), xtExtended.begin() + maxPQ);
 
     const int lengthExtended = xtExtended.size();
 
-    return RealScalarFunction(p + q + 1, 1, [&](Vector params) -> double {
-        Estimators estimators(toArray(params), p, q);
+    return RealScalarFunction(p + q + 1, 1, [=](Vector params) -> double {
+        Estimators estimators(params, p, q);
         const double var = estimators.var;
         if (var < 0) {
             return DBL_MAX;
@@ -141,13 +177,13 @@ RealScalarFunction ConditionalSumOfSquares::nLogLikelihood(const int p,
     });
 }
 
-UnivariateRealFunction ConditionalSumOfSquares::dlogg(const int j) {
-    const dvec& coeff = j <= estimators.p() ? estimators.phi : estimators.theta;
+UnivariateRealFunction ConditionalSumOfSquares::dlogg(const int j) const {
+    const dvec& coeff = j < estimators.p() ? estimators.phi : estimators.theta;
 
-    return UnivariateRealFunction(1, 1, [&](double x) -> double {
-        double numerator = 2.0 * cos(j * x);
+    return UnivariateRealFunction(1, 1, [=](double x) -> double {
+        double numerator = 2.0 * cos((j + 1) * x);
         for (int r = 1; r <= coeff.size(); ++r) {
-            numerator -= 2.0 * coeff[r - 1] * cos(j * x - x);
+            numerator -= 2.0 * coeff[r - 1] * cos((j + 1) * x - x);
         }
 
         double denominator = 1;

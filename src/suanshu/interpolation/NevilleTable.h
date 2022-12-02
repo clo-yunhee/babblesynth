@@ -16,23 +16,40 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUANSHU_INTEGRATION_INTEGRATOR_H
-#define SUANSHU_INTEGRATION_INTEGRATOR_H
+#ifndef SUANSHU_INTERPOLATION_NEVILLE_TABLE_H
+#define SUANSHU_INTERPOLATION_NEVILLE_TABLE_H
 
-#include "function/Function.h"
+#include "defs.h"
+#include "function/OrderedPairs.h"
 
 namespace suanshu {
 
-class Integrator {
+class NevilleTable {
    public:
-    // integrate f from a to b
-    virtual double integrate(const UnivariateRealFunction& f, double a,
-                             double b) = 0;
+    NevilleTable(int n, const OrderedPairs& f);
+    NevilleTable(const OrderedPairs& f);
+    NevilleTable(int n = 0);
 
-    // get the convergence threshold
-    virtual double getPrecision() const = 0;
+    void addData(const OrderedPairs& f);
+
+    int N() const;
+    dvec2 getTable() const;
+    dvec x() const;
+
+    double get(int i, int j) const;
+
+    double evaluate(double x);
+
+   private:
+    dvec m_x;  // the abscissae
+    dvec2 m_table;
+    double m_lastX;  // last x evaluated
+    int m_N;         // number of last data points
+    int m_N0;        // last N before adding new data
+
+    static constexpr double kAllowance = 1.2;
 };
 
 }  // namespace suanshu
 
-#endif  // SUANSHU_INTEGRATION_INTEGRATOR_H
+#endif  // SUANSHU_INTERPOLATION_NEVILLE_TABLE_H

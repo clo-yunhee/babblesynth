@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "newton_cotes.h"
+#include "NewtonCotes.h"
 
 using namespace suanshu;
 
@@ -26,7 +26,7 @@ NewtonCotes::NewtonCotes(const int rate, const Type type,
 
 double NewtonCotes::integrate(const UnivariateRealFunction& f, const double a,
                               const double b) {
-    double sum0, sum1 = NAN;
+    double sum0, sum1(std::numeric_limits<double>::quiet_NaN());
     for (int iter = 1; iter <= m_maxIterations; ++iter) {
         sum0 = sum1;
         sum1 = next(iter, f, a, b, sum0);

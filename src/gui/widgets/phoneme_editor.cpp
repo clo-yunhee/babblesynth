@@ -18,6 +18,9 @@
 
 #include "phoneme_editor.h"
 
+#include <arima/Fitting/BurgYule.h>
+#include <arima/Fitting/ConditionalSumOfSquares.h>
+
 #include <QBoxLayout>
 #include <QDebug>
 #include <QGroupBox>
@@ -171,8 +174,8 @@ PhonemeEditor::PhonemeEditor(phonemes::PhonemeDictionary **pDictionary,
 
 void PhonemeEditor::onRecordingStopped(
     const std::vector<double> &originalAudio) {
-    // Resample to 10500 kHz.
-    const double downSampleRate = 10500;
+    // Sample down.
+    const double downSampleRate = 10000;
     auto audio = resample(originalAudio, m_sampleRate, downSampleRate);
 
     // Process audio.
@@ -252,6 +255,9 @@ void PhonemeEditor::onRecordingStopped(
     for (auto &mapping : mappingList) {
         mapping.intensity /= maxFrameIntensity;
         mapping.duration = 1.0 / mappingList.size();
+    }
+    for (auto &mapping : mappingList) {
+        mapping.intensity = pow(mapping.intensity, 1.2);
     }
 
     const double duration = originalAudio.size() / double(m_sampleRate);
@@ -442,10 +448,25 @@ phonemes::Phoneme PhonemeEditor::generatePhoneme(
     const int arTerms = 10;
     const int maTerms = 4;
 
-    const auto model = arma::fit(audio, arTerms, maTerms, 1e-10);
+    /*suanshu::ConditionalSumOfSquares solver(audio, arTerms, 0, maTerms);
+    const auto model = solver.getFittedARMA();*/
+    const auto model = suanshu::FitBurgYule(audio, arTerms, maTerms);
+    const auto modelAR = model.AR();
+    const auto modelMA = model.MA();
 
-    auto arRoots = filter::solveRoots(model.ar);
-    auto maRoots = filter::solveRoots(model.ma);
+    std::vector<double> arPoly(arTerms + 1);
+    std::vector<double> maPoly(maTerms + 1);
+    arPoly[0] = 1;
+    maPoly[0] = 1;
+    for (int i = 0; i < arTerms; ++i) {
+        arPoly[i + 1] = model.AR(i + 1);
+    }
+    for (int i = 0; i < maTerms; ++i) {
+        maPoly[i + 1] = model.MA(i + 1);
+    }
+
+    auto arRoots = filter::solveRoots(arPoly);
+    auto maRoots = filter::solveRoots(maPoly);
 
     phonemes::Phoneme phoneme;
 
@@ -467,7 +488,7 @@ phonemes::Phoneme PhonemeEditor::generatePhoneme(
         }
 
         const double r = std::abs(z);
-        if (r <= 0.6 || r >= 1.0) {
+        if (/*r <= 0.6 ||*/ r >= 1.0) {
             continue;
         }
 
@@ -478,10 +499,11 @@ phonemes::Phoneme PhonemeEditor::generatePhoneme(
             continue;
         }
 
-        const double bandwidth =
-            std::clamp(-std::log(r) * sampleRate / M_PI, 40.0, 200.0);
+        /*const double bandwidth =
+            std::clamp(-std::log(r) * sampleRate / M_PI, 40.0, 200.0);*/
+        const double bandwidth = -std::log(r) * sampleRate / M_PI;
 
-        phoneme.addPole(frequency, bandwidth);
+        if (n <= 5) phoneme.addPole(frequency, bandwidth);
 
         qDebug() << "pole" << n << ": (" << frequency << "Hz," << bandwidth
                  << "Hz )";
@@ -503,7 +525,7 @@ phonemes::Phoneme PhonemeEditor::generatePhoneme(
         }
 
         const double r = std::abs(z);
-        if (r <= 0.6 || r >= 1.0) {
+        if (/*r <= 0.6 ||*/ r >= 1.0) {
             continue;
         }
 
@@ -514,10 +536,11 @@ phonemes::Phoneme PhonemeEditor::generatePhoneme(
             continue;
         }
 
-        const double bandwidth =
-            std::clamp(-std::log(r) * sampleRate / M_PI, 40.0, 200.0);
+        /*const double bandwidth =
+            std::clamp(-std::log(r) * sampleRate / M_PI, 40.0, 200.0);*/
+        const double bandwidth = -std::log(r) * sampleRate / M_PI;
 
-        phoneme.addZero(frequency, bandwidth);
+        if (m <= 2) phoneme.addZero(frequency, bandwidth);
 
         qDebug() << "zero " << m << ": (" << frequency << "Hz, " << bandwidth
                  << "Hz)";

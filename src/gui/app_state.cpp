@@ -49,10 +49,10 @@ AppState::AppState(int sampleRate)
     }
 
     antiformantFrequencyPlan(0)->reset(400);
-    antiformantBandwidthPlan(0)->reset(70);
+    antiformantBandwidthPlan(0)->reset(100);
 
     antiformantFrequencyPlan(1)->reset(1200);
-    antiformantBandwidthPlan(1)->reset(100);
+    antiformantBandwidthPlan(1)->reset(200);
 }
 
 void AppState::setSampleRate(int sampleRate) {

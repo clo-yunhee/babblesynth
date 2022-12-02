@@ -19,7 +19,7 @@
 #ifndef SUANSHU_INTEGRATION_TRAPEZOIDAL_H
 #define SUANSHU_INTEGRATION_TRAPEZOIDAL_H
 
-#include "newton_cotes.h"
+#include "NewtonCotes.h"
 
 namespace suanshu {
 

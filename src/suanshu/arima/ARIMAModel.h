@@ -16,23 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUANSHU_INTEGRATION_INTEGRATOR_H
-#define SUANSHU_INTEGRATION_INTEGRATOR_H
+#ifndef SUANSHU_ARIMA_ARIMA_MODEL_H
+#define SUANSHU_ARIMA_ARIMA_MODEL_H
 
-#include "function/Function.h"
+#include "ARIMAXModel.h"
 
 namespace suanshu {
 
-class Integrator {
-   public:
-    // integrate f from a to b
-    virtual double integrate(const UnivariateRealFunction& f, double a,
-                             double b) = 0;
+class ARMAModel;
 
-    // get the convergence threshold
-    virtual double getPrecision() const = 0;
+class ARIMAModel : public ARIMAXModel {
+   public:
+    ARIMAModel(double mu, const dvec& AR, int d, const dvec& MA,
+               double sigma = 1);
+
+    ARIMAModel(const dvec& AR, int d, const dvec& MA, double sigma = 1);
+
+    ARIMAModel(const ARIMAModel&) = default;
+
+    ARMAModel* getArma() const;
 };
 
 }  // namespace suanshu
 
-#endif  // SUANSHU_INTEGRATION_INTEGRATOR_H
+#endif  // SUANSHU_ARIMA_ARIMA_MODEL_H

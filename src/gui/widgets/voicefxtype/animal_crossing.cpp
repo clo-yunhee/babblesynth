@@ -335,7 +335,7 @@ void AnimalCrossing::updatePlans() {
                 appState->antiformantFrequencyPlan(i)->cubicToValueAtTime(
                     frequency * heliumFactor, time + timeOffset);
                 /*appState->antiformantBandwidthPlan(i)->cubicToValueAtTime(
-                    bandwidth * heliumFactor, time + timeOffset);*/
+                        bandwidth * heliumFactor, time + timeOffset);*/
             };
 
             const double durationFactor =

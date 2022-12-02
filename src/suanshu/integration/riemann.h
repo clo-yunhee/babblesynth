@@ -19,7 +19,7 @@
 #ifndef SUANSHU_INTEGRATION_RIEMANN_H
 #define SUANSHU_INTEGRATION_RIEMANN_H
 
-#include "integrator.h"
+#include "Integrator.h"
 
 namespace suanshu {
 

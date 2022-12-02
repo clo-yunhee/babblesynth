@@ -16,13 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "riemann.h"
+#include "Riemann.h"
 
 #include <stdexcept>
 
-#include "iterative_integrator.h"
-#include "romberg.h"
-#include "simpson.h"
+#include "IterativeIntegrator.h"
+#include "Romberg.h"
+#include "Simpson.h"
 
 using namespace suanshu;
 

@@ -19,8 +19,8 @@
 #ifndef SUANSHU_INTEGRATION_SIMPSON_H
 #define SUANSHU_INTEGRATION_SIMPSON_H
 
-#include "iterative_integrator.h"
-#include "trapezoidal.h"
+#include "IterativeIntegrator.h"
+#include "Trapezoidal.h"
 
 namespace suanshu {
 

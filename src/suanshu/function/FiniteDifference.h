@@ -16,23 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUANSHU_INTEGRATION_INTEGRATOR_H
-#define SUANSHU_INTEGRATION_INTEGRATOR_H
+#ifndef SUANSHU_FUNCTION_FINITE_DIFFERENCE_H
+#define SUANSHU_FUNCTION_FINITE_DIFFERENCE_H
 
-#include "function/Function.h"
+#include "Function.h"
 
 namespace suanshu {
 
-class Integrator {
+class FiniteDifference {
    public:
-    // integrate f from a to b
-    virtual double integrate(const UnivariateRealFunction& f, double a,
-                             double b) = 0;
+    FiniteDifference(const RealScalarFunction& f,
+                     const std::vector<int>& varIdx);
 
-    // get the convergence threshold
-    virtual double getPrecision() const = 0;
+    double evaluate(const Vector& x);
+    double evaluate(const Vector& x, double h);
+
+   private:
+    double evaluateByRecursion(int n, double h, const Vector& z);
+
+    RealScalarFunction m_f;
+    std::vector<int> m_varIdx;
 };
 
 }  // namespace suanshu
 
-#endif  // SUANSHU_INTEGRATION_INTEGRATOR_H
+#endif  // SUANSHU_FUNCTION_FINITE_DIFFERENCE_H

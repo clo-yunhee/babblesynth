@@ -16,20 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "arima_model.h"
-
-#include "arma_model.h"
+#include "ARMAXModel.h"
 
 using namespace suanshu;
 
-ARIMAModel::ARIMAModel(const double mu, const dvec& AR, const int d,
-                       const dvec& MA, const double sigma)
-    : ARIMAXModel(mu, AR, d, MA, {}, sigma) {}
+ARMAXModel::ARMAXModel(const double mu, const dvec& AR, const dvec& MA,
+                       const dvec& psi, const double sigma)
+    : ARIMAXModel(mu, AR, 0, MA, psi, sigma) {}
 
-ARIMAModel::ARIMAModel(const dvec& AR, const int d, const dvec& MA,
+ARMAXModel::ARMAXModel(const dvec& AR, const dvec& MA, const dvec& psi,
                        const double sigma)
-    : ARIMAModel(0, AR, d, MA, sigma) {}
+    : ARMAXModel(0, AR, MA, psi, sigma) {}
 
-ARMAModel* ARIMAModel::getArma() const {
-    return new ARMAModel(m_mu, m_AR, m_MA, m_sigma);
+double ARMAXModel::armaxMeanNoIntercept(const dvec& arLags, const dvec& maLags,
+                                        const dvec& exVar) const {
+    return dotProduct(m_AR, arLags) + dotProduct(m_MA, maLags) +
+           dotProduct(m_psi, exVar);
+}
+
+double ARMAXModel::armaxMean(const dvec& arLags, const dvec& maLags,
+                             const dvec& exVar) const {
+    return m_mu + armaxMeanNoIntercept(arLags, maLags, exVar);
 }

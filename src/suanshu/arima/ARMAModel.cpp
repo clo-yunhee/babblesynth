@@ -16,28 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUANSHU_ARIMA_ARMAX_MODEL_H
-#define SUANSHU_ARIMA_ARMAX_MODEL_H
+#include "ARMAModel.h"
 
-#include "arima_model.h"
+using namespace suanshu;
 
-namespace suanshu {
+ARMAModel::ARMAModel(const double mu, const dvec& AR, const dvec& MA,
+                     const double sigma)
+    : ARIMAModel(mu, AR, 0, MA, sigma) {}
 
-class ARMAModel : public ARIMAModel {
-   public:
-    ARMAModel(double mu, const dvec& AR, const dvec& MA, double sigma = 1);
+ARMAModel::ARMAModel(const dvec& AR, const dvec& MA, const double sigma)
+    : ARMAModel(0, AR, MA, sigma) {}
 
-    ARMAModel(const dvec& AR, const dvec& MA, double sigma = 1);
+double ARMAModel::armaMeanNoIntercept(const dvec& arLags,
+                                      const dvec& maLags) const {
+    return dotProduct(m_AR, arLags) + dotProduct(m_MA, maLags);
+}
 
-    ARMAModel(const ARMAModel&) = default;
-
-    // compute the zero-intercept (mu) ARMA conditional mean
-    double armaMeanNoIntercept(const dvec& arLags, const dvec& maLags) const;
-
-    // compute the ARMA conditional mean
-    double armaMean(const dvec& arLags, const dvec& maLags) const;
-};
-
-}  // namespace suanshu
-
-#endif  // SUANSHU_ARIMA_ARMAX_MODEL_H
+double ARMAModel::armaMean(const dvec& arLags, const dvec& maLags) const {
+    return m_mu + armaMeanNoIntercept(arLags, maLags);
+}

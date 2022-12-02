@@ -16,37 +16,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUANSHU_ARIMA_ARMA_FITTING_H
-#define SUANSHU_ARIMA_ARMA_FITTING_H
+#ifndef SUANSHU_FUNCTION_DIFFERENTIATION_H
+#define SUANSHU_FUNCTION_DIFFERENTIATION_H
 
-#include "arma_model.h"
+#include "FiniteDifference.h"
+#include "Function.h"
 
 namespace suanshu {
 
-class ARMAFitting {
+class C1 {
    public:
-    // get the ARMA coefficients
-    virtual ARMAModel getFittedArma() = 0;
-
-    // get the variance of the white noise
-    virtual double var() = 0;
-
-    // get the asymptotic standard errors of the estimators
-    virtual Vector stdErr() const = 0;
-
-    // get the asymptotic covariance matrix of the estimators
-    virtual Matrix covariance() const = 0;
-
-    // compute the AIC of model fitting
-    virtual double AIC() const = 0;
-
-    // compute the AICC of model fitting
-    virtual double AICC() const = 0;
-
-    // get string representation
-    virtual std::string toString() const = 0;
+    virtual RealVectorFunction g() const = 0;
 };
+
+class C2 : public C1 {
+   public:
+    virtual RntoMatrix H() const = 0;
+};
+
+Vector Gradient(const RealScalarFunction& f, const Vector& x);
+Matrix Hessian(const RealScalarFunction& f, const Vector& x);
+
+RealVectorFunction GradientFunction(const RealScalarFunction& f);
+RntoMatrix HessianFunction(const RealScalarFunction& f);
 
 }  // namespace suanshu
 
-#endif  // SUANSHU_ARIMA_ARMA_FITTING_H
+#endif  // SUANSHU_FUNCTION_DIFFERENTIATION_H

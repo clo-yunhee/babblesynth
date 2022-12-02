@@ -16,38 +16,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUANSHU_FUNCTION_FUNCTION_H
-#define SUANSHU_FUNCTION_FUNCTION_H
+#ifndef SUANSHU_FUNCTION_ORDERED_PAIRS_H
+#define SUANSHU_FUNCTION_ORDERED_PAIRS_H
 
-#include <functional>
+#include <utility>
+#include <vector>
 
 #include "defs.h"
 
 namespace suanshu {
 
-template <typename D, typename R>
-class Function {
+class OrderedPairs {
    public:
-    using fn_type = std::function<R(D)>;
+    using storage_type = std::pair<std::vector<double>, std::vector<double>>;
 
-    template <typename F>
-    Function(int nD, int nR, F fn) : m_nD(nD), m_nR(nR), m_fn(fn) {}
+    OrderedPairs(const storage_type& data) : m_data(data) {
+        aassert(data.first.size() == data.second.size(),
+                "ordered pairs unequal number");
+    }
 
-    R evaluate(D x) const { return m_fn(x); }
-    int dimensionOfDomain() const { return m_nD; }
-    int dimensionOfRange() const { return m_nR; }
+    OrderedPairs(std::initializer_list<double> left,
+                 std::initializer_list<double> right)
+        : OrderedPairs(std::make_pair(left, right)) {}
+
+    const std::vector<double>& x() const { return m_data.first; }
+    const std::vector<double>& y() const { return m_data.second; }
+    int size() const { return m_data.first.size(); }
 
    private:
-    int m_nD;
-    int m_nR;
-    fn_type m_fn;
+    storage_type m_data;
 };
-
-using RealScalarFunction = Function<Vector, double>;
-using RealVectorFunction = Function<Vector, Vector>;
-using UnivariateRealFunction = Function<double, double>;
-using RntoMatrix = Function<Vector, Matrix>;
 
 }  // namespace suanshu
 
-#endif  // SUANSHU_FUNCTION_FUNCTION_H
+#endif  // SUANSHU_FUNCTION_ORDERED_PAIRS_H

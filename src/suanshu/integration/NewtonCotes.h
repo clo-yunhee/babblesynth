@@ -19,7 +19,7 @@
 #ifndef SUANSHU_INTEGRATION_NEWTON_COTES_H
 #define SUANSHU_INTEGRATION_NEWTON_COTES_H
 
-#include "iterative_integrator.h"
+#include "IterativeIntegrator.h"
 
 namespace suanshu {
 

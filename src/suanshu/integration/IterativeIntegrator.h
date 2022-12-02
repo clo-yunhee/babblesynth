@@ -16,32 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SUANSHU_ARIMA_ARMAX_MODEL_H
-#define SUANSHU_ARIMA_ARMAX_MODEL_H
+#ifndef SUANSHU_INTEGRATION_ITERATIVE_INTEGRATOR_H
+#define SUANSHU_INTEGRATION_ITERATIVE_INTEGRATOR_H
 
-#include "arimax_model.h"
+#include "Integrator.h"
 
 namespace suanshu {
 
-class ARMAXModel : public ARIMAXModel {
+class IterativeIntegrator : public Integrator {
    public:
-    ARMAXModel(double mu, const dvec& AR, const dvec& MA, const dvec& psi,
-               double sigma = 1);
+    // get the discretization size for the current iteration
+    virtual double h() = 0;
 
-    ARMAXModel(const dvec& AR, const dvec& MA, const dvec& psi,
-               double sigma = 1);
+    // compute a refined sum for the integral
+    virtual double next(int iteration, const UnivariateRealFunction& f,
+                        double a, double b, double sum0) = 0;
 
-    ARMAXModel(const ARMAXModel&) = default;
-
-    // compute the zero-intercept (mu) ARMAX conditional mean
-    double armaxMeanNoIntercept(const dvec& arLags, const dvec& maLags,
-                                const dvec& exVar) const;
-
-    // compute the ARMAX conditional mean
-    double armaxMean(const dvec& arLags, const dvec& maLags,
-                     const dvec& exVar) const;
+    // get the maximum number of iterations for this iterative procedure
+    virtual int getMaxIterations() const = 0;
 };
 
 }  // namespace suanshu
 
-#endif  // SUANSHU_ARIMA_ARMAX_MODEL_H
+#endif  // SUANSHU_INTEGRATION_ITERATIVE_INTEGRATOR_H

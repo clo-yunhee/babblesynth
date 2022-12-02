@@ -31,7 +31,7 @@ class variable_plan {
         TransitionCubic,
     };
 
-    explicit variable_plan(bool piecewiseMonotonic = false,
+    explicit variable_plan(bool piecewiseMonotonic = true,
                            double initialValue = 0);
     variable_plan(const variable_plan& orig);
     ~variable_plan();
