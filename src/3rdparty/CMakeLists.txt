@@ -10,8 +10,8 @@ FetchContent_Declare(
 
 FetchContent_Declare(
     xerces-c
-    URL      https://dlcdn.apache.org//xerces/c/3/sources/xerces-c-3.2.3.tar.gz
-    URL_HASH SHA256=fb96fc49b1fb892d1e64e53a6ada8accf6f0e6d30ce0937956ec68d39bd72c7e
+    URL      https://dlcdn.apache.org//xerces/c/3/sources/xerces-c-3.2.4.tar.gz
+    URL_HASH SHA256=3d8ec1c7f94e38fee0e4ca5ad1e1d9db23cbf3a10bba626f6b4afa2dedafe5ab
 )
 
 FetchContent_Declare(
