@@ -1,10 +1,10 @@
 add_library(suanshu STATIC
 
-    arima/fitting/BurgYule.cpp
-    arima/fitting/BurgYule.h
+    arima/Fitting/BurgYule.cpp
+    arima/Fitting/BurgYule.h
 
-    arima/fitting/ConditionalSumOfSquares.cpp
-    arima/fitting/conditionalSumOfSquares.h
+    arima/Fitting/ConditionalSumOfSquares.cpp
+    arima/Fitting/conditionalSumOfSquares.h
 
     arima/ARIMAModel.cpp
     arima/ARIMAModel.h
