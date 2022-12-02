@@ -18,6 +18,8 @@
 
 #include "ConditionalSumOfSquares.h"
 
+#include <cfloat>
+
 #include "integration/Riemann.h"
 #include "optimization/unconstrained/NelderMead.h"
 

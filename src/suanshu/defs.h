@@ -81,4 +81,4 @@ std::vector<T> diff(const std::vector<T>& arr, int lag = 1, int order = 1) {
 
 }  // namespace suanshu
 
-#endif SUANSHU_DEFS_H
+#endif  // SUANSHU_DEFS_H
